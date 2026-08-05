@@ -1,10 +1,13 @@
-# Cloudflare Workers config — for the OG image endpoint only.
-# The rest of the site is static and uses Cloudflare's direct Git integration
-# (push to dist/, Workers serves as static assets).
+# Cloudflare Workers Static Assets config for the Astro SSG output.
+# Workers Builds runs `npm run build`, then `npx wrangler deploy`.
 
 name = "cochinchine-pensee"
 compatibility_date = "2026-08-01"
-pages_build_output_dir = "./dist"
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"
+html_handling = "drop-trailing-slash"
 
 # Analytics (free, no cookie banner)
 # Enable in Cloudflare dashboard: Workers & Pages → cochinchine-pensee → Analytics
