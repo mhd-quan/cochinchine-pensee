@@ -18,7 +18,7 @@ npm run format       # biome format --write .
 ## Architecture
 
 - **Output:** pure static (SSG) — no SSR
-- **Deploy target:** Cloudflare Workers via direct Git integration
+- **Deploy target:** Cloudflare Workers Static Assets via direct Git integration
 - **Content:** MDX files in `src/content/essays/`, validated by Zod schema in `src/content.config.ts`
 - **Styling:** Vanilla CSS via `@import tokens.css; reset.css; prose.css;` in `globals.css`
 - **Fonts:** Self-hosted via `@fontsource/*` (no Google CDN)
@@ -30,7 +30,7 @@ npm run format       # biome format --write .
 .
 ├── public/                  # static assets, favicon.svg, robots.txt
 ├── src/
-│   ├── content/             # MDX essays (one folder per essay by date-slug)
+│   ├── content/             # MDX essays (one file per date-slug)
 │   ├── content.config.ts    # Content Collections + Zod schema
 │   ├── components/
 │   │   ├── essay/           # DropCap, ViewCustomizer, ShareLinks, EssayCard
@@ -60,6 +60,18 @@ npm run format       # biome format --write .
 2. Fill frontmatter (see `src/content.config.ts` for valid schema)
 3. Write content in markdown/MDX
 4. The page appears automatically at `/essays/<slug>/`
+
+## Cloudflare Workers deployment
+
+Cloudflare Workers Builds should use:
+
+- **Build command:** `npm run build`
+- **Deploy command:** `npx wrangler deploy`
+- **Output directory:** `dist`
+
+`wrangler.toml` exposes `dist/` as Worker static assets, serves the generated
+`404.html` for missing routes, and keeps URLs aligned with Astro's
+`trailingSlash: 'never'` setting.
 
 ## Deferred feature slots
 
