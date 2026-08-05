@@ -1,0 +1,13 @@
+{
+  "name": "Capitalism",
+  "nameVi": "Chủ nghĩa tư bản",
+  "slug": "tu-ban",
+  "description": "Capitalism, contested. Three essays.",
+  "blurb": "Từ Marx đến Zitelmann, ba câu hỏi về một chủ nghĩa mà người ta vừa phục vụ vừa khinh miệt.",
+  "featured": true,
+  "essayIds": [
+    "2026-03-01-the-golden-age-and-its-discontents",
+    "2026-01-31-khoang-trong-ly-luan",
+    "2026-03-10-niem-an-ui-cua-suy-tan"
+  ]
+}

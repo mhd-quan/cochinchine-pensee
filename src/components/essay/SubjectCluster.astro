@@ -1,0 +1,125 @@
+---
+/**
+ * SubjectCluster — a horizontal trio of essays from the same subject slug.
+ * Rendered on homepage to mirror CRB's "From the Archive / From the Web" pattern.
+ *
+ * Anatomy:
+ *   - Subject name + Vietnamese label
+ *   - Description blurb (italic serif)
+ *   - 3 essay cards inline (with thumbnails if available)
+ *   - "Browse all →" link to /subjects/<slug>/
+ */
+import type { CollectionEntry } from 'astro:content';
+import EssayCard from '~/components/essay/EssayCard.astro';
+
+interface Props {
+  subject: CollectionEntry<'subjects'>;
+  essays: CollectionEntry<'essays'>[];
+}
+
+const { subject, essays } = Astro.props;
+const trio = essays.slice(0, 3);
+---
+
+<section class="subject-cluster">
+  <header class="subject-cluster__header">
+    <p class="subject-cluster__eyebrow">Subject</p>
+    <h3 class="subject-cluster__name">{subject.data.nameVi ?? subject.data.name}</h3>
+    {subject.data.blurb && (
+      <p class="subject-cluster__blurb">{subject.data.blurb}</p>
+    )}
+    <a href={`/subjects/${subject.data.slug}`} class="subject-cluster__more">
+      Browse all essays →
+    </a>
+  </header>
+
+  <ul class="subject-cluster__trio">
+    {trio.map((essay) => (
+      <li>
+        <EssayCard essay={essay} />
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .subject-cluster {
+    padding-block: var(--sp-10);
+    border-top: 2px solid var(--ink-primary);
+  }
+
+  .subject-cluster__header {
+    margin-bottom: var(--sp-6);
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--rule-hair);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-3);
+    align-items: baseline;
+  }
+
+  @media (min-width: 768px) {
+    .subject-cluster__header {
+      grid-template-columns: auto 1fr auto;
+      gap: var(--sp-5);
+    }
+  }
+
+  .subject-cluster__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+  }
+
+  .subject-cluster__name {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--ink-primary);
+  }
+
+  .subject-cluster__blurb {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    color: var(--ink-secondary);
+    max-width: 36rem;
+  }
+
+  .subject-cluster__more {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    border-bottom: 1px solid var(--accent-crimson);
+    padding-bottom: 2px;
+    transition: color var(--t-base),
+                border-color var(--t-base);
+    white-space: nowrap;
+  }
+
+  .subject-cluster__more:hover {
+    color: var(--ink-primary);
+    border-bottom-color: var(--ink-primary);
+  }
+
+  .subject-cluster__trio {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: var(--sp-6);
+    row-gap: 0;
+  }
+
+  @media (min-width: 768px) {
+    .subject-cluster__trio {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

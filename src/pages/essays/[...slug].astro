@@ -1,0 +1,57 @@
+---
+/**
+ * Single essay page — uses EssayLayout which wraps content in .prose.
+ * Dynamic route for all essays in the collection.
+ */
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import EssayLayout from '~/layouts/EssayLayout.astro';
+import { getCoverTreatment } from '~/lib/coverTreatment';
+
+export const getStaticPaths = (async () => {
+  const essays = await getCollection('essays', ({ data }) => !data.draft);
+  const sorted = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return sorted.map((essay, index) => {
+    const prevEssay = sorted[index + 1];
+    const nextEssay = sorted[index - 1];
+
+    return {
+      params: { slug: essay.id },
+      props: {
+        essay,
+        prevEssay: prevEssay
+          ? { url: `/essays/${prevEssay.id}`, title: prevEssay.data.title }
+          : null,
+        nextEssay: nextEssay
+          ? { url: `/essays/${nextEssay.id}`, title: nextEssay.data.title }
+          : null,
+      },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { essay, prevEssay, nextEssay } = Astro.props;
+const { Content } = await render(essay);
+---
+
+<EssayLayout
+  title={essay.data.title}
+  subtitle={essay.data.subtitle}
+  dek={essay.data.dek}
+  date={essay.data.date}
+  author={essay.data.author}
+  tags={essay.data.tags}
+  series={essay.data.series}
+  dropcap={essay.data.dropcap}
+  excerpt={essay.data.excerpt}
+  originalUrl={essay.data.originalUrl}
+  publicationHistory={essay.data.publicationHistory}
+  coverImage={essay.data.coverImage}
+  coverImageAlt={essay.data.coverImageAlt ?? `Minh hoạ cho ${essay.data.title}`}
+  coverTreatment={getCoverTreatment(essay.id)}
+  prevEssay={prevEssay}
+  nextEssay={nextEssay}
+>
+  <Content />
+</EssayLayout>

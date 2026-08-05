@@ -1,0 +1,169 @@
+---
+/**
+ * /subjects — Index of all curated topic clusters.
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+const subjects = await getCollection('subjects');
+---
+
+<BaseLayout
+  title="Subjects"
+  description="Curated topic clusters in The Cochinchine Pensée."
+>
+  <section class="subjects">
+    <div class="container">
+      <header class="subjects__header">
+        <p class="subjects__eyebrow">Subjects</p>
+        <h1 class="subjects__title">Curated Topics</h1>
+        <p class="subjects__subtitle">
+          The essays on this site are not arranged by chronology but by
+          argument. Each subject gathers essays that share a structural
+          preoccupation, not a topical surface.
+        </p>
+      </header>
+
+      <ul class="subjects__list">
+        {subjects.map((subject) => (
+          <li class="subjects__item">
+            <a href={`/subjects/${subject.data.slug}`} class="subjects__link">
+              <h2 class="subjects__name">
+                {subject.data.nameVi ?? subject.data.name}
+              </h2>
+              {subject.data.name !== subject.data.nameVi && subject.data.nameVi && (
+                <p class="subjects__name-en">{subject.data.name}</p>
+              )}
+              {subject.data.blurb && (
+                <p class="subjects__blurb">{subject.data.blurb}</p>
+              )}
+              <p class="subjects__count">
+                {subject.data.essayIds.length} {subject.data.essayIds.length === 1 ? 'essay' : 'essays'}
+              </p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .subjects {
+    padding-block: var(--sp-12) var(--sp-16);
+  }
+
+  .subjects__header {
+    text-align: center;
+    margin-bottom: var(--sp-10);
+    padding-bottom: var(--sp-8);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .subjects__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-3);
+  }
+
+  .subjects__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    line-height: 1.1;
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-3);
+  }
+
+  .subjects__subtitle {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-body-larger);
+    color: var(--ink-secondary);
+    max-width: 36rem;
+    margin-inline: auto;
+    line-height: var(--lh-body-larger);
+  }
+
+  .subjects__list {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: var(--sp-8);
+    row-gap: 0;
+  }
+
+  @media (min-width: 640px) {
+    .subjects__list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .subjects__list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .subjects__item {
+    border-top: 1px solid var(--ink-primary);
+    padding-block: var(--sp-6);
+  }
+
+  .subjects__item:last-child {
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .subjects__link {
+    display: block;
+    color: var(--ink-primary);
+    transition: color var(--t-base);
+  }
+
+  .subjects__link:hover {
+    color: var(--accent-crimson);
+  }
+
+  .subjects__name {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-h2);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--sp-2);
+  }
+
+  .subjects__name-en {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: var(--sp-3);
+  }
+
+  .subjects__blurb {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    color: var(--ink-secondary);
+    margin-bottom: var(--sp-3);
+  }
+
+  .subjects__count {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .subjects__link:hover .subjects__count {
+    color: var(--accent-crimson);
+  }
+</style>

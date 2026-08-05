@@ -1,0 +1,116 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Subscribe"
+  description="Newsletter subscription — coming soon."
+>
+  <article class="subscribe">
+    <div class="container">
+      <header class="subscribe__header">
+        <p class="subscribe__eyebrow">Newsletter</p>
+        <h1 class="subscribe__title">Subscribe</h1>
+      </header>
+
+      <section class="subscribe__placeholder">
+        <p class="subscribe__glyph" aria-hidden="true">✦</p>
+        <h2 class="subscribe__placeholder-heading">Coming soon</h2>
+        <p class="subscribe__placeholder-body">
+          A weekly Vietnamese long-form essay delivered to your inbox is in
+          preparation. The publication is launching with its core reading
+          experience first; the newsletter will follow when the reading
+          experience is polished.
+        </p>
+        <p class="subscribe__placeholder-body">
+          In the meantime, you can follow every new essay via
+          <a href="/rss.xml" class="subscribe__link">RSS</a>,
+          <a href="/feed.json" class="subscribe__link">JSON Feed</a>, or simply
+          <a href="/" class="subscribe__link">return to the latest essay</a>.
+        </p>
+      </section>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .subscribe {
+    padding-block: var(--sp-12) var(--sp-16);
+  }
+
+  .subscribe__header {
+    text-align: center;
+    margin-bottom: var(--sp-10);
+    padding-bottom: var(--sp-8);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .subscribe__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-3);
+  }
+
+  .subscribe__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    line-height: 1.1;
+    color: var(--ink-primary);
+  }
+
+  .subscribe__placeholder {
+    max-width: var(--measure-prose);
+    margin-inline: auto;
+    padding-inline: var(--gutter-mobile);
+    text-align: center;
+    border: 1px solid var(--rule-hair);
+    padding-block: var(--sp-10);
+    background: var(--bg-page-deep);
+  }
+
+  @media (min-width: 768px) {
+    .subscribe__placeholder {
+      padding-inline: var(--gutter-tablet);
+    }
+  }
+
+  .subscribe__glyph {
+    font-family: var(--font-glyph);
+    font-size: 3rem;
+    color: var(--accent-crimson);
+    line-height: 1;
+    margin-bottom: var(--sp-5);
+  }
+
+  .subscribe__placeholder-heading {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-h2);
+    line-height: var(--lh-headline);
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-4);
+  }
+
+  .subscribe__placeholder-body {
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    color: var(--ink-secondary);
+    margin-bottom: var(--sp-4);
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+
+  .subscribe__link {
+    color: var(--accent-crimson);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .subscribe__link:hover {
+    color: var(--ink-primary);
+  }
+</style>

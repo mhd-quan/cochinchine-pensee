@@ -1,0 +1,251 @@
+---
+/**
+ * Footer — 4-column with newsletter column, plus bottom strip with utility links.
+ *
+ * Now absorbs: utility nav (about, RSS, newsletter) + the issue line that used
+ * to float in the header.
+ */
+const year = new Date().getFullYear();
+const romanYear = (() => {
+  const num = new Date().getFullYear();
+  const numerals: Array<[number, string]> = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I'],
+  ];
+  let result = '';
+  let n = num;
+  for (const [value, letter] of numerals) {
+    while (n >= value) {
+      result += letter;
+      n -= value;
+    }
+  }
+  return result;
+})();
+
+const footerColumns = [
+  {
+    title: 'Latest',
+    links: [
+      { href: '/', label: 'Most recent' },
+      { href: '/essays', label: 'All essays' },
+      { href: '/books', label: 'Book reviews' },
+      { href: '/rss.xml', label: 'Subscribe via RSS' },
+    ],
+  },
+  {
+    title: 'Browse',
+    links: [
+      { href: '/essays', label: 'By date' },
+      { href: '/subjects', label: 'By subject' },
+      { href: '/subjects/tu-ban', label: 'Capitalism' },
+      { href: '/subjects/dan-toc', label: 'Nationalism' },
+    ],
+  },
+  {
+    title: 'Subjects',
+    links: [
+      { href: '/subjects/tu-ban', label: 'Chủ nghĩa tư bản' },
+      { href: '/subjects/vuon-minh', label: 'Kỷ nguyên vươn mình' },
+      { href: '/subjects/kiet-suc', label: 'Thế hệ kiệt sức' },
+      { href: '/subjects/dan-toc', label: 'Chủ nghĩa dân tộc' },
+    ],
+  },
+  {
+    title: 'About',
+    links: [
+      { href: '/about', label: 'Masthead' },
+      { href: '/about/principles', label: 'Editorial principles' },
+      { href: '/about/contact', label: 'Contact' },
+      { href: '/feed.json', label: 'JSON Feed' },
+    ],
+  },
+];
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      {footerColumns.map((column) => (
+        <div class="site-footer__column">
+          <h4 class="site-footer__column-title">{column.title}</h4>
+          <ul class="site-footer__column-list">
+            {column.links.map((link) => (
+              <li>
+                <a href={link.href} class="site-footer__link">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      {/* Newsletter column */}
+      <div class="site-footer__column">
+        <h4 class="site-footer__column-title">Newsletter</h4>
+        <p class="site-footer__newsletter-copy">
+          Weekly long-form Vietnamese essays delivered to your inbox.
+        </p>
+        <p class="site-footer__newsletter-status">
+          <span class="site-footer__newsletter-glyph" aria-hidden="true">✦</span>
+          <em>Newsletter coming soon</em>
+        </p>
+        <a href="/subscribe" class="site-footer__link site-footer__link--more">
+          Read more →
+        </a>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p class="site-footer__issue-line">
+        Vol I · {romanYear}
+      </p>
+      <p class="site-footer__copyright">
+        © {year} The Cochinchine Pensée. All essays property of their author.
+      </p>
+      <p class="site-footer__colophon">
+        Set in Source Serif 4 and EB Garamond. Built with Astro.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 2px solid var(--ink-primary);
+    margin-top: var(--sp-16);
+    padding-block: var(--sp-10) var(--sp-6);
+    background: var(--bg-page);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-8);
+  }
+
+  @media (min-width: 640px) {
+    .site-footer__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .site-footer__grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .site-footer__column-title {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-3);
+    padding-bottom: var(--sp-2);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .site-footer__column-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  .site-footer__link {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+    border-bottom: 1px solid transparent;
+    transition:
+      color var(--t-base),
+      border-color var(--t-base);
+    display: inline-block;
+    padding-bottom: 1px;
+  }
+
+  .site-footer__link:hover {
+    color: var(--accent-crimson);
+    border-bottom-color: var(--accent-crimson);
+  }
+
+  .site-footer__link--more {
+    margin-top: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+  }
+
+  .site-footer__newsletter-copy {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+    margin-bottom: var(--sp-3);
+    line-height: var(--lh-meta);
+  }
+
+  .site-footer__newsletter-status {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  .site-footer__newsletter-glyph {
+    font-family: var(--font-glyph);
+    color: var(--accent-crimson);
+  }
+
+  .site-footer__bottom {
+    margin-top: var(--sp-10);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    align-items: center;
+    text-align: center;
+  }
+
+  .site-footer__issue-line {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-kicker);
+    color: var(--accent-crimson);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+  }
+
+  .site-footer__copyright {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+  }
+
+  .site-footer__colophon {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-kicker);
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+</style>

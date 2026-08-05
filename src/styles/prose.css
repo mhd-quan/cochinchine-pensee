@@ -1,0 +1,340 @@
+/* ============================================================================
+ * prose.css — Long-form essay typographic rules
+ *
+ * The .prose class wraps the article body. Every typography decision here
+ * follows CRB / Substack reading-first principles: generous leading,
+ * restrained measure, hairline rules. NO Tailwind utility classes.
+ * ========================================================================= */
+
+.prose {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--ink-primary);
+  max-width: var(--measure-prose);
+  margin-inline: auto;
+  padding-inline: var(--gutter-mobile);
+}
+
+@media (min-width: 768px) {
+  .prose {
+    padding-inline: var(--gutter-tablet);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Paragraphs and rhythm
+ * ────────────────────────────────────────────────────────────────── */
+.prose p {
+  margin-block: 1.1em;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+.prose p:first-of-type {
+  margin-top: 0;
+}
+
+/* Optional: lead paragraph slightly larger / italic */
+.prose .lead {
+  font-size: var(--fs-body-larger);
+  line-height: var(--lh-body-larger);
+  font-style: italic;
+  color: var(--ink-secondary);
+  margin-bottom: var(--sp-5);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Headings inside prose
+ * ────────────────────────────────────────────────────────────────── */
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-headline);
+  letter-spacing: var(--tr-headline);
+  margin-block: 2.2em 0.6em;
+  color: var(--ink-primary);
+}
+
+.prose h3 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-headline);
+  letter-spacing: var(--tr-headline);
+  margin-block: 1.8em 0.5em;
+  color: var(--ink-primary);
+}
+
+.prose h4 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-headline);
+  font-weight: var(--w-semibold);
+  margin-block: 1.5em 0.4em;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Links
+ * ────────────────────────────────────────────────────────────────── */
+.prose a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t-base),
+              color var(--t-base);
+}
+
+.prose a:hover {
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
+}
+
+.prose a:visited {
+  color: var(--link-visited);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Blockquote (regular — body colour)
+ * ────────────────────────────────────────────────────────────────── */
+.prose blockquote {
+  font-style: italic;
+  font-size: 1.0625em;
+  line-height: 1.5;
+  border-left: 3px solid var(--accent-crimson);
+  padding: var(--sp-3) 0 var(--sp-3) var(--sp-5);
+  margin-block: var(--sp-6);
+  color: var(--ink-secondary);
+}
+
+.prose blockquote p {
+  margin-block: 0.5em;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Pull quote (uses class, not blockquote)
+ *
+ * Rendered as <aside class="pullquote">. Bigger, centered, no border-left.
+ * ────────────────────────────────────────────────────────────────── */
+.prose .pullquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  letter-spacing: var(--tr-headline);
+  text-align: center;
+  color: var(--ink-primary);
+  margin-block: var(--sp-8);
+  padding-block: var(--sp-5);
+  max-width: 36rem;
+  margin-inline: auto;
+  border-block: 1px solid var(--rule-hair);
+  position: relative;
+}
+
+.prose .pullquote::before {
+  content: '“';
+  position: absolute;
+  font-size: 4rem;
+  line-height: 1;
+  top: -1.5rem;
+  left: -1.5rem;
+  color: var(--accent-crimson);
+  font-family: var(--font-display);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Epigraph (the top-of-essay quote, often italic, sometimes centered)
+ * ────────────────────────────────────────────────────────────────── */
+.prose .epigraph {
+  font-style: italic;
+  color: var(--ink-secondary);
+  font-size: var(--fs-body-larger);
+  line-height: var(--lh-body-larger);
+  text-align: center;
+  margin-block: 0 var(--sp-6);
+  padding: 0 var(--sp-4);
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.prose .epigraph cite {
+  display: block;
+  font-style: normal;
+  font-family: var(--font-sans);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--tr-kicker);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-top: var(--sp-2);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Footnotes (inline references and footnotes section)
+ * ────────────────────────────────────────────────────────────────── */
+.prose sup.fn {
+  font-family: var(--font-sans);
+  font-weight: var(--w-semibold);
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+  color: var(--accent-crimson);
+  margin-left: 0.1em;
+}
+
+.prose sup.fn a {
+  color: inherit;
+  border-bottom: none;
+}
+
+.prose .footnotes {
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--rule-hair);
+  font-size: var(--fs-meta);
+  line-height: var(--lh-meta);
+  color: var(--ink-secondary);
+  font-family: var(--font-sans);
+}
+
+.prose .footnotes ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+
+.prose .footnotes li {
+  margin-bottom: var(--sp-3);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Drop cap (optional — use via .prose-with-dropcap wrapper)
+ * Rendered only on essay opening paragraphs if frontmatter.dropcap: true
+ * ────────────────────────────────────────────────────────────────── */
+.prose.has-dropcap > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: 4.5em;
+  float: left;
+  line-height: 0.85;
+  padding: 0.1em 0.1em 0 0;
+  margin-right: 0.05em;
+  color: var(--accent-crimson);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Asterism — section break
+ *
+ * Use <hr class="asterism"> or <p class="asterism">✦ ✦ ✦</p>
+ * ────────────────────────────────────────────────────────────────── */
+.prose hr.asterism,
+.prose .asterism {
+  border: 0;
+  text-align: center;
+  margin-block: var(--sp-8);
+  font-family: var(--font-glyph);
+  font-size: 0.875rem;
+  letter-spacing: 1em;
+  color: var(--ink-primary);
+  padding-left: 1em; /* compensate for letter-spacing right-edge cutoff */
+}
+
+.prose hr.asterism::before {
+  content: '✦ ✦ ✦';
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Lists inside prose (rare but legal essays need them)
+ * ────────────────────────────────────────────────────────────────── */
+.prose ul,
+.prose ol {
+  margin-block: 1.1em;
+  padding-left: 1.5em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+}
+
+.prose li::marker {
+  color: var(--accent-crimson);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Inline emphasis
+ * ────────────────────────────────────────────────────────────────── */
+.prose strong {
+  font-weight: var(--w-semibold);
+}
+
+.prose em {
+  font-style: italic;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Code (rare — essay quoting source)
+ * ────────────────────────────────────────────────────────────────── */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--bg-page-deep);
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--rule-hair);
+}
+
+.prose pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: var(--bg-page-deep);
+  padding: var(--sp-4);
+  margin-block: var(--sp-5);
+  overflow-x: auto;
+  border: 1px solid var(--rule-hair);
+}
+
+.prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Image figure
+ * ────────────────────────────────────────────────────────────────── */
+.prose figure {
+  margin-block: var(--sp-8);
+}
+
+.prose figure img {
+  width: 100%;
+  height: auto;
+}
+
+.prose figcaption {
+  font-family: var(--font-sans);
+  font-size: var(--fs-caption);
+  color: var(--ink-muted);
+  text-align: center;
+  margin-top: var(--sp-2);
+  letter-spacing: 0.04em;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Mark / highlight (rare)
+ * ────────────────────────────────────────────────────────────────── */
+.prose mark {
+  background: var(--bg-tinted);
+  padding: 0 0.2em;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Reader preference selectors live in globals.css because their data
+ * attributes are applied to the document root.
+ * ────────────────────────────────────────────────────────────────── */

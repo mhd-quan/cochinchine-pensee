@@ -1,0 +1,71 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Not Found" noindex={true}>
+  <article class="not-found">
+    <div class="container">
+      <p class="not-found__eyebrow">Error 404</p>
+      <h1 class="not-found__title">Essay not found</h1>
+      <p class="not-found__body">
+        The essay you are looking for is not at this address. It may have been
+        moved, or the link may be mistyped.
+      </p>
+      <p class="not-found__actions">
+        <a href="/" class="not-found__link">Return to the latest essay →</a>
+        <span aria-hidden="true">·</span>
+        <a href="/essays" class="not-found__link">Browse the archive</a>
+      </p>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .not-found {
+    padding-block: var(--sp-16) var(--sp-16);
+    text-align: center;
+  }
+
+  .not-found__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-3);
+  }
+
+  .not-found__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    line-height: 1.1;
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-5);
+  }
+
+  .not-found__body {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-body-larger);
+    color: var(--ink-secondary);
+    max-width: 32rem;
+    margin-inline: auto;
+    margin-bottom: var(--sp-6);
+  }
+
+  .not-found__actions {
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+    display: flex;
+    justify-content: center;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+  }
+
+  .not-found__link {
+    color: var(--accent-crimson);
+    border-bottom: 1px solid currentColor;
+  }
+</style>

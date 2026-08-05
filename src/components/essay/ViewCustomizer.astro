@@ -1,0 +1,724 @@
+---
+/**
+ * Persistent reading preferences.
+ * Desktop: a compact sticky rail beside the essay.
+ * Mobile: a fixed trigger opens the same controls as a bottom sheet.
+ */
+---
+
+<aside class="reader-tools" aria-label="Reading preferences">
+  <button
+    type="button"
+    class="reader-tools__mobile-trigger"
+    aria-controls="reader-tools-panel"
+    aria-expanded="false"
+    data-reader-open
+  >
+    <span aria-hidden="true">Aa</span>
+    <span class="sr-only">Open reading preferences</span>
+  </button>
+
+  <button
+    type="button"
+    class="reader-tools__scrim"
+    aria-label="Close reading preferences"
+    data-reader-dismiss
+    tabindex="-1"
+  ></button>
+
+  <div class="reader-tools__panel" id="reader-tools-panel">
+    <div class="reader-tools__heading">
+      <span>Reading</span>
+      <button
+        type="button"
+        class="reader-tools__close"
+        aria-label="Close reading preferences"
+        data-reader-dismiss
+      >
+        <span class="reader-tools__close-icon" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+      </button>
+    </div>
+
+    <fieldset class="reader-tools__group">
+      <legend>Type size</legend>
+      <div class="reader-tools__options reader-tools__options--size">
+        <button type="button" data-pref="fontSize" data-value="md" aria-label="Default font size">
+          <span class="reader-tools__option-label" data-label="A">A</span>
+        </button>
+        <button type="button" data-pref="fontSize" data-value="lg" aria-label="Larger font size">
+          <span class="reader-tools__option-label" data-label="A+">A+</span>
+        </button>
+        <button type="button" data-pref="fontSize" data-value="xl" aria-label="Largest font size">
+          <span class="reader-tools__option-label" data-label="A++">A++</span>
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset class="reader-tools__group">
+      <legend>Text width</legend>
+      <div class="reader-tools__options reader-tools__options--measure">
+        <button type="button" data-pref="measure" data-value="standard" aria-label="Standard text width">
+          <span class="reader-tools__option-label" data-label="Standard">Standard</span>
+        </button>
+        <button type="button" data-pref="measure" data-value="wide" aria-label="Wide text width">
+          <span class="reader-tools__option-label" data-label="Wide">Wide</span>
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset class="reader-tools__group">
+      <legend>Theme</legend>
+      <div class="reader-tools__options reader-tools__options--theme">
+        <button type="button" data-pref="theme" data-value="paper" aria-label="Paper theme">
+          <span class="reader-tools__option-label" data-label="Paper">Paper</span>
+        </button>
+        <button type="button" data-pref="theme" data-value="sepia" aria-label="Sepia theme">
+          <span class="reader-tools__option-label" data-label="Sepia">Sepia</span>
+        </button>
+        <button type="button" data-pref="theme" data-value="night" aria-label="Night theme">
+          <span class="reader-tools__option-label" data-label="Night">Night</span>
+        </button>
+      </div>
+    </fieldset>
+  </div>
+</aside>
+
+<script>
+  type ReaderPrefs = {
+    fontSize: 'md' | 'lg' | 'xl';
+    measure: 'standard' | 'wide';
+    theme: 'paper' | 'sepia' | 'night';
+  };
+
+  type PrefName = keyof ReaderPrefs;
+
+  const STORAGE_KEY = 'tcp-reader-prefs';
+  const DEFAULTS: ReaderPrefs = {
+    fontSize: 'md',
+    measure: 'standard',
+    theme: 'paper',
+  };
+
+  const VALID_VALUES: { [Key in PrefName]: readonly ReaderPrefs[Key][] } = {
+    fontSize: ['md', 'lg', 'xl'],
+    measure: ['standard', 'wide'],
+    theme: ['paper', 'sepia', 'night'],
+  };
+  let activePreferenceAnimation: Animation | null = null;
+  let preferenceCommitTimer: number | undefined;
+
+  function isPrefName(value: string | undefined): value is PrefName {
+    return value === 'fontSize' || value === 'measure' || value === 'theme';
+  }
+
+  function isValidValue<Key extends PrefName>(
+    pref: Key,
+    value: string | undefined,
+  ): value is ReaderPrefs[Key] {
+    return typeof value === 'string' && (VALID_VALUES[pref] as readonly string[]).includes(value);
+  }
+
+  function setPreference<Key extends PrefName>(
+    prefs: ReaderPrefs,
+    pref: Key,
+    value: ReaderPrefs[Key],
+  ): void {
+    prefs[pref] = value;
+  }
+
+  function loadPrefs(): ReaderPrefs {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { ...DEFAULTS };
+
+      const stored = JSON.parse(raw) as Partial<Record<PrefName, unknown>>;
+      const prefs = { ...DEFAULTS };
+
+      for (const pref of Object.keys(DEFAULTS) as PrefName[]) {
+        const value = stored[pref];
+        if (typeof value === 'string' && isValidValue(pref, value)) {
+          setPreference(prefs, pref, value);
+        }
+      }
+
+      return prefs;
+    } catch {
+      return { ...DEFAULTS };
+    }
+  }
+
+  function savePrefs(prefs: ReaderPrefs): void {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    } catch {
+      // Browsing modes that block storage can safely use the current session.
+    }
+  }
+
+  function applyPrefs(prefs: ReaderPrefs): void {
+    const root = document.documentElement;
+    root.dataset.fontSize = prefs.fontSize;
+    root.dataset.measure = prefs.measure;
+    root.dataset.theme = prefs.theme;
+    const themeColor = prefs.theme === 'night'
+      ? '#1B1816'
+      : prefs.theme === 'sepia'
+        ? '#F5EFE0'
+        : '#FAFAF7';
+    document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+      ?.setAttribute('content', themeColor);
+
+    document.querySelectorAll<HTMLButtonElement>('[data-pref]').forEach((button) => {
+      const pref = button.dataset.pref;
+      if (!isPrefName(pref)) return;
+
+      const active = button.dataset.value === prefs[pref];
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function commitPrefs(prefs: ReaderPrefs, pref: PrefName): void {
+    const shell = document.querySelector<HTMLElement>('.essay__reading-shell');
+    const update = () => applyPrefs(prefs);
+    const startingOpacity = shell
+      ? Number.parseFloat(getComputedStyle(shell).opacity) || 1
+      : 1;
+
+    if (preferenceCommitTimer !== undefined) {
+      window.clearTimeout(preferenceCommitTimer);
+      preferenceCommitTimer = undefined;
+    }
+    activePreferenceAnimation?.cancel();
+    activePreferenceAnimation = null;
+
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      !shell ||
+      typeof shell.animate !== 'function'
+    ) {
+      if (shell) delete shell.dataset.preferenceTransition;
+      update();
+      return;
+    }
+
+    const animation = shell.animate(
+      [
+        { opacity: startingOpacity, offset: 0, easing: 'cubic-bezier(0.4, 0, 1, 1)' },
+        { opacity: 0.52, offset: 0.3, easing: 'cubic-bezier(0.2, 0, 0, 1)' },
+        { opacity: 1, offset: 1 },
+      ],
+      { duration: 320 },
+    );
+    activePreferenceAnimation = animation;
+    shell.dataset.preferenceTransition = pref;
+
+    preferenceCommitTimer = window.setTimeout(() => {
+      if (activePreferenceAnimation !== animation) return;
+      preferenceCommitTimer = undefined;
+      update();
+    }, 96);
+
+    void animation.finished.then(() => {
+      if (activePreferenceAnimation !== animation) return;
+      if (preferenceCommitTimer !== undefined) {
+        window.clearTimeout(preferenceCommitTimer);
+        preferenceCommitTimer = undefined;
+        update();
+      }
+      activePreferenceAnimation = null;
+      delete shell.dataset.preferenceTransition;
+    }).catch(() => {
+      // A newer preference animation intentionally cancels this one.
+    });
+  }
+
+  function initializeReaderTools(): void {
+    const tools = document.querySelector<HTMLElement>('.reader-tools');
+    if (!tools || tools.dataset.initialized === 'true') return;
+
+    const trigger = tools.querySelector<HTMLButtonElement>('[data-reader-open]');
+    const panel = tools.querySelector<HTMLElement>('.reader-tools__panel');
+    const dismissers = tools.querySelectorAll<HTMLButtonElement>('[data-reader-dismiss]');
+    if (!trigger || !panel) return;
+
+    tools.dataset.initialized = 'true';
+
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lastFocused: HTMLElement | null = null;
+    let closeTimer: number | undefined;
+    let closeTransitionHandler: ((event: TransitionEvent) => void) | null = null;
+
+    const cancelPendingClose = (): void => {
+      if (closeTimer !== undefined) {
+        window.clearTimeout(closeTimer);
+        closeTimer = undefined;
+      }
+      if (closeTransitionHandler) {
+        panel.removeEventListener('transitionend', closeTransitionHandler);
+        closeTransitionHandler = null;
+      }
+    };
+
+    const finishClose = (restoreFocus: boolean): void => {
+      cancelPendingClose();
+      tools.classList.remove('is-open', 'is-closing');
+      trigger.setAttribute('aria-expanded', 'false');
+      document.documentElement.classList.remove('has-reader-panel-open');
+      if (restoreFocus) lastFocused?.focus({ preventScroll: true });
+      lastFocused = null;
+    };
+
+    const closePanel = (restoreFocus = true): void => {
+      if (!tools.classList.contains('is-open')) return;
+
+      tools.classList.add('is-closing');
+      tools.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+
+      if (reducedMotion.matches) {
+        finishClose(restoreFocus);
+        return;
+      }
+
+      closeTransitionHandler = (event: TransitionEvent) => {
+        if (event.target !== panel || event.propertyName !== 'transform') return;
+        finishClose(restoreFocus);
+      };
+      panel.addEventListener('transitionend', closeTransitionHandler);
+      closeTimer = window.setTimeout(() => finishClose(restoreFocus), 300);
+    };
+
+    const openPanel = (): void => {
+      cancelPendingClose();
+      lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      tools.classList.remove('is-closing');
+      tools.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      document.documentElement.classList.add('has-reader-panel-open');
+      window.requestAnimationFrame(() => {
+        panel.querySelector<HTMLButtonElement>('button')?.focus({ preventScroll: true });
+      });
+    };
+
+    applyPrefs(loadPrefs());
+
+    trigger.addEventListener('click', openPanel, { signal });
+    dismissers.forEach((button) => {
+      button.addEventListener('click', () => closePanel(), { signal });
+    });
+
+    tools.querySelectorAll<HTMLButtonElement>('[data-pref]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const pref = button.dataset.pref;
+        const value = button.dataset.value;
+        if (!isPrefName(pref) || !isValidValue(pref, value)) return;
+
+        const prefs = loadPrefs();
+        if (prefs[pref] === value) return;
+        setPreference(prefs, pref, value);
+        savePrefs(prefs);
+        commitPrefs(prefs, pref);
+      }, { signal });
+    });
+
+    const handleKeydown = (event: KeyboardEvent): void => {
+      if (!tools.classList.contains('is-open')) return;
+
+      if (event.key === 'Escape') {
+        closePanel();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !panel) return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'),
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeydown, { signal });
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        cancelPendingClose();
+        lifecycle.abort();
+        tools.classList.remove('is-open', 'is-closing');
+        document.documentElement.classList.remove('has-reader-panel-open');
+        if (preferenceCommitTimer !== undefined) {
+          window.clearTimeout(preferenceCommitTimer);
+          preferenceCommitTimer = undefined;
+        }
+        activePreferenceAnimation?.cancel();
+        activePreferenceAnimation = null;
+      },
+      { once: true },
+    );
+  }
+
+  initializeReaderTools();
+  document.addEventListener('astro:page-load', initializeReaderTools);
+</script>
+
+<style>
+  .reader-tools {
+    position: sticky;
+    top: calc(4.25rem + var(--sp-5));
+    align-self: start;
+    font-family: var(--font-sans);
+  }
+
+  .reader-tools__panel {
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-hair);
+    padding-block: var(--sp-4) var(--sp-5);
+    transition:
+      background-color var(--t-base),
+      border-color var(--t-base);
+  }
+
+  .reader-tools__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-5);
+    font-size: 0.6875rem;
+    font-weight: var(--w-bold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-primary);
+  }
+
+  .reader-tools__group {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .reader-tools__group + .reader-tools__group {
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
+  }
+
+  .reader-tools__group legend {
+    margin-bottom: var(--sp-2);
+    font-size: 0.625rem;
+    font-weight: var(--w-semibold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .reader-tools__options {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .reader-tools__options--size {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reader-tools__options button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    padding: 0.625rem var(--sp-1);
+    border: 0;
+    background: transparent;
+    color: var(--ink-muted);
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: var(--w-medium);
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+    transition:
+      color var(--t-base),
+      background-color var(--t-base);
+  }
+
+  .reader-tools__options--size button {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .reader-tools__option-label {
+    position: relative;
+    display: inline-block;
+    transform-origin: center;
+    transition:
+      color var(--t-base),
+      transform var(--t-fast);
+  }
+
+  .reader-tools__option-label::after {
+    position: absolute;
+    inset: 0;
+    color: var(--ink-primary);
+    content: attr(data-label);
+    filter: blur(4px);
+    font-weight: var(--w-bold);
+    opacity: 0;
+    pointer-events: none;
+    text-shadow:
+      -0.012em 0 color-mix(in srgb, var(--ink-primary) 16%, transparent),
+      0.012em 0 color-mix(in srgb, var(--ink-primary) 16%, transparent),
+      0 0 0.42rem color-mix(in srgb, var(--accent-crimson) 14%, transparent);
+    transform: scale(0.25);
+    transform-origin: center;
+    white-space: nowrap;
+    transition:
+      opacity 220ms cubic-bezier(0.2, 0, 0, 1),
+      transform 300ms cubic-bezier(0.2, 0, 0, 1),
+      filter 220ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .reader-tools__options button:hover:not(.is-active) {
+    color: var(--ink-secondary);
+  }
+
+  .reader-tools__options button:focus-visible {
+    outline: 0;
+  }
+
+  .reader-tools__options button:focus-visible .reader-tools__option-label {
+    outline: var(--focus-ring);
+    outline-offset: 0.25rem;
+  }
+
+  .reader-tools__options button:active .reader-tools__option-label {
+    transform: scale(0.96);
+  }
+
+  .reader-tools__options button.is-active .reader-tools__option-label {
+    color: color-mix(in srgb, var(--ink-primary) 18%, transparent);
+  }
+
+  .reader-tools__options button.is-active .reader-tools__option-label::after {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .reader-tools__options button.is-active:hover {
+    color: var(--ink-primary);
+  }
+
+  .reader-tools__mobile-trigger,
+  .reader-tools__close,
+  .reader-tools__scrim {
+    display: none;
+  }
+
+  @media (max-width: 1099px) {
+    .reader-tools {
+      position: static;
+    }
+
+    .reader-tools__mobile-trigger {
+      display: grid;
+      place-items: center;
+      position: fixed;
+      left: max(var(--gutter-mobile), env(safe-area-inset-left));
+      bottom: max(var(--gutter-mobile), env(safe-area-inset-bottom));
+      z-index: var(--z-overlay);
+      width: 3rem;
+      height: 3rem;
+      border: 1px solid var(--rule-strong);
+      background: var(--bg-page);
+      color: var(--ink-primary);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: var(--w-semibold);
+      box-shadow: 0 0.3rem 1rem rgb(15 15 15 / 8%);
+      transition:
+        color var(--t-fast),
+        background-color var(--t-fast),
+        opacity var(--t-base),
+        transform var(--t-fast);
+    }
+
+    .reader-tools__mobile-trigger:hover {
+      color: var(--accent-crimson);
+    }
+
+    .reader-tools__mobile-trigger:active {
+      transform: scale(0.96);
+    }
+
+    .reader-tools.is-open .reader-tools__mobile-trigger {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.85);
+    }
+
+    .reader-tools__scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-overlay);
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: rgb(15 15 15 / 0.42);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity var(--t-exit),
+        visibility 0s linear 220ms;
+    }
+
+    .reader-tools__panel {
+      position: fixed;
+      inset: auto 0 0;
+      z-index: var(--z-modal);
+      max-height: min(80vh, 34rem);
+      overflow-y: auto;
+      border-top: 1px solid var(--rule-strong);
+      border-bottom: 0;
+      padding: var(--sp-5) var(--gutter-mobile) max(var(--sp-6), env(safe-area-inset-bottom));
+      background: var(--bg-page);
+      box-shadow: 0 -0.5rem 1.5rem rgb(15 15 15 / 8%);
+      opacity: 0.82;
+      visibility: hidden;
+      transform: translate3d(0, calc(100% + 1px), 0);
+      transition:
+        transform var(--t-exit),
+        opacity 160ms cubic-bezier(0.4, 0, 1, 1),
+        visibility 0s linear 220ms,
+        background-color var(--t-base),
+        border-color var(--t-base);
+      contain: layout paint;
+    }
+
+    .reader-tools.is-open .reader-tools__scrim {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity var(--t-base),
+        visibility 0s;
+    }
+
+    .reader-tools.is-open .reader-tools__panel {
+      opacity: 1;
+      visibility: visible;
+      transform: translate3d(0, 0, 0);
+      transition:
+        transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 240ms cubic-bezier(0.2, 0, 0, 1),
+        visibility 0s,
+        background-color var(--t-base),
+        border-color var(--t-base);
+    }
+
+    .reader-tools.is-open .reader-tools__scrim,
+    .reader-tools.is-open .reader-tools__panel,
+    .reader-tools.is-closing .reader-tools__scrim,
+    .reader-tools.is-closing .reader-tools__panel {
+      will-change: opacity, transform;
+    }
+
+    .reader-tools__heading {
+      margin-bottom: var(--sp-6);
+    }
+
+    .reader-tools__close {
+      display: grid;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      color: var(--ink-primary);
+      transition:
+        color var(--t-base),
+        transform var(--t-fast);
+    }
+
+    .reader-tools__close:hover {
+      color: var(--accent-crimson);
+    }
+
+    .reader-tools__close:active {
+      transform: scale(0.96);
+    }
+
+    .reader-tools__close-icon {
+      position: relative;
+      display: block;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .reader-tools__close-icon span {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1.5px;
+      background: currentColor;
+      transform-origin: center;
+      transition:
+        transform 300ms cubic-bezier(0.2, 0, 0, 1),
+        opacity 180ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    .reader-tools__close-icon span:first-child {
+      transform: translateY(-0.25rem) scaleX(0.78);
+    }
+
+    .reader-tools__close-icon span:last-child {
+      transform: translateY(0.25rem) scaleX(0.78);
+    }
+
+    .reader-tools.is-open .reader-tools__close-icon span:first-child {
+      transform: rotate(45deg);
+    }
+
+    .reader-tools.is-open .reader-tools__close-icon span:last-child {
+      transform: rotate(-45deg);
+    }
+
+    .reader-tools__options--measure {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .reader-tools__options--theme {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .reader-tools__options--measure button,
+    .reader-tools__options--theme button {
+      justify-content: center;
+      padding-inline: var(--sp-2);
+      text-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reader-tools__panel,
+    .reader-tools__scrim,
+    .reader-tools__close-icon span,
+    .reader-tools__option-label,
+    .reader-tools__option-label::after {
+      transition-duration: 0.01ms;
+    }
+  }
+</style>

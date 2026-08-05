@@ -1,0 +1,137 @@
+---
+/**
+ * ShareLinks — placeholder component at launch.
+ *
+ * Deferred feature: when ready, swap implementation with X/Twitter,
+ * Facebook, LinkedIn, copy-link, email-permalink. The slot stays reserved
+ * so the layout never needs to change — just this component's body.
+ *
+ * Glyphs (✦, ◆, etc.) stay in round sans per design decisions.
+ */
+interface Props {
+  title: string;
+  excerpt?: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="share-links" aria-label="Share">
+  <span class="share-links__label">Share</span>
+  <ul class="share-links__list">
+    <li>
+      <a
+        href="#"
+        class="share-links__btn"
+        aria-label="Share on X"
+        data-share="twitter"
+      >
+        <span class="share-links__glyph" aria-hidden="true">X</span>
+      </a>
+    </li>
+    <li>
+      <a
+        href="#"
+        class="share-links__btn"
+        aria-label="Share on Facebook"
+        data-share="facebook"
+      >
+        <span class="share-links__glyph" aria-hidden="true">f</span>
+      </a>
+    </li>
+    <li>
+      <a
+        href="#"
+        class="share-links__btn"
+        aria-label="Copy link"
+        data-share="copy"
+      >
+        <span class="share-links__glyph" aria-hidden="true">⎘</span>
+      </a>
+    </li>
+    <li>
+      <a
+        href={`mailto:?subject=${encodeURIComponent(title)}`}
+        class="share-links__btn"
+        aria-label="Share via email"
+      >
+        <span class="share-links__glyph" aria-hidden="true">✉</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<script>
+  // Wire up copy-link and share-button handlers.
+  // Currently inert (preview state). When ready to deploy, replace
+  // href="#" with live share URLs.
+  document.querySelectorAll<HTMLAnchorElement>('[data-share]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const action = link.dataset.share;
+      if (action === 'copy') {
+        navigator.clipboard?.writeText(window.location.href)
+          .then(() => {
+            const glyph = link.querySelector('.share-links__glyph');
+            const original = glyph?.textContent;
+            if (glyph) glyph.textContent = '✓';
+            setTimeout(() => {
+              if (glyph && original) glyph.textContent = original;
+            }, 1500);
+          })
+          .catch(() => {});
+      }
+    });
+  });
+</script>
+
+<style>
+  .share-links {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) 0;
+    margin-block: var(--sp-5);
+    border-block: 1px solid var(--rule-hair);
+  }
+
+  .share-links__label {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .share-links__list {
+    display: flex;
+    gap: var(--sp-2);
+  }
+
+  .share-links__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--rule-hair);
+    color: var(--ink-secondary);
+    font-family: var(--font-glyph);
+    font-size: 1rem;
+    line-height: 1;
+    transition:
+      color var(--t-base),
+      border-color var(--t-base),
+      transform var(--t-fast);
+  }
+
+  .share-links__btn:hover {
+    color: var(--accent-crimson);
+    border-color: var(--accent-crimson);
+  }
+
+  .share-links__btn:active {
+    transform: scale(0.96);
+  }
+</style>

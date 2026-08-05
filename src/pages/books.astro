@@ -1,0 +1,102 @@
+---
+/**
+ * /books — Book reviews archive.
+ * Each book links to the essay that reviewed it.
+ */
+import { getCollection } from 'astro:content';
+import BookCard from '~/components/essay/BookCard.astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+const books = await getCollection('books');
+---
+
+<BaseLayout
+  title="Books"
+  description="Book reviews and intellectual literature referenced in The Cochinchine Pensée."
+>
+  <section class="books">
+    <div class="container">
+      <header class="books__header">
+        <p class="books__eyebrow">The Stacks</p>
+        <h1 class="books__title">Books Reviewed</h1>
+        <p class="books__subtitle">
+          A working library of the works that have shaped essays on this site.
+          Click any cover to read the essay.
+        </p>
+      </header>
+
+      <ul class="books__grid">
+        {books.map((book) => (
+          <li>
+            <BookCard book={book} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .books {
+    padding-block: var(--sp-12) var(--sp-16);
+  }
+
+  .books__header {
+    text-align: center;
+    margin-bottom: var(--sp-10);
+    padding-bottom: var(--sp-8);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .books__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-3);
+  }
+
+  .books__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    line-height: 1.1;
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-3);
+  }
+
+  .books__subtitle {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-body-larger);
+    color: var(--ink-secondary);
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  .books__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--sp-5);
+    row-gap: 0;
+  }
+
+  @media (min-width: 640px) {
+    .books__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .books__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .books__grid {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+</style>

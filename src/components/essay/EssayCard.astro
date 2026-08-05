@@ -1,0 +1,224 @@
+---
+/**
+ * EssayCard — homepage grid + archive + categories.
+ *
+ * Anatomy:
+ *   - Thumbnail (cover image) — optional, blended into page background
+ *   - Optional kicker (eyebrow tag from series or category)
+ *   - Title (display serif)
+ *   - Optional subtitle (italic)
+ *   - Byline (italic by + author + date)
+ *   - Optional excerpt
+ *
+ * Thumbnail handling:
+ *   - Paper illustrations optically merge into the page without redrawing.
+ *   - Full-frame plates keep their content and dissolve only at the edges.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { getCoverTreatment } from '~/lib/coverTreatment';
+
+interface Props {
+  essay: CollectionEntry<'essays'>;
+  showExcerpt?: boolean;
+  variant?: 'default' | 'featured';
+}
+
+const { essay, showExcerpt = false, variant = 'default' } = Astro.props;
+const formattedDate = essay.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+
+const hasCover = !!essay.data.coverImage;
+const coverTreatment = getCoverTreatment(essay.id);
+---
+
+<article class:list={['essay-card', `essay-card--${variant}`]}>
+  {hasCover && (
+    <a
+      href={`/essays/${essay.id}`}
+      class="essay-card__cover-link"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <figure class="essay-card__cover" data-cover-treatment={coverTreatment}>
+        <img
+          src={essay.data.coverImage}
+          alt={essay.data.coverImageAlt ?? ''}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+    </a>
+  )}
+
+  <div class="essay-card__body">
+    {essay.data.series && (
+      <p class="essay-card__kicker">From the series · {essay.data.series}</p>
+    )}
+
+    <h4 class="essay-card__title">
+      <a href={`/essays/${essay.id}`}>{essay.data.title}</a>
+    </h4>
+
+    {essay.data.subtitle && (
+      <p class="essay-card__subtitle">{essay.data.subtitle}</p>
+    )}
+
+    {showExcerpt && essay.data.excerpt && (
+      <p class="essay-card__excerpt">{essay.data.excerpt}</p>
+    )}
+
+    <p class="essay-card__byline">
+      <span class="essay-card__byline-by">by</span>
+      <span class="essay-card__byline-author">{essay.data.author}</span>
+      <span aria-hidden="true">·</span>
+      <time datetime={essay.data.date.toISOString()}>{formattedDate}</time>
+    </p>
+  </div>
+</article>
+
+<style>
+  .essay-card {
+    padding-block: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  /* Cover image — blends into page background */
+  .essay-card__cover-link {
+    display: block;
+    overflow: hidden;
+    transition: transform var(--t-slow);
+  }
+
+  .essay-card:hover .essay-card__cover-link {
+    transform: translateY(-2px);
+  }
+
+  .essay-card__cover {
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: transparent;
+  }
+
+  .essay-card__cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform var(--t-slow);
+  }
+
+  .essay-card__cover[data-cover-treatment='paper'] img {
+    filter: url('#paper-to-alpha');
+  }
+
+  .essay-card:hover .essay-card__cover img {
+    transform: scale(1.012);
+  }
+
+  .essay-card__cover[data-cover-treatment='plate'] img {
+    mask-image: radial-gradient(ellipse 82% 80% at center, #000 58%, transparent 100%);
+  }
+
+  :global(html[data-theme='night']) .essay-card__cover img {
+    mix-blend-mode: screen;
+    filter: invert(1) grayscale(1) contrast(1.05) brightness(0.82);
+  }
+
+  :global(html[data-theme='night']) .essay-card__cover[data-cover-treatment='paper'] img {
+    filter: url('#paper-to-alpha') invert(1) grayscale(1) contrast(1.05) brightness(0.82);
+  }
+
+  .essay-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    flex-grow: 1;
+  }
+
+  .essay-card__kicker {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .essay-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-headline);
+    letter-spacing: var(--tr-headline);
+  }
+
+  .essay-card__title a {
+    color: var(--ink-primary);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size var(--t-base),
+                color var(--t-base);
+  }
+
+  .essay-card__title a:hover {
+    color: var(--accent-crimson);
+    background-size: 100% 1px;
+  }
+
+  .essay-card__subtitle {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-body);
+    line-height: var(--lh-headline);
+    color: var(--ink-secondary);
+  }
+
+  .essay-card__excerpt {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+    color: var(--ink-secondary);
+    flex-grow: 1;
+  }
+
+  .essay-card__byline {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+
+  .essay-card__byline-by {
+    font-style: italic;
+    color: var(--ink-muted);
+  }
+
+  .essay-card__byline-author {
+    font-style: italic;
+    color: var(--accent-crimson);
+  }
+
+  /* Featured variant — larger title and more vertical breathing room */
+  .essay-card--featured .essay-card__title {
+    font-size: var(--fs-h2);
+  }
+
+  .essay-card--featured .essay-card__subtitle {
+    font-size: var(--fs-h4);
+  }
+</style>

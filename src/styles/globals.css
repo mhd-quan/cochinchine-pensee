@@ -1,0 +1,171 @@
+/* ============================================================================
+ * globals.css — Imports order matters. Tokens first, then reset, then prose.
+ * This file is imported once in BaseLayout.astro.
+ * ========================================================================= */
+
+@import './tokens.css';
+@import './reset.css';
+@import './prose.css';
+
+/* ──────────────────────────────────────────────────────────────────
+ * Fonts — self-hosted via @fontsource
+ * Importing only what's used (weights + styles) to keep bundle small.
+ * ────────────────────────────────────────────────────────────────── */
+@import '@fontsource/source-serif-4/400.css';
+@import '@fontsource/source-serif-4/400-italic.css';
+@import '@fontsource/source-serif-4/600.css';
+@import '@fontsource/source-serif-4/700.css';
+
+@import '@fontsource/eb-garamond/400.css';
+@import '@fontsource/eb-garamond/400-italic.css';
+@import '@fontsource/eb-garamond/600.css';
+@import '@fontsource/eb-garamond/700.css';
+
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/600.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+
+/* ──────────────────────────────────────────────────────────────────
+ * Base typography
+ * ────────────────────────────────────────────────────────────────── */
+html {
+  font-family: var(--font-serif);
+  color: var(--ink-primary);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  font-synthesis: none;
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  background: var(--bg-page);
+  color: var(--ink-primary);
+  transition:
+    background-color var(--t-base),
+    color var(--t-base);
+}
+
+.image-filter-defs {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+html[data-measure='wide'] {
+  --reader-measure: var(--measure-long);
+}
+
+html[data-theme='sepia'] {
+  --bg-page: #F5EFE0;
+  --bg-page-deep: #EBE3D0;
+  --bg-tinted: #E9DFCA;
+  --rule-hair: #D8CFBE;
+}
+
+html[data-theme='night'] {
+  --bg-page: #1B1816;
+  --bg-page-deep: #14110F;
+  --bg-tinted: #27211D;
+  --ink-primary: #EDE6D6;
+  --ink-secondary: #C9BFAA;
+  --ink-muted: #9C9385;
+  --ink-faint: #5A534A;
+  --ink-inverse: #1B1816;
+  --rule-hair: #3A3530;
+  --rule-strong: #EDE6D6;
+  color-scheme: dark;
+}
+
+html[data-font-size='lg'] .prose {
+  font-size: 1.1875rem;
+}
+
+html[data-font-size='xl'] .prose {
+  font-size: 1.3125rem;
+}
+
+html.has-reader-panel-open {
+  overflow: hidden;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Reusable utility classes (very few — most styling lives in components)
+ * ────────────────────────────────────────────────────────────────── */
+.container {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter-mobile);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-inline: var(--gutter-tablet);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rule {
+  border: 0;
+  border-top: 1px solid var(--rule-hair);
+  margin-block: var(--sp-6);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * View Transitions
+ * Astro 7 + native CSS View Transitions API
+ * Subtle fade — no flashy slide. Editorial aesthetic.
+ * ────────────────────────────────────────────────────────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: fade-in;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Disable transitions on reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

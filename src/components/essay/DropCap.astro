@@ -1,0 +1,20 @@
+---
+/**
+ * DropCap — Optional, only rendered when frontmatter.dropcap = true.
+ *
+ * Implementation note: the actual drop-cap CSS is applied via the
+ * .prose.has-dropcap selector in prose.css. This component exists only
+ * to mark the prose wrapper with the has-dropcap class when used.
+ *
+ * Per design decisions:
+ *   - Only on "opening" essay (cover-piece), never on list pages
+ *   - Restrained: 4.5em float, accent crimson, no decorative flourishes
+ */
+---
+
+<div class="dropcap-marker" aria-hidden="true"></div>
+
+<style>
+  /* Drop cap styling lives in prose.css via .prose.has-dropcap */
+  /* This component is a marker hook — see EssayLayout */
+</style>

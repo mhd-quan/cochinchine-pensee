@@ -1,0 +1,113 @@
+---
+/**
+ * BaseLayout — every page extends this.
+ * Holds the document shell, font preloads, meta, and the Header/Footer chrome.
+ * UI chrome is English. The article body itself lives in <slot /> — that is
+ * Vietnamese. The language policy is split by region, not by page.
+ */
+import '~/styles/globals.css';
+import { ClientRouter } from 'astro:transitions';
+import Footer from '~/components/nav/Footer.astro';
+import Header from '~/components/nav/Header.astro';
+import MetaTags from '~/components/seo/MetaTags.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang?: 'en' | 'vi';
+  canonicalUrl?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = 'A Vietnamese editorial publication in the Claremont Review of Books tradition.',
+  lang = 'en',
+  canonicalUrl,
+  ogImage,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle =
+  title === 'The Cochinchine Pensée'
+    ? 'The Cochinchine Pensée'
+    : `${title} — The Cochinchine Pensée`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAFAF7" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="generator" content={Astro.generator} />
+
+    <script is:inline>
+      try {
+        const saved = JSON.parse(localStorage.getItem('tcp-reader-prefs') || '{}');
+        const root = document.documentElement;
+        if (['md', 'lg', 'xl'].includes(saved.fontSize)) root.dataset.fontSize = saved.fontSize;
+        if (['standard', 'wide'].includes(saved.measure)) root.dataset.measure = saved.measure;
+        if (['paper', 'sepia', 'night'].includes(saved.theme)) {
+          root.dataset.theme = saved.theme;
+          const colors = { paper: '#FAFAF7', sepia: '#F5EFE0', night: '#1B1816' };
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors[saved.theme]);
+        }
+      } catch {
+        // Invalid or blocked storage falls back to the paper defaults.
+      }
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <MetaTags
+      title={fullTitle}
+      description={description}
+      canonicalUrl={canonicalUrl}
+      ogImage={ogImage}
+      noindex={noindex}
+    />
+
+    {/* DNS prefetch for any external resources we may add later */}
+    <link rel="dns-prefetch" href="//cochinchinepensees.studio" />
+
+    {/* View Transitions — Astro 7 native */}
+    <ClientRouter />
+  </head>
+  <body>
+    <svg class="image-filter-defs" aria-hidden="true" width="0" height="0" focusable="false">
+      <defs>
+        <filter
+          id="paper-to-alpha"
+          x="-5%"
+          y="-5%"
+          width="110%"
+          height="110%"
+          color-interpolation-filters="sRGB"
+        >
+          <feColorMatrix
+            type="matrix"
+            values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              -0.3938 -1.3231 -0.1336 1.74 0
+            "
+          />
+        </filter>
+      </defs>
+    </svg>
+
+    <a href="#main" class="sr-only">Skip to main content</a>
+
+    <Header />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

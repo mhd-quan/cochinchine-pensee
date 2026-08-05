@@ -1,0 +1,10 @@
+# Cloudflare Workers config — for the OG image endpoint only.
+# The rest of the site is static and uses Cloudflare's direct Git integration
+# (push to dist/, Workers serves as static assets).
+
+name = "cochinchine-pensee"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "./dist"
+
+# Analytics (free, no cookie banner)
+# Enable in Cloudflare dashboard: Workers & Pages → cochinchine-pensee → Analytics

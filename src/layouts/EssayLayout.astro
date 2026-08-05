@@ -1,0 +1,441 @@
+---
+import ShareLinks from '~/components/essay/ShareLinks.astro';
+import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import type { CoverTreatment } from '~/lib/coverTreatment';
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  dek?: string;
+  date: Date;
+  author?: string;
+  tags?: string[];
+  series?: string;
+  dropcap?: boolean;
+  excerpt?: string;
+  originalUrl?: string;
+  publicationHistory?: string;
+  coverImage?: string;
+  coverImageAlt?: string;
+  coverTreatment?: CoverTreatment;
+  prevEssay?: { url: string; title: string } | null;
+  nextEssay?: { url: string; title: string } | null;
+}
+
+const {
+  title,
+  subtitle,
+  dek,
+  date,
+  author = 'M. Q. Doan',
+  tags = [],
+  series,
+  dropcap = false,
+  excerpt,
+  originalUrl,
+  publicationHistory,
+  coverImage,
+  coverImageAlt = `Minh hoạ cho ${title}`,
+  coverTreatment = 'paper',
+  prevEssay,
+  nextEssay,
+} = Astro.props;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const isoDate = date.toISOString();
+---
+
+<BaseLayout
+  title={title}
+  description={excerpt ?? dek ?? subtitle}
+  lang="vi"
+  ogImage={coverImage}
+>
+  <article class="essay">
+    <header class="essay__hero">
+      <div class:list={['essay__hero-inner', { 'essay__hero-inner--text-only': !coverImage }]}>
+        <div class="essay__header-copy">
+          {series && (
+            <p class="essay__series">
+              <a href={`/series/${series}`}>From the series: <strong>{series}</strong></a>
+            </p>
+          )}
+
+          <h1 class="essay__title">{title}</h1>
+
+          {subtitle && <p class="essay__subtitle">{subtitle}</p>}
+          {dek && <p class="essay__dek">{dek}</p>}
+
+          <div class="essay__byline">
+            <span class="essay__byline-by">by</span>
+            <span class="essay__byline-author">{author}</span>
+            <span class="essay__byline-sep" aria-hidden="true">·</span>
+            <time datetime={isoDate}>{formattedDate}</time>
+          </div>
+
+          {tags.length > 0 && (
+            <ul class="essay__tags" aria-label="Topics">
+              {tags.map((tag) => <li class="essay__tag">{tag}</li>)}
+            </ul>
+          )}
+        </div>
+
+        {coverImage && (
+          <figure class="essay__cover" data-cover-treatment={coverTreatment}>
+            <img
+              src={coverImage}
+              alt={coverImageAlt}
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </figure>
+        )}
+      </div>
+    </header>
+
+    <div class="essay__reading-shell">
+      <div class:list={['prose', { 'has-dropcap': dropcap }]}>
+        <slot />
+      </div>
+
+      <ViewCustomizer />
+    </div>
+
+    <footer class="essay__footer">
+      {publicationHistory && (
+        <details class="essay__history">
+          <summary>Publication history</summary>
+          <p>{publicationHistory}</p>
+          {originalUrl && (
+            <p>
+              <a href={originalUrl} rel="noopener external">Originally published on Substack</a>
+            </p>
+          )}
+        </details>
+      )}
+
+      <ShareLinks title={title} excerpt={excerpt} />
+
+      {(prevEssay || nextEssay) && (
+        <nav class="essay__prev-next" aria-label="Article navigation">
+          {prevEssay ? (
+            <a href={prevEssay.url} class="essay__prev-next-link essay__prev-next-link--prev">
+              <span class="essay__prev-next-direction">← Previous</span>
+              <span class="essay__prev-next-title">{prevEssay.title}</span>
+            </a>
+          ) : <span />}
+          {nextEssay ? (
+            <a href={nextEssay.url} class="essay__prev-next-link essay__prev-next-link--next">
+              <span class="essay__prev-next-direction">Next →</span>
+              <span class="essay__prev-next-title">{nextEssay.title}</span>
+            </a>
+          ) : <span />}
+        </nav>
+      )}
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .essay {
+    padding-bottom: var(--sp-12);
+  }
+
+  .essay__hero {
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .essay__hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.86fr) minmax(22rem, 1.14fr);
+    align-items: center;
+    gap: clamp(var(--sp-8), 5vw, var(--sp-12));
+    width: min(100%, 76rem);
+    margin-inline: auto;
+    padding: clamp(var(--sp-8), 5vw, var(--sp-12)) var(--gutter-tablet);
+  }
+
+  .essay__hero-inner--text-only {
+    display: block;
+    max-width: var(--measure-prose);
+  }
+
+  .essay__header-copy {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .essay__series {
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .essay__series a {
+    color: var(--ink-secondary);
+  }
+
+  .essay__title {
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    line-height: var(--lh-headline);
+    letter-spacing: var(--tr-display);
+    text-wrap: balance;
+    color: var(--ink-primary);
+  }
+
+  .essay__subtitle {
+    max-width: 34rem;
+    margin-bottom: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-style: italic;
+    line-height: 1.35;
+    text-wrap: pretty;
+    color: var(--ink-secondary);
+  }
+
+  .essay__dek {
+    max-width: 34rem;
+    margin-bottom: var(--sp-5);
+    font-family: var(--font-serif);
+    font-size: var(--fs-body-larger);
+    font-style: italic;
+    line-height: var(--lh-body-larger);
+    text-wrap: pretty;
+    color: var(--ink-secondary);
+  }
+
+  .essay__byline {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+  }
+
+  .essay__byline-by {
+    font-style: italic;
+    color: var(--ink-muted);
+  }
+
+  .essay__byline-author {
+    font-style: italic;
+    color: var(--accent-crimson);
+  }
+
+  .essay__byline-sep {
+    color: var(--ink-faint);
+  }
+
+  .essay__tags {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-3);
+    margin-top: var(--sp-3);
+  }
+
+  .essay__tag {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .essay__cover {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .essay__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .essay__cover[data-cover-treatment='paper'] img {
+    filter: url('#paper-to-alpha');
+  }
+
+  .essay__cover[data-cover-treatment='plate'] img {
+    object-fit: cover;
+    mask-image: radial-gradient(ellipse 80% 78% at center, #000 56%, transparent 100%);
+  }
+
+  :global(html[data-theme='night']) .essay__cover img {
+    mix-blend-mode: screen;
+    filter: invert(1) grayscale(1) contrast(1.05) brightness(0.82);
+  }
+
+  :global(html[data-theme='night']) .essay__cover[data-cover-treatment='paper'] img {
+    filter: url('#paper-to-alpha') invert(1) grayscale(1) contrast(1.05) brightness(0.82);
+  }
+
+  .essay__reading-shell {
+    width: min(100%, var(--reader-measure));
+    margin-inline: auto;
+    padding: var(--sp-8) var(--gutter-mobile) 0;
+  }
+
+  .essay__reading-shell :global(.prose) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .essay__footer {
+    max-width: var(--measure-prose);
+    margin: var(--sp-12) auto 0;
+    padding-inline: var(--gutter-mobile);
+  }
+
+  .essay__history {
+    margin-bottom: var(--sp-8);
+    padding-block: var(--sp-4);
+    border-top: 1px solid var(--rule-hair);
+    border-bottom: 1px solid var(--rule-hair);
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+  }
+
+  .essay__history summary {
+    cursor: pointer;
+    margin-bottom: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .essay__prev-next {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-5);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .essay__prev-next-link {
+    font-family: var(--font-display);
+    color: var(--ink-primary);
+    transition: color var(--t-base);
+  }
+
+  .essay__prev-next-link:hover {
+    color: var(--accent-crimson);
+  }
+
+  .essay__prev-next-link--prev {
+    grid-column: 1;
+  }
+
+  .essay__prev-next-link--next {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .essay__prev-next-direction {
+    display: block;
+    margin-bottom: var(--sp-1);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .essay__prev-next-title {
+    display: block;
+    font-size: var(--fs-h4);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-headline);
+  }
+
+  @media (min-width: 1100px) {
+    .essay__reading-shell {
+      display: grid;
+      grid-template-columns: 10rem minmax(0, var(--reader-measure)) 10rem;
+      align-items: start;
+      gap: var(--sp-8);
+      width: min(100%, calc(var(--measure-long) + 30rem));
+      padding-inline: var(--gutter-tablet);
+    }
+
+    .essay__reading-shell :global(.prose) {
+      grid-column: 2;
+    }
+
+    .essay__reading-shell :global(.reader-tools) {
+      grid-column: 3;
+    }
+
+    .essay__footer {
+      padding-inline: 0;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .essay__hero-inner {
+      grid-template-columns: 1fr;
+      gap: var(--sp-6);
+      padding: var(--sp-8) var(--gutter-mobile) var(--sp-6);
+    }
+
+    .essay__cover {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .essay__hero-inner {
+      padding-top: var(--sp-6);
+    }
+
+    .essay__title {
+      font-size: clamp(2rem, 9vw, 2.75rem);
+    }
+
+    .essay__subtitle {
+      font-size: var(--fs-h4);
+    }
+
+    .essay__reading-shell {
+      padding-top: var(--sp-6);
+    }
+
+    .essay__prev-next {
+      grid-template-columns: 1fr;
+    }
+
+    .essay__prev-next-link--next {
+      grid-column: 1;
+      padding-top: var(--sp-4);
+      border-top: 1px solid var(--rule-hair);
+      text-align: left;
+    }
+  }
+</style>

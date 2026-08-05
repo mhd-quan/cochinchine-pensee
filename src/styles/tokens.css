@@ -1,0 +1,162 @@
+/* ============================================================================
+ * tokens.css — Design tokens for The Cochinchine Pensée
+ *
+ * Every color, font size, spacing value, and z-index is defined here.
+ * All component CSS uses var(--token). No magic numbers anywhere else.
+ *
+ * Refined 2026-08-05:
+ *   - Off-white #FAFAF7 (subtle warmth, gentler than ivory, no HDR glare)
+ *   - Two-register typography: serif (Old Republic) + sans glyph (contemporary)
+ * ========================================================================= */
+
+:root {
+  /* ──────────────────────────────────────────────────────────────────
+   * Surfaces
+   * ────────────────────────────────────────────────────────────────── */
+  --bg-page:           #FAFAF7;   /* off-white subtle warm — gentler than pure white, less warm than ivory */
+  --bg-page-deep:      #F2F0EA;   /* one step warmer for cards, newsletter, callouts */
+  --bg-tinted:         #F4EFE6;   /* CRB-style promo/overlay tint */
+  --bg-rule-soft:      #F5F5F4;   /* image placeholders */
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Ink (text)
+   * ────────────────────────────────────────────────────────────────── */
+  --ink-primary:       #0F0F0F;   /* near-black for body and headings */
+  --ink-secondary:     #4A4A4A;   /* metadata, byline, dek */
+  --ink-muted:         #8A8A8A;   /* kicker, dateline, small caps */
+  --ink-faint:         #B5B5B5;   /* disabled UI states */
+  --ink-inverse:       #FAFAF7;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Accents — single accent principle
+   * ────────────────────────────────────────────────────────────────── */
+  --accent-crimson:    #8B1A1A;   /* CRB-inspired oxblood — links, monogram, pull quote border */
+  --accent-crimson-hi: #A52222;   /* hover state */
+  --accent-gold:       #B8860B;   /* optional secondary for special callouts only */
+  --link:              #8B1A1A;
+  --link-hover:        #A52222;
+  --link-visited:      #6E1414;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Rules and dividers
+   * ────────────────────────────────────────────────────────────────── */
+  --rule-hair:         #E5E5E5;   /* hairline between cards */
+  --rule-strong:       #1A1A1A;   /* footer top edge, masthead underline */
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Typography — fonts
+   *
+   * Two registers:
+   *   serif (Old Republic): body and reading
+   *   sans glyph (contemporary): UI, icons, monograms
+   * ────────────────────────────────────────────────────────────────── */
+  --font-serif:        "Source Serif 4", "PT Serif", Charter, "EB Garamond", Georgia, "Times New Roman", Times, serif;
+  --font-display:      "EB Garamond", "Cormorant Garamond", Garamond, "Playfair Display", Georgia, serif;
+  --font-sans:         "Be Vietnam Pro", "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-glyph:        "Be Vietnam Pro", "Inter", system-ui, sans-serif;
+  --font-mono:         "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Typography — scale
+   * ────────────────────────────────────────────────────────────────── */
+  --fs-display:        clamp(2.25rem, 1.6rem + 2vw, 3.25rem);  /* 36-52px hero/feature */
+  --fs-h1:             clamp(1.875rem, 1.4rem + 1.4vw, 2.625rem);  /* 30-42px article H1 */
+  --fs-h2:             1.625rem;       /* 26px section heads */
+  --fs-h3:             1.25rem;        /* 20px card titles */
+  --fs-h4:             1.125rem;       /* 18px sub-section / pull-quote attribution */
+  --fs-body:           1.0625rem;      /* 17px prose */
+  --fs-body-larger:    1.1875rem;      /* 19px Substack-style long read */
+  --fs-meta:           0.8125rem;      /* 13px byline/dates */
+  --fs-kicker:         0.75rem;        /* 12px small-caps eyebrow */
+  --fs-caption:        0.75rem;
+
+  /* Weights */
+  --w-regular:         400;
+  --w-medium:          500;
+  --w-semibold:        600;
+  --w-bold:            700;
+
+  /* Leading */
+  --lh-display:        1.1;
+  --lh-headline:       1.18;
+  --lh-body:           1.65;
+  --lh-body-larger:    1.6;
+  --lh-meta:           1.4;
+
+  /* Tracking */
+  --tr-display:        -0.01em;
+  --tr-headline:       -0.005em;
+  --tr-kicker:         0.18em;
+  --tr-nav:            0.16em;
+
+  /* Measure */
+  --measure-prose:     39.25rem;    /* balanced default measure — ~628px */
+  --measure-long:      48rem;       /* optional wide reading mode — ~768px */
+  --reader-measure:    var(--measure-prose);
+  --measure-card:      22rem;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Layout
+   * ────────────────────────────────────────────────────────────────── */
+  --container-max:     80rem;       /* 1280px */
+  --content-max:       64rem;       /* 1024px */
+  --gutter-mobile:     1.25rem;
+  --gutter-tablet:     2rem;
+  --gutter-desktop:    3rem;
+
+  /* Spacing scale (8px base) */
+  --sp-1:              0.25rem;     /* 4px */
+  --sp-2:              0.5rem;      /* 8px */
+  --sp-3:              0.75rem;     /* 12px */
+  --sp-4:              1rem;        /* 16px */
+  --sp-5:              1.5rem;      /* 24px */
+  --sp-6:              2rem;        /* 32px */
+  --sp-8:              3rem;        /* 48px */
+  --sp-10:             4rem;        /* 64px */
+  --sp-12:             5rem;        /* 80px */
+  --sp-16:             8rem;        /* 128px */
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Z-index scale
+   * ────────────────────────────────────────────────────────────────── */
+  --z-base:            1;
+  --z-card:            10;
+  --z-sticky:          50;
+  --z-header:          100;
+  --z-overlay:         500;
+  --z-modal:           1000;
+  --z-toast:           2000;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Transitions
+   * ────────────────────────────────────────────────────────────────── */
+  --t-fast:            150ms cubic-bezier(0.2, 0, 0, 1);
+  --t-base:            250ms cubic-bezier(0.2, 0, 0, 1);
+  --t-slow:            400ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-exit:            220ms cubic-bezier(0.4, 0, 1, 1);
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Radius — none, mostly. CRB austre.
+   * ────────────────────────────────────────────────────────────────── */
+  --radius-none:       0;
+  --radius-sm:         2px;         /* inputs only */
+  --radius-pill:       999px;       /* tag pills (deferred) */
+
+  /* Focus ring */
+  --focus-ring:        2px solid var(--accent-crimson);
+  --focus-offset:      2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+ * Reduce motion preference
+ * ────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

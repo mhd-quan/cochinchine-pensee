@@ -1,0 +1,275 @@
+---
+/**
+ * Homepage — single-column CRB style, refined per user feedback (Aug 2026):
+ *   1. Hero essay (latest, with cover image)
+ *   2. "Recent Essays" grid
+ *   3. "From the Stacks" book reviews grid
+ *   4. Curated subject clusters (trios by topic)
+ *
+ * No right rail, no utility nav, no floating issue line in header.
+ */
+import { getCollection } from 'astro:content';
+import BookCard from '~/components/essay/BookCard.astro';
+import EssayCard from '~/components/essay/EssayCard.astro';
+import SubjectCluster from '~/components/essay/SubjectCluster.astro';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+const allEssays = await getCollection('essays', ({ data }) => !data.draft);
+const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const essaysById = new Map(sortedEssays.map((e) => [e.id, e]));
+
+const heroEssay = sortedEssays[0];
+const recentEssays = sortedEssays.slice(1, 13);
+
+const allBooks = await getCollection('books');
+const recentBooks = allBooks.slice(0, 6);
+
+const featuredSubjects = await getCollection('subjects', ({ data }) => data.featured);
+const featuredClusters = featuredSubjects
+  .map((subject) => ({
+    subject,
+    essays: subject.data.essayIds
+      .map((id) => essaysById.get(id))
+      .filter((essay) => essay !== undefined),
+  }))
+  .filter(({ essays }) => essays.length > 0);
+---
+
+<BaseLayout
+  title="The Cochinchine Pensée"
+  description="A Vietnamese editorial publication on politics, literature, and the Vietnamese intellectual tradition."
+>
+  {/* ── Hero essay ── */}
+  {heroEssay && (
+    <section class="hero">
+      <div class="container">
+        <p class="hero__eyebrow">Latest Essay</p>
+        <h2 class="hero__title">
+          <a href={`/essays/${heroEssay.id}`}>{heroEssay.data.title}</a>
+        </h2>
+        {heroEssay.data.subtitle && (
+          <p class="hero__subtitle">{heroEssay.data.subtitle}</p>
+        )}
+        <p class="hero__meta">
+          <span class="hero__byline">by <em>{heroEssay.data.author}</em></span>
+          <span aria-hidden="true">·</span>
+          <time datetime={heroEssay.data.date.toISOString()}>
+            {heroEssay.data.date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </time>
+        </p>
+      </div>
+    </section>
+  )}
+
+  {/* ── Recent essays ── */}
+  <section class="recent container">
+    <div class="recent__header">
+      <h3 class="recent__heading">Recent Essays</h3>
+      <a href="/essays" class="recent__more">All essays →</a>
+    </div>
+
+    <ul class="recent__grid">
+      {recentEssays.map((essay) => (
+        <li>
+          <EssayCard essay={essay} />
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {/* ── From the Stacks — book reviews ── */}
+  {recentBooks.length > 0 && (
+    <section class="stacks container">
+      <div class="stacks__header">
+        <h3 class="stacks__heading">From the Stacks</h3>
+        <a href="/books" class="stacks__more">All books →</a>
+      </div>
+
+      <ul class="stacks__grid">
+        {recentBooks.map((book) => (
+          <li>
+            <BookCard book={book} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {/* ── Curated subject clusters ── */}
+  <div class="clusters container">
+    {featuredClusters.map(({ subject, essays }) => (
+      <SubjectCluster subject={subject} essays={essays} />
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding-block: var(--sp-12) var(--sp-10);
+    border-bottom: 1px solid var(--rule-hair);
+    text-align: center;
+    background: var(--bg-page);
+  }
+
+  .hero__eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-4);
+  }
+
+  .hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 1.4rem + 2.5vw, 3.75rem);
+    line-height: 1.05;
+    letter-spacing: var(--tr-display);
+    color: var(--ink-primary);
+    margin-bottom: var(--sp-4);
+    text-wrap: balance;
+  }
+
+  .hero__title a {
+    color: inherit;
+    transition: color var(--t-base);
+  }
+
+  .hero__title a:hover {
+    color: var(--accent-crimson);
+  }
+
+  .hero__subtitle {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+    line-height: var(--lh-headline);
+    color: var(--ink-secondary);
+    margin-bottom: var(--sp-5);
+    max-width: 36rem;
+    margin-inline: auto;
+    text-wrap: balance;
+  }
+
+  .hero__meta {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+
+  .hero__byline em {
+    color: var(--accent-crimson);
+  }
+
+  /* Section primitives */
+  .recent,
+  .stacks {
+    padding-block: var(--sp-10);
+  }
+
+  .recent__header,
+  .stacks__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--sp-6);
+    padding-bottom: var(--sp-3);
+    border-bottom: 2px solid var(--ink-primary);
+    gap: var(--sp-4);
+  }
+
+  .recent__heading,
+  .stacks__heading {
+    font-family: var(--font-sans);
+    font-size: var(--fs-h4);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-primary);
+  }
+
+  .recent__more,
+  .stacks__more {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    border-bottom: 1px solid transparent;
+    transition: color var(--t-base),
+                border-color var(--t-base);
+    white-space: nowrap;
+  }
+
+  .recent__more:hover,
+  .stacks__more:hover {
+    color: var(--ink-primary);
+    border-bottom-color: var(--ink-primary);
+  }
+
+  /* Recent essays grid */
+  .recent__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: var(--sp-6);
+    row-gap: 0;
+  }
+
+  @media (min-width: 640px) {
+    .recent__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .recent__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Books grid */
+  .stacks__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--sp-5);
+    row-gap: 0;
+  }
+
+  @media (min-width: 640px) {
+    .stacks__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .stacks__grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  .stacks {
+    background: var(--bg-page-deep);
+    border-block: 1px solid var(--rule-hair);
+  }
+
+  .stacks__heading {
+    color: var(--ink-primary);
+  }
+
+  /* Subjects cluster container */
+  .clusters {
+    padding-block: 0 var(--sp-12);
+  }
+</style>
