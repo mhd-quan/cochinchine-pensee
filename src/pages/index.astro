@@ -4,14 +4,14 @@
  *   1. Hero essay (latest, with cover image)
  *   2. "Recent Essays" grid
  *   3. "From the Stacks" book reviews grid
- *   4. Curated subject clusters (trios by topic)
+ *   4. Series clusters (the trio of essays in each series)
  *
  * No right rail, no utility nav, no floating issue line in header.
  */
 import { getCollection } from 'astro:content';
 import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
-import SubjectCluster from '~/components/essay/SubjectCluster.astro';
+import SeriesCluster from '~/components/essay/SeriesCluster.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
@@ -19,16 +19,25 @@ const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.dat
 const essaysById = new Map(sortedEssays.map((e) => [e.id, e]));
 
 const heroEssay = sortedEssays[0];
-const recentEssays = sortedEssays.slice(1, 13);
+// Max three rows on the widest grid (3 columns); CSS trims to 3 rows at
+// narrower breakpoints too. Everything else lives at /essays.
+const recentEssays = sortedEssays.slice(1, 10);
 
+// Books run newest-first, dated by the essay that reviewed them.
 const allBooks = await getCollection('books');
-const recentBooks = allBooks.slice(0, 6);
+const stackBooks = allBooks
+  .map((book) => ({ book, essay: essaysById.get(book.data.reviewEssayId) }))
+  .filter((pair) => pair.essay !== undefined)
+  .sort((a, b) => b.essay!.data.date.valueOf() - a.essay!.data.date.valueOf())
+  .map(({ book }) => book);
 
-const featuredSubjects = await getCollection('subjects', ({ data }) => data.featured);
-const featuredClusters = featuredSubjects
-  .map((subject) => ({
-    subject,
-    essays: subject.data.essayIds
+// Homepage clusters show published work only — a series appears once it has
+// at least one live essay. Announced slots are left for the series page.
+const featuredSeries = await getCollection('series', ({ data }) => data.featured);
+const featuredClusters = featuredSeries
+  .map((series) => ({
+    series,
+    essays: series.data.essayIds
       .map((id) => essaysById.get(id))
       .filter((essay) => essay !== undefined),
   }))
@@ -36,7 +45,7 @@ const featuredClusters = featuredSubjects
 ---
 
 <BaseLayout
-  title="The Cochinchine Pensée"
+  title="The Cochinchine Pensées"
   description="A Vietnamese editorial publication on politics, literature, and the Vietnamese intellectual tradition."
 >
   {/* ── Hero essay ── */}
@@ -81,17 +90,40 @@ const featuredClusters = featuredSubjects
     </ul>
   </section>
 
-  {/* ── From the Stacks — book reviews ── */}
-  {recentBooks.length > 0 && (
-    <section class="stacks container">
+  {/* ── From the Stacks — book reviews, newest first, horizontally scrollable ── */}
+  {stackBooks.length > 0 && (
+    <section class="stacks container" data-stacks>
       <div class="stacks__header">
         <h3 class="stacks__heading">From the Stacks</h3>
-        <a href="/books" class="stacks__more">All books →</a>
+        <div class="stacks__header-end">
+          <div class="stacks__controls">
+            <button
+              type="button"
+              class="stacks__arrow"
+              data-stacks-prev
+              aria-label="Previous books"
+              aria-controls="stacks-track"
+              disabled
+            >
+              <span aria-hidden="true">&lt;</span>
+            </button>
+            <button
+              type="button"
+              class="stacks__arrow"
+              data-stacks-next
+              aria-label="More books"
+              aria-controls="stacks-track"
+            >
+              <span aria-hidden="true">&gt;</span>
+            </button>
+          </div>
+          <a href="/books" class="stacks__more">All books →</a>
+        </div>
       </div>
 
-      <ul class="stacks__grid">
-        {recentBooks.map((book) => (
-          <li>
+      <ul id="stacks-track" class="stacks__track" data-stacks-track tabindex="0">
+        {stackBooks.map((book) => (
+          <li class="stacks__slide">
             <BookCard book={book} />
           </li>
         ))}
@@ -99,13 +131,74 @@ const featuredClusters = featuredSubjects
     </section>
   )}
 
-  {/* ── Curated subject clusters ── */}
+  {/* ── Series clusters ── */}
   <div class="clusters container">
-    {featuredClusters.map(({ subject, essays }) => (
-      <SubjectCluster subject={subject} essays={essays} />
+    {featuredClusters.map(({ series, essays }) => (
+      <SeriesCluster series={series} essays={essays} />
     ))}
   </div>
 </BaseLayout>
+
+<script>
+  function initStacks() {
+    for (const section of document.querySelectorAll<HTMLElement>('[data-stacks]')) {
+      if (section.dataset.initialized === 'true') continue;
+
+      const track = section.querySelector<HTMLElement>('[data-stacks-track]');
+      const prev = section.querySelector<HTMLButtonElement>('[data-stacks-prev]');
+      const next = section.querySelector<HTMLButtonElement>('[data-stacks-next]');
+      if (!track || !prev || !next) continue;
+
+      section.dataset.initialized = 'true';
+
+      // Listeners are torn down before Astro swaps the page, so repeated
+      // client-side navigations don't stack duplicates on window.
+      const lifecycle = new AbortController();
+      const { signal } = lifecycle;
+
+      const step = () => {
+        const slide = track.querySelector<HTMLElement>('.stacks__slide');
+        if (!slide) return track.clientWidth;
+        const gap = Number.parseFloat(getComputedStyle(track).columnGap) || 0;
+        return slide.getBoundingClientRect().width + gap;
+      };
+
+      // Advance by a full view, keeping one slide on screen for continuity.
+      const page = () => {
+        const one = step();
+        const perView = Math.max(1, Math.floor(track.clientWidth / one));
+        return one * Math.max(1, perView - 1);
+      };
+
+      const sync = () => {
+        const max = track.scrollWidth - track.clientWidth;
+        prev.disabled = track.scrollLeft <= 1;
+        next.disabled = track.scrollLeft >= max - 1;
+      };
+
+      prev.addEventListener('click', () => {
+        track.scrollBy({ left: -page(), behavior: 'smooth' });
+      }, { signal });
+
+      next.addEventListener('click', () => {
+        track.scrollBy({ left: page(), behavior: 'smooth' });
+      }, { signal });
+
+      track.addEventListener('scroll', sync, { passive: true, signal });
+      window.addEventListener('resize', sync, { passive: true, signal });
+
+      document.addEventListener('astro:before-swap', () => {
+        lifecycle.abort();
+        delete section.dataset.initialized;
+      }, { once: true, signal });
+
+      sync();
+    }
+  }
+
+  document.addEventListener('astro:page-load', initStacks);
+  initStacks();
+</script>
 
 <style>
   /* Hero */
@@ -239,23 +332,97 @@ const featuredClusters = featuredSubjects
     }
   }
 
-  /* Books grid */
-  .stacks__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: var(--sp-5);
-    row-gap: 0;
+  /* Recent essays: never more than three rows at any breakpoint */
+  .recent__grid > li:nth-child(n + 4) {
+    display: none;
   }
 
   @media (min-width: 640px) {
-    .stacks__grid {
-      grid-template-columns: repeat(3, 1fr);
+    .recent__grid > li:nth-child(n + 4) {
+      display: revert;
+    }
+
+    .recent__grid > li:nth-child(n + 7) {
+      display: none;
     }
   }
 
   @media (min-width: 1024px) {
-    .stacks__grid {
-      grid-template-columns: repeat(6, 1fr);
+    .recent__grid > li:nth-child(n + 7) {
+      display: revert;
+    }
+  }
+
+  /* Books slider */
+  .stacks__header-end {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+
+  .stacks__controls {
+    display: flex;
+    gap: var(--sp-2);
+  }
+
+  .stacks__arrow {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--rule-hair);
+    color: var(--ink-primary);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1;
+    background: var(--bg-page);
+    transition:
+      color var(--t-base),
+      border-color var(--t-base),
+      opacity var(--t-base);
+  }
+
+  .stacks__arrow:hover:not(:disabled) {
+    color: var(--accent-crimson);
+    border-color: var(--accent-crimson);
+  }
+
+  .stacks__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .stacks__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - var(--sp-5)) / 2);
+    gap: var(--sp-5);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: var(--sp-2);
+  }
+
+  .stacks__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stacks__slide {
+    scroll-snap-align: start;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .stacks__track {
+      grid-auto-columns: calc((100% - (var(--sp-5) * 2)) / 3);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .stacks__track {
+      grid-auto-columns: calc((100% - (var(--sp-5) * 5)) / 6);
     }
   }
 
@@ -268,7 +435,7 @@ const featuredClusters = featuredSubjects
     color: var(--ink-primary);
   }
 
-  /* Subjects cluster container */
+  /* Series cluster container */
   .clusters {
     padding-block: 0 var(--sp-12);
   }

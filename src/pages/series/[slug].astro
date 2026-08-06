@@ -1,81 +1,93 @@
 ---
 /**
- * /subjects/[slug] — Single subject page.
- * Renders the curated cluster of essays tagged with this subject.
+ * /series/[slug] — A single essay series.
+ *
+ * Renders the ordered run of essays. Publication state is per-essay: a
+ * published essay gets a normal card, while one marked `draft` +
+ * `comingSoon` keeps its place in the run as an inert slot. Drafts
+ * without `comingSoon` are omitted entirely.
  */
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
+import ComingSoonCard from '~/components/essay/ComingSoonCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 
 export const getStaticPaths = (async () => {
-  const subjects = await getCollection('subjects');
-  const allEssays = await getCollection('essays', ({ data }) => !data.draft);
+  const allSeries = await getCollection('series');
+  // Announced-but-unpublished essays are pulled in deliberately: their slot
+  // is shown, their prose is not.
+  const allEssays = await getCollection(
+    'essays',
+    ({ data }) => !data.draft || data.comingSoon,
+  );
   const essaysById = new Map(allEssays.map((e) => [e.id, e]));
 
-  return subjects.map((subject) => {
-    const essays = subject.data.essayIds
+  return allSeries.map((entry) => {
+    const essays = entry.data.essayIds
       .map((id) => essaysById.get(id))
       .filter((e): e is NonNullable<typeof e> => Boolean(e));
 
     return {
-      params: { slug: subject.data.slug },
-      props: { subject, essays },
+      params: { slug: entry.data.slug },
+      props: { series: entry, essays },
     };
   });
 }) satisfies GetStaticPaths;
 
-const { subject, essays } = Astro.props;
+const { series, essays } = Astro.props;
+const publishedCount = essays.filter((e) => !e.data.draft).length;
 ---
 
 <BaseLayout
-  title={subject.data.nameVi ?? subject.data.name}
-  description={subject.data.description}
+  title={series.data.nameVi ?? series.data.name}
+  description={series.data.description}
 >
-  <section class="subject">
+  <section class="series">
     <div class="container">
-      <header class="subject__header">
-        <p class="subject__eyebrow">Subject</p>
-        <h1 class="subject__name">{subject.data.nameVi ?? subject.data.name}</h1>
-        {subject.data.nameVi && (
-          <p class="subject__name-en">{subject.data.name}</p>
+      <header class="series__header">
+        <p class="series__eyebrow">Series</p>
+        <h1 class="series__name">{series.data.nameVi ?? series.data.name}</h1>
+        {series.data.nameVi && (
+          <p class="series__name-en">{series.data.name}</p>
         )}
-        {subject.data.blurb && (
-          <p class="subject__blurb">{subject.data.blurb}</p>
-        )}
-        <p class="subject__count">
-          {essays.length} {essays.length === 1 ? 'essay' : 'essays'}
+        <p class="series__count">
+          {`${publishedCount} ${publishedCount === 1 ? 'essay' : 'essays'}`}
         </p>
       </header>
 
       {essays.length > 0 ? (
-        <ul class="subject__grid">
+        <ul class="series__grid">
           {essays.map((essay) => (
             <li>
-              <EssayCard essay={essay} />
+              {essay.data.draft ? (
+                <ComingSoonCard essay={essay} />
+              ) : (
+                <EssayCard essay={essay} />
+              )}
             </li>
           ))}
         </ul>
       ) : (
-        <p class="subject__empty">No essays in this subject yet.</p>
+        <p class="series__empty">No essays in this series yet.</p>
       )}
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .subject {
+  .series {
     padding-block: var(--sp-12) var(--sp-16);
   }
 
-  .subject__header {
+  .series__header {
     text-align: center;
     margin-bottom: var(--sp-10);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
 
-  .subject__eyebrow {
+  .series__eyebrow {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
@@ -85,7 +97,7 @@ const { subject, essays } = Astro.props;
     margin-bottom: var(--sp-3);
   }
 
-  .subject__name {
+  .series__name {
     font-family: var(--font-display);
     font-style: italic;
     font-size: clamp(2rem, 1.4rem + 2.5vw, 3.5rem);
@@ -95,7 +107,7 @@ const { subject, essays } = Astro.props;
     margin-bottom: var(--sp-2);
   }
 
-  .subject__name-en {
+  .series__name-en {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-medium);
@@ -105,18 +117,7 @@ const { subject, essays } = Astro.props;
     margin-bottom: var(--sp-4);
   }
 
-  .subject__blurb {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-body-larger);
-    line-height: var(--lh-body-larger);
-    color: var(--ink-secondary);
-    max-width: 36rem;
-    margin-inline: auto;
-    margin-bottom: var(--sp-4);
-  }
-
-  .subject__count {
+  .series__count {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
@@ -125,7 +126,7 @@ const { subject, essays } = Astro.props;
     color: var(--ink-muted);
   }
 
-  .subject__grid {
+  .series__grid {
     display: grid;
     grid-template-columns: 1fr;
     column-gap: var(--sp-6);
@@ -133,18 +134,18 @@ const { subject, essays } = Astro.props;
   }
 
   @media (min-width: 640px) {
-    .subject__grid {
+    .series__grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (min-width: 1024px) {
-    .subject__grid {
+    .series__grid {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
-  .subject__empty {
+  .series__empty {
     font-family: var(--font-serif);
     font-style: italic;
     color: var(--ink-muted);

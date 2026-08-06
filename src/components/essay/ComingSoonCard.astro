@@ -1,0 +1,85 @@
+---
+/**
+ * ComingSoonCard — an announced but unpublished essay holding its slot
+ * in a series.
+ *
+ * Mirrors EssayCard's anatomy so a series reads as one continuous run,
+ * but the slot is inert: no link, no cover, no prose. Only the title and
+ * the planned date are exposed; the text stays behind `draft: true`.
+ */
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  essay: CollectionEntry<'essays'>;
+}
+
+const { essay } = Astro.props;
+const formattedDate = essay.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<article class="coming-card" aria-label={`${essay.data.title} — coming soon`}>
+  <div class="coming-card__body">
+    <p class="coming-card__badge">Coming soon</p>
+
+    <h4 class="coming-card__title">{essay.data.title}</h4>
+
+    <p class="coming-card__byline">
+      <span class="coming-card__byline-by">expected</span>
+      <time datetime={essay.data.date.toISOString()}>{formattedDate}</time>
+    </p>
+  </div>
+</article>
+
+<style>
+  .coming-card {
+    padding-block: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  .coming-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    flex-grow: 1;
+  }
+
+  .coming-card__badge {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+  }
+
+  .coming-card__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-headline);
+    letter-spacing: var(--tr-headline);
+    color: var(--ink-muted);
+  }
+
+  .coming-card__byline {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    flex-wrap: wrap;
+    margin-top: auto;
+  }
+
+  .coming-card__byline-by {
+    font-style: italic;
+  }
+</style>

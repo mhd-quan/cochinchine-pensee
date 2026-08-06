@@ -4,81 +4,61 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 
 <BaseLayout
   title="About"
-  description="Masthead and editorial principles of The Cochinchine Pensée."
+  description="About The Cochinchine Pensées."
 >
   <article class="about">
     <div class="container">
       <header class="about__header">
-        <p class="about__eyebrow">Masthead</p>
-        <h1 class="about__title">Editorial Principles</h1>
+        <p class="about__eyebrow">About</p>
+        <h1 class="about__title">About</h1>
+        <p class="about__status" role="status">Under construction</p>
       </header>
 
       <div class="about__body prose">
         <p class="lead">
-          The Cochinchine Pensée is a Vietnamese-language essay publication in the
-          tradition of Claremont Review of Books, The American Scholar, and the
-          Times Literary Supplement. It exists for one purpose: to publish long-form
-          essays of intellectual seriousness about politics, literature, and the
-          Vietnamese intellectual tradition.
+          The Cochinchine Pensées is a Vietnamese-language essay publication on
+          politics, literature, and the Vietnamese intellectual tradition. This
+          page is still being written.
         </p>
 
-        <h2>What we publish</h2>
+        <h2>What is published here</h2>
         <p>
-          Essays between 3,000 and 7,000 words. We do not publish news, reviews of
-          contemporary events for their own sake, or work that mistakes polemic
-          for argument. Each essay is held to a falsifiable thesis — a verdict
-          the author is willing to defend — and the body of the essay is the
-          defense.
+          Long-form essays, usually between 3,000 and 7,000 words. Each one
+          argues a thesis it is willing to defend, and the essay is the defense.
+          No news coverage.
         </p>
 
         <p>
-          Vietnamese evidence carries equal weight to the Western canon. The
-          sequence matters: in modern Vietnam, the state demolished civil
-          society first; the market only colonized the vacuum. We do not invert
-          this.
+          Vietnamese evidence carries the same weight as the Western canon. On
+          the sequence in modern Vietnam: the state dismantled civil society
+          first, and the market moved into the vacuum afterwards. That order is
+          not reversed here.
         </p>
 
-        <h2>What we will not publish</h2>
+        <h2>Where else it runs</h2>
         <p>
-          Decorative rhetoric that earns its place only by sounding learned.
-          Meta-commentary on the essay's own machinery. The short sentence
-          manufactured into a punchline. We are a seasoned critic, not an
-          amateur displaying range.
+          Every essay is published in parallel on Substack, at
+          <a href="https://archyatt.substack.com/" rel="noopener">archyatt.substack.com</a>.
+          The two are the same texts; this site is the archive, with the essays
+          grouped into series.
         </p>
 
-        <h2>Editorial cadence</h2>
+        <h2>Reading order</h2>
         <p>
-          One or two essays per week, published without a fixed schedule. Each
-          essay goes through an editorial pipeline: brief, research dossier,
-          architecture (movement model from a library of thirty-three named
-          architectures), segmented drafting, assembly, and three parallel
-          audits (argument, voice, fact) before publication.
+          Begin anywhere. Essays stand alone. Where several belong to the same
+          argument they are collected under <a href="/series">Series</a>, which
+          can be read in order or not.
         </p>
 
         <h2>Language</h2>
         <p>
-          Essays are published in Vietnamese. Site chrome — navigation, footer,
-          buttons, metadata — is in English, in keeping with the publication's
-          international academic orientation. The Vietnamese intellectual
-          tradition has always been in conversation with the world; the
-          interface reflects that.
+          Essays are in Vietnamese. Navigation, footer, and metadata are in
+          English.
         </p>
 
         <h2>Editor</h2>
         <p>
-          The publication is edited and largely written by its sole proprietor,
-          M. Q. Doan. The masthead does not list a board of advisors, a
-          distinguished committee, or a fellowship. There is one author. The
-          standards are not lowered on that account.
-        </p>
-
-        <h2>How to read</h2>
-        <p>
-          Begin anywhere. The essays are not arranged in series and do not
-          require prior reading. Each stands alone and presents its own
-          argument in full. The reader-customizer at the bottom of each essay
-          lets you adjust font size, measure, and theme — preferences persist
-          between visits.
+          Edited and written by M. Q. Doan.
         </p>
       </div>
     </div>
@@ -112,6 +92,19 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
     font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
     line-height: 1.1;
     color: var(--ink-primary);
+  }
+
+  .about__status {
+    display: inline-block;
+    margin-top: var(--sp-4);
+    padding: var(--sp-2) var(--sp-4);
+    border: 1px solid var(--accent-crimson);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
   }
 
   .about__body {

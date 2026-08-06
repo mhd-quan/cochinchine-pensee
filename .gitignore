@@ -30,3 +30,6 @@ public/pagefind/
 # editor
 .vscode/
 .idea/
+
+# agent scratch — safe to delete
+_DELETE-ME-*/

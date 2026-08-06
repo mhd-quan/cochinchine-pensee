@@ -7,12 +7,21 @@ import { getCollection } from 'astro:content';
 import BookCard from '~/components/essay/BookCard.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 
-const books = await getCollection('books');
+const allBooks = await getCollection('books');
+const allEssays = await getCollection('essays', ({ data }) => !data.draft);
+const essaysById = new Map(allEssays.map((e) => [e.id, e]));
+
+// Newest first, dated by the essay that reviewed each book.
+const books = allBooks
+  .map((book) => ({ book, essay: essaysById.get(book.data.reviewEssayId) }))
+  .filter((pair) => pair.essay !== undefined)
+  .sort((a, b) => b.essay!.data.date.valueOf() - a.essay!.data.date.valueOf())
+  .map(({ book }) => book);
 ---
 
 <BaseLayout
   title="Books"
-  description="Book reviews and intellectual literature referenced in The Cochinchine Pensée."
+  description="Book reviews and intellectual literature referenced in The Cochinchine Pensées."
 >
   <section class="books">
     <div class="container">
@@ -20,8 +29,8 @@ const books = await getCollection('books');
         <p class="books__eyebrow">The Stacks</p>
         <h1 class="books__title">Books Reviewed</h1>
         <p class="books__subtitle">
-          A working library of the works that have shaped essays on this site.
-          Click any cover to read the essay.
+          The works these essays read. Each one links to the essay that
+          reviewed it.
         </p>
       </header>
 

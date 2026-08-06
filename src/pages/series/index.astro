@@ -1,44 +1,48 @@
 ---
 /**
- * /subjects — Index of all curated topic clusters.
+ * /series — Index of every essay series.
+ *
+ * A series is a fixed, ordered run of essays. No editorial preface:
+ * the name, the count, and the essays themselves carry the page.
  */
 import { getCollection } from 'astro:content';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 
-const subjects = await getCollection('subjects');
+const series = await getCollection('series');
+
+// Count only what a reader can actually open: announced-but-unpublished
+// essays hold a slot inside a series, but don't count toward its total.
+const published = await getCollection('essays', ({ data }) => !data.draft);
+const publishedIds = new Set(published.map((e) => e.id));
+const countFor = (ids: string[]) => ids.filter((id) => publishedIds.has(id)).length;
 ---
 
 <BaseLayout
-  title="Subjects"
-  description="Curated topic clusters in The Cochinchine Pensée."
+  title="Series"
+  description="Essay series in The Cochinchine Pensées."
 >
-  <section class="subjects">
+  <section class="series">
     <div class="container">
-      <header class="subjects__header">
-        <p class="subjects__eyebrow">Subjects</p>
-        <h1 class="subjects__title">Curated Topics</h1>
-        <p class="subjects__subtitle">
-          The essays on this site are not arranged by chronology but by
-          argument. Each subject gathers essays that share a structural
-          preoccupation, not a topical surface.
-        </p>
+      <header class="series__header">
+        <p class="series__eyebrow">Series</p>
+        <h1 class="series__title">Series</h1>
       </header>
 
-      <ul class="subjects__list">
-        {subjects.map((subject) => (
-          <li class="subjects__item">
-            <a href={`/subjects/${subject.data.slug}`} class="subjects__link">
-              <h2 class="subjects__name">
-                {subject.data.nameVi ?? subject.data.name}
+      <ul class="series__list">
+        {series.map((entry) => (
+          <li class="series__item">
+            <a href={`/series/${entry.data.slug}`} class="series__link">
+              <h2 class="series__name">
+                {entry.data.nameVi ?? entry.data.name}
               </h2>
-              {subject.data.name !== subject.data.nameVi && subject.data.nameVi && (
-                <p class="subjects__name-en">{subject.data.name}</p>
+              {entry.data.name !== entry.data.nameVi && entry.data.nameVi && (
+                <p class="series__name-en">{entry.data.name}</p>
               )}
-              {subject.data.blurb && (
-                <p class="subjects__blurb">{subject.data.blurb}</p>
-              )}
-              <p class="subjects__count">
-                {subject.data.essayIds.length} {subject.data.essayIds.length === 1 ? 'essay' : 'essays'}
+              <p class="series__count">
+                {(() => {
+                  const n = countFor(entry.data.essayIds);
+                  return `${n} ${n === 1 ? 'essay' : 'essays'}`;
+                })()}
               </p>
             </a>
           </li>
@@ -49,18 +53,18 @@ const subjects = await getCollection('subjects');
 </BaseLayout>
 
 <style>
-  .subjects {
+  .series {
     padding-block: var(--sp-12) var(--sp-16);
   }
 
-  .subjects__header {
+  .series__header {
     text-align: center;
     margin-bottom: var(--sp-10);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
 
-  .subjects__eyebrow {
+  .series__eyebrow {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
@@ -70,7 +74,7 @@ const subjects = await getCollection('subjects');
     margin-bottom: var(--sp-3);
   }
 
-  .subjects__title {
+  .series__title {
     font-family: var(--font-display);
     font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
     line-height: 1.1;
@@ -78,17 +82,7 @@ const subjects = await getCollection('subjects');
     margin-bottom: var(--sp-3);
   }
 
-  .subjects__subtitle {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-body-larger);
-    color: var(--ink-secondary);
-    max-width: 36rem;
-    margin-inline: auto;
-    line-height: var(--lh-body-larger);
-  }
-
-  .subjects__list {
+  .series__list {
     display: grid;
     grid-template-columns: 1fr;
     column-gap: var(--sp-8);
@@ -96,37 +90,37 @@ const subjects = await getCollection('subjects');
   }
 
   @media (min-width: 640px) {
-    .subjects__list {
+    .series__list {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (min-width: 1024px) {
-    .subjects__list {
+    .series__list {
       grid-template-columns: repeat(3, 1fr);
     }
   }
 
-  .subjects__item {
+  .series__item {
     border-top: 1px solid var(--ink-primary);
     padding-block: var(--sp-6);
   }
 
-  .subjects__item:last-child {
+  .series__item:last-child {
     border-bottom: 1px solid var(--rule-hair);
   }
 
-  .subjects__link {
+  .series__link {
     display: block;
     color: var(--ink-primary);
     transition: color var(--t-base);
   }
 
-  .subjects__link:hover {
+  .series__link:hover {
     color: var(--accent-crimson);
   }
 
-  .subjects__name {
+  .series__name {
     font-family: var(--font-display);
     font-style: italic;
     font-size: var(--fs-h2);
@@ -135,7 +129,7 @@ const subjects = await getCollection('subjects');
     margin-bottom: var(--sp-2);
   }
 
-  .subjects__name-en {
+  .series__name-en {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
@@ -145,16 +139,7 @@ const subjects = await getCollection('subjects');
     margin-bottom: var(--sp-3);
   }
 
-  .subjects__blurb {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-body);
-    line-height: var(--lh-body);
-    color: var(--ink-secondary);
-    margin-bottom: var(--sp-3);
-  }
-
-  .subjects__count {
+  .series__count {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
@@ -163,7 +148,7 @@ const subjects = await getCollection('subjects');
     color: var(--ink-muted);
   }
 
-  .subjects__link:hover .subjects__count {
+  .series__link:hover .series__count {
     color: var(--accent-crimson);
   }
 </style>
