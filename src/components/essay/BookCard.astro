@@ -1,13 +1,13 @@
 ---
 /**
- * BookCard — used on homepage "Recent Books" section and /books/ archive.
- * Clicking thumbnail or card → goes to the review essay.
+ * BookCard — a single reviewed book. Clicking anywhere opens the review essay.
  *
  * Anatomy:
- *   - Cover image (3:4 portrait, blended to page tone)
- *   - Title (serif italic — like a real book cover title)
+ *   - Cover image (3:4 portrait, blended to page tone). Where no cover art has
+ *     been supplied yet, a typographic stand-in carries the title and author
+ *     rather than leaving a broken <img>.
+ *   - Title (serif italic, like a real book cover)
  *   - Author (sans uppercase, like a publishing imprint)
- *   - Optional blurb (italic dek)
  */
 import type { CollectionEntry } from 'astro:content';
 
@@ -16,16 +16,26 @@ interface Props {
 }
 
 const { book } = Astro.props;
+const cover = book.data.coverImage?.trim();
+const hasCover = Boolean(cover);
 ---
 
 <a href={`/essays/${book.data.reviewEssayId}`} class="book-card">
   <figure class="book-card__cover">
-    <img
-      src={book.data.coverImage}
-      alt={book.data.coverImageAlt ?? `${book.data.title} by ${book.data.author}`}
-      loading="lazy"
-      decoding="async"
-    />
+    {hasCover ? (
+      <img
+        src={cover}
+        alt={book.data.coverImageAlt ?? `Bìa sách ${book.data.title}`}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class="book-card__placeholder" aria-hidden="true">
+        <span class="book-card__placeholder-title">{book.data.title}</span>
+        <span class="book-card__placeholder-rule"></span>
+        <span class="book-card__placeholder-author">{book.data.author}</span>
+      </div>
+    )}
     <div class="book-card__spine" aria-hidden="true"></div>
   </figure>
 
@@ -78,6 +88,47 @@ const { book } = Astro.props;
       rgba(0, 0, 0, 0.12) 100%
     );
     pointer-events: none;
+  }
+
+  /* Typographic stand-in until real cover art is supplied */
+  .book-card__placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    text-align: center;
+    background:
+      linear-gradient(160deg, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.04)),
+      var(--bg-page-deep);
+  }
+
+  .book-card__placeholder-title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-meta);
+    line-height: 1.25;
+    color: var(--ink-secondary);
+    text-wrap: balance;
+  }
+
+  .book-card__placeholder-rule {
+    width: 1.75rem;
+    height: 1px;
+    background: var(--ink-muted);
+    opacity: 0.5;
+  }
+
+  .book-card__placeholder-author {
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--ink-muted);
   }
 
   .book-card__cover img {

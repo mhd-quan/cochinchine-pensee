@@ -1,4 +1,4 @@
-# The Cochinchine Pensée — Site
+# The Cochinchine Pensées — Site
 
 Vietnamese editorial publication in the Claremont Review of Books tradition.
 Built with **Astro 7** + Cloudflare Workers (Static Assets) + MDX + Tailwind-free CSS.

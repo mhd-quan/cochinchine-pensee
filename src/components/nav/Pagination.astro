@@ -1,0 +1,97 @@
+---
+/**
+ * Pagination — Prev / Next for the essay archive.
+ *
+ * Arrow glyphs are literal angle brackets, per house preference.
+ * A disabled edge renders as a span, not a dead link.
+ */
+interface Props {
+  prevUrl?: string | undefined;
+  nextUrl?: string | undefined;
+  currentPage: number;
+  lastPage: number;
+}
+
+const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
+---
+
+<nav class="pagination" aria-label="Essay pages">
+  {prevUrl ? (
+    <a href={prevUrl} class="pagination__link" rel="prev">
+      <span class="pagination__glyph" aria-hidden="true">&lt;</span>
+      <span>Prev</span>
+    </a>
+  ) : (
+    <span class="pagination__link is-disabled" aria-disabled="true">
+      <span class="pagination__glyph" aria-hidden="true">&lt;</span>
+      <span>Prev</span>
+    </span>
+  )}
+
+  <p class="pagination__count">
+    Page {currentPage} of {lastPage}
+  </p>
+
+  {nextUrl ? (
+    <a href={nextUrl} class="pagination__link" rel="next">
+      <span>Next</span>
+      <span class="pagination__glyph" aria-hidden="true">&gt;</span>
+    </a>
+  ) : (
+    <span class="pagination__link is-disabled" aria-disabled="true">
+      <span>Next</span>
+      <span class="pagination__glyph" aria-hidden="true">&gt;</span>
+    </span>
+  )}
+</nav>
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 2px solid var(--ink-primary);
+  }
+
+  .pagination__link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    min-height: 2.75rem;
+    padding-block: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    color: var(--accent-crimson);
+    transition: color var(--t-base);
+  }
+
+  .pagination__link:hover {
+    color: var(--ink-primary);
+  }
+
+  .pagination__link.is-disabled {
+    color: var(--ink-muted);
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .pagination__glyph {
+    font-family: var(--font-sans);
+    font-size: 1em;
+    line-height: 1;
+  }
+
+  .pagination__count {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--fs-meta);
+    color: var(--ink-muted);
+    text-align: center;
+  }
+</style>

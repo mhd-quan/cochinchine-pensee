@@ -1,5 +1,5 @@
 /* ============================================================================
- * tokens.css — Design tokens for The Cochinchine Pensée
+ * tokens.css — Design tokens for The Cochinchine Pensées
  *
  * Every color, font size, spacing value, and z-index is defined here.
  * All component CSS uses var(--token). No magic numbers anywhere else.

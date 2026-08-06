@@ -29,6 +29,9 @@ const essays = defineCollection({
       author: z.string().default('M. Q. Doan'),
       lang: z.enum(['vi']).default('vi'),
       draft: z.boolean().default(false),
+      // Announced but not yet published. Always paired with draft: true —
+      // draft hides the text, comingSoon shows the slot in its series.
+      comingSoon: z.boolean().default(false),
       coverImage: z.string().optional(),
       cover_image: z.string().optional(),
       coverImageAlt: z.string().optional(),
@@ -60,7 +63,7 @@ const books = defineCollection({
   schema: z.object({
     title: z.string(),
     author: z.string(),
-    coverImage: z.string().url(),
+    coverImage: z.string().optional(), // relative path or URL; may be blank until a cover is added
     coverImageAlt: z.string().optional(),
     publisher: z.string().optional(),
     year: z.number().int().optional(),
@@ -70,20 +73,24 @@ const books = defineCollection({
 });
 
 /**
- * Subjects collection — curated topic clusters for the homepage.
- * Trios of categories like Capitalism, Rising Era, etc.
+ * Series collection — the named sequences an essay belongs to.
+ * Each series is a fixed, ordered run of essays (currently trios):
+ * Chủ nghĩa dân tộc, Kỷ nguyên vươn mình, Thế hệ Kiệt sức, Chủ nghĩa tư bản.
+ *
+ * A series carries no editorial preface: the name and its essays stand alone.
+ * Publication state lives on the essay, not the series: an essay marked
+ * `draft` + `comingSoon` holds a slot here without exposing its text.
  */
-const subjects = defineCollection({
-  loader: glob({ pattern: '**/*.json', base: './src/content/subjects' }),
+const series = defineCollection({
+  loader: glob({ pattern: '**/*.json', base: './src/content/series' }),
   schema: z.object({
     name: z.string(), // "Capitalism"
     nameVi: z.string().optional(), // "Chủ nghĩa tư bản"
     slug: z.string(), // "tu-ban"
     description: z.string(),
-    blurb: z.string().optional(),
     essayIds: z.array(z.string()).default([]), // ordered essay slug list
     featured: z.boolean().default(false),
   }),
 });
 
-export const collections = { essays, books, subjects };
+export const collections = { essays, books, series };

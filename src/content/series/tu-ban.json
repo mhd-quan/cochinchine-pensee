@@ -1,0 +1,12 @@
+{
+  "name": "Capitalism",
+  "nameVi": "Chủ nghĩa tư bản",
+  "slug": "tu-ban",
+  "description": "Chủ nghĩa tư bản.",
+  "featured": true,
+  "essayIds": [
+    "2026-07-17-vung-phan-cho",
+    "2026-07-31-ba-do-va-phuong-thuoc",
+    "2026-08-14-bon-phan-nam-vo-danh"
+  ]
+}

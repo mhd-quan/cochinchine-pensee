@@ -7,7 +7,7 @@ export async function GET(context: APIContext) {
   const sorted = essays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return rss({
-    title: 'The Cochinchine Pensée',
+    title: 'The Cochinchine Pensées',
     description:
       'A Vietnamese editorial publication on politics, literature, and the Vietnamese intellectual tradition.',
     site: context.site ?? 'https://cochinchinepensees.studio',

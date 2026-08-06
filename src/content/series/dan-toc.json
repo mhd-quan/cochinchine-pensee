@@ -1,0 +1,12 @@
+{
+  "name": "Nationalism",
+  "nameVi": "Chủ nghĩa dân tộc",
+  "slug": "dan-toc",
+  "description": "Chủ nghĩa dân tộc.",
+  "featured": true,
+  "essayIds": [
+    "2026-02-28-su-phat-minh-to-quoc",
+    "2026-03-07-huyen-thoai-ve-mot-lanh-tho-vo-nhiem",
+    "2026-03-14-vuot-qua-to-quoc"
+  ]
+}
