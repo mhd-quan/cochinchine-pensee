@@ -19,27 +19,29 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
   {prevUrl ? (
     <a href={prevUrl} class="pagination__link" rel="prev">
       <span class="pagination__glyph" aria-hidden="true">&lt;</span>
-      <span>Prev</span>
+      <span>Prev Page</span>
     </a>
   ) : (
     <span class="pagination__link is-disabled" aria-disabled="true">
       <span class="pagination__glyph" aria-hidden="true">&lt;</span>
-      <span>Prev</span>
+      <span>Prev Page</span>
     </span>
   )}
 
   <p class="pagination__count">
-    Page {currentPage} of {lastPage}
+    <span class="pagination__count-current">{currentPage}</span>
+    <span class="pagination__count-divider" aria-hidden="true">of</span>
+    <span class="pagination__count-total">{lastPage}</span>
   </p>
 
   {nextUrl ? (
     <a href={nextUrl} class="pagination__link" rel="next">
-      <span>Next</span>
+      <span>Next Page</span>
       <span class="pagination__glyph" aria-hidden="true">&gt;</span>
     </a>
   ) : (
     <span class="pagination__link is-disabled" aria-disabled="true">
-      <span>Next</span>
+      <span>Next Page</span>
       <span class="pagination__glyph" aria-hidden="true">&gt;</span>
     </span>
   )}
@@ -48,27 +50,30 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
 <style>
   .pagination {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
     gap: var(--sp-4);
-    margin-top: var(--sp-8);
-    padding-top: var(--sp-5);
-    border-top: 2px solid var(--ink-primary);
+    margin-top: var(--sp-12);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--rule-hair);
   }
 
   .pagination__link {
     display: inline-flex;
     align-items: baseline;
-    gap: var(--sp-2);
+    gap: var(--sp-3);
     min-height: 2.75rem;
     padding-block: var(--sp-2);
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+    font-variant: small-caps;
     color: var(--accent-crimson);
-    transition: color var(--t-base);
+    transition:
+      color var(--t-base),
+      opacity var(--t-base);
   }
 
   .pagination__link:hover {
@@ -77,7 +82,7 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
 
   .pagination__link.is-disabled {
     color: var(--ink-muted);
-    opacity: 0.4;
+    opacity: 0.35;
     cursor: default;
   }
 
@@ -85,13 +90,32 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
     font-family: var(--font-sans);
     font-size: 1em;
     line-height: 1;
+    letter-spacing: 0;
   }
 
   .pagination__count {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-meta);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: 0.18em;
+    text-transform: lowercase;
+    font-variant: small-caps;
     color: var(--ink-muted);
     text-align: center;
+  }
+
+  .pagination__count-current {
+    color: var(--accent-crimson);
+  }
+
+  .pagination__count-divider {
+    color: var(--ink-faint);
+  }
+
+  .pagination__count-total {
+    color: var(--ink-secondary);
   }
 </style>

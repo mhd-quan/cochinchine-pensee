@@ -200,8 +200,6 @@ function isActive(itemHref: string): boolean {
     let closeTimer: number | undefined;
     let isClosing = false;
     let pointerStartedOnScrim = false;
-    let lockedScrollY = 0;
-    let previousBodyTop = '';
     let scrollFrame = 0;
     let previousScrollY = Math.max(0, window.scrollY);
     let accumulatedDelta = 0;
@@ -236,7 +234,6 @@ function isActive(itemHref: string): boolean {
 
     const updateScrollDirection = () => {
       scrollFrame = 0;
-      if (document.documentElement.classList.contains('has-open-menu')) return;
 
       const nextScrollY = Math.max(0, window.scrollY);
       const delta = nextScrollY - previousScrollY;
@@ -270,28 +267,6 @@ function isActive(itemHref: string): boolean {
     sentinelObserver.observe(sentinel);
     window.addEventListener('scroll', scheduleScrollUpdate, { passive: true, signal });
 
-    const lockPageScroll = () => {
-      lockedScrollY = window.scrollY;
-      previousBodyTop = document.body.style.top;
-      document.body.style.top = `-${lockedScrollY}px`;
-      document.documentElement.classList.add('has-open-menu');
-    };
-
-    const unlockPageScroll = () => {
-      if (!document.documentElement.classList.contains('has-open-menu')) return;
-
-      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = 'auto';
-      document.documentElement.classList.remove('has-open-menu');
-      document.body.style.top = previousBodyTop;
-      window.scrollTo(0, lockedScrollY);
-      previousScrollY = lockedScrollY;
-
-      requestAnimationFrame(() => {
-        document.documentElement.style.scrollBehavior = previousScrollBehavior;
-      });
-    };
-
     const finishClose = (restoreFocus: boolean) => {
       if (closeTimer !== undefined) {
         window.clearTimeout(closeTimer);
@@ -305,7 +280,6 @@ function isActive(itemHref: string): boolean {
 
       isClosing = false;
       setExpanded(false);
-      unlockPageScroll();
 
       if (restoreFocus && activeOpener?.isConnected) {
         activeOpener.focus({ preventScroll: true });
@@ -356,7 +330,6 @@ function isActive(itemHref: string): boolean {
       afterClose = null;
       isClosing = false;
       dialog.classList.remove('is-closing', 'is-visible');
-      lockPageScroll();
       dialog.showModal();
       setExpanded(true);
       closeButton.focus({ preventScroll: true });
@@ -718,31 +691,17 @@ function isActive(itemHref: string): boolean {
     background: transparent;
   }
 
+  /* The scrim is invisible — the panel is part of the page, not an overlay.
+   * Kept in the DOM as a click-capture target only. */
   .site-menu__scrim {
     position: fixed;
     inset: 0;
-    background: rgb(20 16 12 / 44%);
-    opacity: 0;
-    transition: opacity 360ms var(--ease-out-quart);
+    background: transparent;
+    cursor: default;
   }
 
-  .site-menu[open] .site-menu__scrim {
-    will-change: opacity;
-  }
-
-  .site-menu.is-visible .site-menu__scrim {
-    opacity: 1;
-  }
-
-  .site-menu.is-closing .site-menu__scrim {
-    transition: opacity var(--t-exit);
-  }
-
-  /* The panel arrives on a gentle physical spring and leaves quickly —
-   * entrances breathe, exits get out of the way. The panel sits in the
-   * top layer, so its background is plain paper — no texture overlay,
-   * the body grain underneath is masked by it. Section emphasis comes
-   * from hover/active states on the nav items themselves. */
+  /* Panel slides in smoothly and lives as part of the page.
+   * Same paper background as the page; no shadow, no texture, no overshoot. */
   .site-menu__panel {
     position: relative;
     z-index: 1;
@@ -753,9 +712,8 @@ function isActive(itemHref: string): boolean {
     overscroll-behavior: contain;
     border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
     background-color: var(--bg-page);
-    box-shadow: -0.75rem 0 2rem rgb(0 0 0 / 10%);
     transform: translate3d(104%, 0, 0);
-    transition: transform var(--t-spring);
+    transition: transform 280ms var(--ease-out-quart);
     contain: layout paint;
   }
 
@@ -768,7 +726,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-menu.is-closing .site-menu__panel {
-    transition: transform 260ms var(--ease-in-soft);
+    transition: transform 220ms var(--ease-out-quart);
   }
 
   .site-menu__header {
@@ -819,50 +777,11 @@ function isActive(itemHref: string): boolean {
     gap: var(--sp-1);
   }
 
-  /* Items drift up a hair behind the panel — short rise, tight stagger.
-   * No blur: blur re-rasterises text every frame and reads as judder. */
+  /* Items are always visible — no stagger, no transform.
+   * Emphasis comes from font-weight + background fade on hover/focus. */
   .site-menu__nav-item {
-    opacity: 0;
-    transform: translate3d(0, 0.75rem, 0);
-    transition:
-      opacity 260ms var(--ease-out-quart),
-      transform 380ms var(--ease-out-expo);
-  }
-
-  .site-menu[open] .site-menu__nav-item {
-    will-change: opacity, transform;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(1) {
-    transition-delay: 50ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(2) {
-    transition-delay: 85ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(3) {
-    transition-delay: 120ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(4) {
-    transition-delay: 155ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(5) {
-    transition-delay: 190ms;
-  }
-
-  .site-menu.is-closing .site-menu__nav-item {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-    transition-delay: 0ms;
-    transition-duration: 120ms;
+    transform: none;
   }
 
   .site-menu__nav-link {
@@ -871,47 +790,50 @@ function isActive(itemHref: string): boolean {
     justify-content: space-between;
     gap: var(--sp-4);
     min-height: 3.25rem;
-    padding: var(--sp-2) var(--sp-1);
+    padding: var(--sp-2) var(--sp-4);
     color: var(--ink-secondary);
-    font-family: var(--font-display);
-    font-size: clamp(1.375rem, 5vw, 2rem);
-    font-weight: var(--w-semibold);
-    line-height: var(--lh-display);
-    transition: color var(--t-fast);
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 3vw, 1.125rem);
+    font-weight: var(--w-medium);
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    /* Square-edged highlight — no rounded blob under the label. */
+    border-radius: 0;
+    transition:
+      font-weight var(--t-fast),
+      color var(--t-fast),
+      background-color var(--t-fast);
   }
 
-  .site-menu__nav-link:hover {
-    color: var(--accent-crimson);
+  .site-menu__nav-link:hover,
+  .site-menu__nav-link:focus-visible {
+    color: var(--ink-primary);
+    font-weight: var(--w-bold);
+    background-color: var(--bg-page-deep);
+    border-radius: 0;
+    outline: none;
   }
 
   .site-menu__nav-link.is-active {
     color: var(--ink-primary);
+    font-weight: var(--w-bold);
   }
 
-  /* Label nudges right on hover — a typographic indent, not an effect */
+  /* No label transform — items stay put. */
   .site-menu__nav-label {
     position: relative;
     display: inline-block;
-    transform: translate3d(0, 0, 0);
-    transition: transform var(--t-spring-snap);
-  }
-
-  .site-menu__nav-link:hover .site-menu__nav-label {
-    transform: translate3d(0.35rem, 0, 0);
   }
 
   .site-menu__nav-link.is-active .site-menu__nav-label::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: -1.05rem;
-    width: 0.55rem;
+    left: -1rem;
+    width: 0.45rem;
     height: 1.5px;
     background: var(--accent-crimson);
-  }
-
-  .site-menu__nav-link.is-active .site-menu__nav-label {
-    transform: translate3d(1.05rem, 0, 0);
   }
 
   .site-menu__nav-index {
@@ -927,26 +849,14 @@ function isActive(itemHref: string): boolean {
       opacity var(--t-base);
   }
 
-  .site-menu__nav-link:hover .site-menu__nav-index {
-    opacity: 0.85;
-  }
-
+  .site-menu__nav-link:hover .site-menu__nav-index,
   .site-menu__nav-link.is-active .site-menu__nav-index {
     color: var(--accent-crimson);
     opacity: 0.85;
   }
 
-  :global(html.has-open-menu) {
-    overflow: hidden;
-  }
-
-  :global(html.has-open-menu body) {
-    position: fixed;
-    right: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-  }
+  /* No body scroll lock — the panel sits as part of the page, not as
+   * a modal overlay. */
 
   @media (min-width: 48rem) {
     .site-header__masthead {
@@ -994,6 +904,44 @@ function isActive(itemHref: string): boolean {
     .site-header__menu-toggle--reading {
       width: 4.25rem;
       height: 4.25rem;
+    }
+  }
+
+  /* Desktop (≥1024px): the menu docks as a fixed right-column sidebar.
+   * It still slides in, but is permanently in the layout — body does not
+   * dim, body does not lock scroll. */
+  @media (min-width: 64rem) {
+    .site-menu[open] {
+      display: block;
+    }
+
+    .site-menu__panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(22rem, 26vw);
+      height: 100vh;
+      height: 100dvh;
+      transform: translate3d(100%, 0, 0);
+      transition: transform 320ms var(--ease-out-quart);
+    }
+
+    .site-menu.is-visible .site-menu__panel {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .site-menu.is-closing .site-menu__panel {
+      transition: transform 240ms var(--ease-out-quart);
+    }
+
+    .site-menu__nav {
+      padding: var(--sp-8) var(--sp-4) var(--sp-10);
+    }
+
+    .site-menu__nav-link {
+      min-height: 2.75rem;
+      padding: var(--sp-2) var(--sp-3);
     }
   }
 
