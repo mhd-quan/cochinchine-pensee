@@ -12,55 +12,8 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
         <p class="about__eyebrow">About</p>
         <h1 class="about__title">About</h1>
         <p class="about__status" role="status">Under construction</p>
+        <p class="about__asterism" aria-hidden="true">✦ ✦ ✦</p>
       </header>
-
-      <div class="about__body prose">
-        <p class="lead">
-          The Cochinchine Pensées is a Vietnamese-language essay publication on
-          politics, literature, and the Vietnamese intellectual tradition. This
-          page is still being written.
-        </p>
-
-        <h2>What is published here</h2>
-        <p>
-          Long-form essays, usually between 3,000 and 7,000 words. Each one
-          argues a thesis it is willing to defend, and the essay is the defense.
-          No news coverage.
-        </p>
-
-        <p>
-          Vietnamese evidence carries the same weight as the Western canon. On
-          the sequence in modern Vietnam: the state dismantled civil society
-          first, and the market moved into the vacuum afterwards. That order is
-          not reversed here.
-        </p>
-
-        <h2>Where else it runs</h2>
-        <p>
-          Every essay is published in parallel on Substack, at
-          <a href="https://archyatt.substack.com/" rel="noopener">archyatt.substack.com</a>.
-          The two are the same texts; this site is the archive, with the essays
-          grouped into series.
-        </p>
-
-        <h2>Reading order</h2>
-        <p>
-          Begin anywhere. Essays stand alone. Where several belong to the same
-          argument they are collected under <a href="/series">Series</a>, which
-          can be read in order or not.
-        </p>
-
-        <h2>Language</h2>
-        <p>
-          Essays are in Vietnamese. Navigation, footer, and metadata are in
-          English.
-        </p>
-
-        <h2>Editor</h2>
-        <p>
-          Edited and written by M. Q. Doan.
-        </p>
-      </div>
     </div>
   </article>
 </BaseLayout>
@@ -72,9 +25,7 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 
   .about__header {
     text-align: center;
-    margin-bottom: var(--sp-10);
-    padding-bottom: var(--sp-8);
-    border-bottom: 1px solid var(--rule-hair);
+    padding-bottom: var(--sp-10);
   }
 
   .about__eyebrow {
@@ -107,7 +58,12 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
     color: var(--accent-crimson);
   }
 
-  .about__body {
-    /* inherits .prose from prose.css */
+  .about__asterism {
+    margin-top: var(--sp-10);
+    font-family: var(--font-glyph);
+    font-size: 0.875rem;
+    letter-spacing: 1em;
+    padding-left: 1em;
+    color: var(--ink-muted);
   }
 </style>

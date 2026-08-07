@@ -3,6 +3,8 @@
   "author": "Anthony Esolen",
   "year": 2022,
   "reviewEssayId": "2026-01-23-ung-thu-lanh-tinh",
-  "coverImage": "",
-  "coverImageAlt": "Bìa sách No Apologies"
+  "coverImage": "/images/books/esolen-no-apologies.jpg",
+  "coverImageAlt": "Bìa sách No Apologies",
+  "coverWidth": 640,
+  "coverHeight": 966
 }

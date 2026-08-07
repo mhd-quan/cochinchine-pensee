@@ -50,6 +50,7 @@ const fullTitle =
         const root = document.documentElement;
         if (['md', 'lg', 'xl'].includes(saved.fontSize)) root.dataset.fontSize = saved.fontSize;
         if (['standard', 'wide'].includes(saved.measure)) root.dataset.measure = saved.measure;
+        if (['serif', 'garamond', 'newyork'].includes(saved.font)) root.dataset.font = saved.font;
         if (['paper', 'sepia', 'night'].includes(saved.theme)) {
           root.dataset.theme = saved.theme;
           const colors = { paper: '#FAFAF7', sepia: '#F5EFE0', night: '#1B1816' };

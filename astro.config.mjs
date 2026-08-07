@@ -3,6 +3,7 @@
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
+import fetchCovers from './scripts/fetch-covers.mjs';
 
 // The Cochinchine Pensées — Astro 7 config
 // Output: pure static. Deploy target: Cloudflare Workers (Static Assets).
@@ -18,6 +19,7 @@ export default defineConfig({
     defaultStrategy: 'viewport',
   },
   integrations: [
+    fetchCovers(), // TEMP: one-shot cover download — remove once covers are committed
     mdx(),
     sitemap({
       filter: (page) => !page.includes('/draft/'),

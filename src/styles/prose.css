@@ -8,7 +8,9 @@
 
 .prose {
   font-family: var(--font-serif);
-  font-size: var(--fs-body);
+  /* Size and typeface compose: the reader's size step times the face's
+   * optical compensation (EB Garamond runs small, so it scales up). */
+  font-size: calc(var(--reader-font-size, var(--fs-body)) * var(--reader-font-scale, 1));
   line-height: var(--lh-body);
   color: var(--ink-primary);
   max-width: var(--measure-prose);

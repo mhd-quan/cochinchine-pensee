@@ -51,10 +51,44 @@ body {
     color var(--t-base);
 }
 
+/* ──────────────────────────────────────────────────────────────────
+ * Paper grain — one fixed, tiled noise layer over every surface.
+ * Multiply keeps it reading as fibre in the paper rather than dirt
+ * on the glass; night flips it to a faint screen-blended tooth.
+ * ────────────────────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  background-image: var(--texture-grain);
+  background-repeat: repeat;
+  opacity: var(--texture-opacity);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+html[data-theme='night'] body::after {
+  mix-blend-mode: screen;
+  filter: invert(1);
+  opacity: 0.08;
+}
+
+@media print {
+  body::after {
+    display: none;
+  }
+}
+
 .image-filter-defs {
   position: absolute;
   overflow: hidden;
   pointer-events: none;
+}
+
+html {
+  --reader-font-size: var(--fs-body);
+  --reader-font-scale: 1;
 }
 
 html[data-measure='wide'] {
@@ -79,15 +113,32 @@ html[data-theme='night'] {
   --ink-inverse: #1B1816;
   --rule-hair: #3A3530;
   --rule-strong: #EDE6D6;
+  --bg-ink-well: #131009;
+  --bg-ink-well-deep: #0E0B07;
+  --selection-bg: rgb(196 99 91 / 30%);
   color-scheme: dark;
 }
 
-html[data-font-size='lg'] .prose {
-  font-size: 1.1875rem;
+/* Reading type size — resolved through vars so size and typeface compose */
+html[data-font-size='lg'] {
+  --reader-font-size: 1.1875rem;
 }
 
-html[data-font-size='xl'] .prose {
-  font-size: 1.3125rem;
+html[data-font-size='xl'] {
+  --reader-font-size: 1.3125rem;
+}
+
+/* Reading typeface — applies to essay prose only; chrome keeps its registers */
+html[data-font='garamond'] {
+  --reader-font-scale: 1.09; /* EB Garamond runs small on the body; compensate */
+}
+
+html[data-font='garamond'] .prose {
+  font-family: 'EB Garamond', 'Cormorant Garamond', Garamond, Georgia, serif;
+}
+
+html[data-font='newyork'] .prose {
+  font-family: ui-serif, 'New York', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
 }
 
 html.has-reader-panel-open {

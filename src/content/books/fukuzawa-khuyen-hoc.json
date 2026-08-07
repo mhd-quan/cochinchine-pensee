@@ -3,6 +3,8 @@
   "author": "Fukuzawa Yukichi",
   "year": 1872,
   "reviewEssayId": "2026-04-04-tha-hoa-tri-thuc",
-  "coverImage": "",
-  "coverImageAlt": "Bìa sách Khuyến học"
+  "coverImage": "/images/books/fukuzawa-khuyen-hoc.jpg",
+  "coverImageAlt": "Bìa sách Khuyến học",
+  "coverWidth": 640,
+  "coverHeight": 1001
 }

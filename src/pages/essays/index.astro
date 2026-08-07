@@ -109,8 +109,12 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
     color: var(--accent-crimson);
   }
 
+  /* CRB-style bounded measure: the list never sprawls the full container,
+   * so titles stay a gutter away from their thumbnails on wide screens. */
   .archive__list {
     display: block;
+    max-width: 56rem;
+    margin-inline: auto;
   }
 
   .archive__list > li:last-child :global(.essay-row) {
