@@ -1,9 +1,11 @@
 ---
 /**
- * EssayRow — one essay as a full-width horizontal row, for the /essays archive.
+ * EssayRow — one essay as a horizontal row, for the /essays archive.
  *
  * Unlike EssayCard (a grid tile), a row gives the title room to run and keeps
  * the date in a fixed left column so the eye can scan down the years.
+ * The whole list sits on a constrained measure (see archive pages), CRB-style,
+ * so the text column ends where the thumbnail begins instead of sprawling.
  *
  * Anatomy:  date · | · title + subtitle · | · thumbnail
  */
@@ -67,19 +69,33 @@ const year = String(essay.data.date.getFullYear());
   }
 
   .essay-row__date {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4em;
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
-    letter-spacing: var(--tr-kicker);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
     color: var(--ink-muted);
+  }
+
+  .essay-row__date time {
+    display: flex;
+    align-items: baseline;
+  }
+
+  .essay-row__day {
+    white-space: nowrap;
   }
 
   .essay-row__year {
     color: var(--accent-crimson);
+  }
+
+  /* Inline lockup on small screens: JUL 31 · 2026 */
+  .essay-row__year::before {
+    content: '·';
+    margin-inline: 0.55em 0.45em;
+    color: var(--ink-faint);
   }
 
   .essay-row__title {
@@ -110,10 +126,10 @@ const year = String(essay.data.date.getFullYear());
     font-family: var(--font-display);
     font-style: italic;
     font-size: var(--fs-body);
-    line-height: var(--lh-headline);
+    line-height: 1.4;
     color: var(--ink-secondary);
     margin-top: var(--sp-2);
-    max-width: 44rem;
+    max-width: 34rem;
   }
 
   .essay-row__cover-link {
@@ -159,19 +175,26 @@ const year = String(essay.data.date.getFullYear());
     filter: url('#paper-to-alpha') invert(1) grayscale(1) contrast(1.05) brightness(0.82);
   }
 
-  /* Date column left, thumbnail right, title given the middle to breathe */
+  /* Date column left, thumbnail right, title in a bounded middle column.
+   * The row lives inside a ~56rem list measure, so the thumbnail sits
+   * one gutter away from the text instead of a viewport away. */
   @media (min-width: 48rem) {
     .essay-row {
-      grid-template-columns: 6.5rem minmax(0, 1fr) 9rem;
+      grid-template-columns: 5.5rem minmax(0, 1fr) 10.5rem;
       align-items: start;
-      column-gap: var(--sp-6);
+      column-gap: var(--sp-5);
       padding-block: var(--sp-6);
     }
 
-    .essay-row__date {
+    .essay-row__date time {
       flex-direction: column;
-      gap: 0.15em;
+      gap: 0.3em;
       padding-top: 0.35em;
+    }
+
+    .essay-row__year::before {
+      content: none;
+      margin-inline: 0;
     }
 
     .essay-row__cover-link {

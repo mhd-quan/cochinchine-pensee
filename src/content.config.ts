@@ -65,6 +65,8 @@ const books = defineCollection({
     author: z.string(),
     coverImage: z.string().optional(), // relative path or URL; may be blank until a cover is added
     coverImageAlt: z.string().optional(),
+    coverWidth: z.number().int().optional(), // intrinsic px, for CLS-free natural-ratio rendering
+    coverHeight: z.number().int().optional(),
     publisher: z.string().optional(),
     year: z.number().int().optional(),
     reviewEssayId: z.string(), // matches essay.id (slug)

@@ -4,19 +4,33 @@
  * Every color, font size, spacing value, and z-index is defined here.
  * All component CSS uses var(--token). No magic numbers anywhere else.
  *
- * Refined 2026-08-05:
- *   - Off-white #FAFAF7 (subtle warmth, gentler than ivory, no HDR glare)
+ * Refined 2026-08-06 (v0.4) — "Cochinchine" palette board:
+ *   - Paper register (light): warm off-whites carrying a faint rag-paper grain
+ *   - Ink-well register (dark): two dark tones — lacquer cabinet + deep oxblood —
+ *     used to punch contrast between sections (footer, feature bands)
  *   - Two-register typography: serif (Old Republic) + sans glyph (contemporary)
  * ========================================================================= */
 
 :root {
   /* ──────────────────────────────────────────────────────────────────
-   * Surfaces
+   * Surfaces — paper register
    * ────────────────────────────────────────────────────────────────── */
   --bg-page:           #FAFAF7;   /* off-white subtle warm — gentler than pure white, less warm than ivory */
   --bg-page-deep:      #F2F0EA;   /* one step warmer for cards, newsletter, callouts */
   --bg-tinted:         #F4EFE6;   /* CRB-style promo/overlay tint */
   --bg-rule-soft:      #F5F5F4;   /* image placeholders */
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Surfaces — ink-well register (dark contrast sections)
+   * ────────────────────────────────────────────────────────────────── */
+  --bg-ink-well:       #1E1A16;   /* lacquer-cabinet near-black, warm — footer, dark bands */
+  --bg-ink-well-deep:  #16130F;   /* recessed edge inside dark sections */
+  --bg-oxblood-well:   #46120F;   /* deep oxblood — second dark tone, sparing accents */
+  --ink-on-dark:       #EDE7D8;   /* primary text on ink-well */
+  --ink-on-dark-muted: #A89D8A;   /* secondary text on ink-well */
+  --ink-on-dark-faint: #6E6557;   /* tertiary/disabled on ink-well */
+  --rule-on-dark:      rgb(237 231 216 / 14%);
+  --accent-on-dark:    #C4635B;   /* crimson lifted for dark surfaces */
 
   /* ──────────────────────────────────────────────────────────────────
    * Ink (text)
@@ -36,6 +50,17 @@
   --link:              #8B1A1A;
   --link-hover:        #A52222;
   --link-visited:      #6E1414;
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Selection + touch feedback
+   * ────────────────────────────────────────────────────────────────── */
+  --selection-bg:      rgb(139 26 26 / 15%);  /* soft oxblood wash — text colour stays */
+
+  /* ──────────────────────────────────────────────────────────────────
+   * Paper grain — tiny tiled SVG noise, laid over every surface
+   * ────────────────────────────────────────────────────────────────── */
+  --texture-grain:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0.2 0.2 0 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  --texture-opacity:   0.16;      /* ~1.5% effective darkening — fibre, not static */
 
   /* ──────────────────────────────────────────────────────────────────
    * Rules and dividers
@@ -128,12 +153,26 @@
   --z-toast:           2000;
 
   /* ──────────────────────────────────────────────────────────────────
-   * Transitions
+   * Motion — easing vocabulary (refined 2026-08-06)
+   *
+   * Micro-interactions use ease-out curves; spatial elements (panels,
+   * sheets) ride physical springs sampled into CSS linear(). Exits are
+   * always faster than entrances. Transform/opacity only — no filter,
+   * no blur, nothing that forces repaint.
    * ────────────────────────────────────────────────────────────────── */
-  --t-fast:            150ms cubic-bezier(0.2, 0, 0, 1);
-  --t-base:            250ms cubic-bezier(0.2, 0, 0, 1);
-  --t-slow:            400ms cubic-bezier(0.16, 1, 0.3, 1);
-  --t-exit:            220ms cubic-bezier(0.4, 0, 1, 1);
+  --ease-out-quart:    cubic-bezier(0.25, 1, 0.5, 1);    /* hovers, colour shifts */
+  --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);    /* larger movements */
+  --ease-in-soft:      cubic-bezier(0.45, 0, 0.7, 0.4);  /* exits */
+  --spring-gentle:     linear(0, 0.0517 5%, 0.1667 10%, 0.3037 15%, 0.4394 20%, 0.5617 25%, 0.6657 30%, 0.7506 35%, 0.8177 40%, 0.8694 45%, 0.9082 50%, 0.9369 55%, 0.9575 60%, 0.9722 65%, 0.9823 70%, 0.9892 75%, 0.9938 80%, 0.9967 85%, 0.9986 90%, 0.9996 95%, 1);
+  --spring-snappy:     linear(0, 0.0653 6.25%, 0.2096 12.5%, 0.3781 18.75%, 0.5394 25%, 0.6779 31.25%, 0.7882 37.5%, 0.8707 43.75%, 0.929 50%, 0.9679 56.25%, 0.9919 62.5%, 1.0054 68.75%, 1.0118 75%, 1.0138 81.25%, 1.0132 87.5%, 1.0113 93.75%, 1);
+
+  /* Shorthand durations+curves used across components */
+  --t-fast:            160ms var(--ease-out-quart);
+  --t-base:            240ms var(--ease-out-quart);
+  --t-slow:            420ms var(--ease-out-expo);
+  --t-exit:            200ms var(--ease-in-soft);
+  --t-spring:          520ms var(--spring-gentle);
+  --t-spring-snap:     400ms var(--spring-snappy);
 
   /* ──────────────────────────────────────────────────────────────────
    * Radius — none, mostly. CRB austre.

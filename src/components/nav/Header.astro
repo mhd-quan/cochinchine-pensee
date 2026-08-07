@@ -200,8 +200,6 @@ function isActive(itemHref: string): boolean {
     let closeTimer: number | undefined;
     let isClosing = false;
     let pointerStartedOnScrim = false;
-    let lockedScrollY = 0;
-    let previousBodyTop = '';
     let scrollFrame = 0;
     let previousScrollY = Math.max(0, window.scrollY);
     let accumulatedDelta = 0;
@@ -236,7 +234,6 @@ function isActive(itemHref: string): boolean {
 
     const updateScrollDirection = () => {
       scrollFrame = 0;
-      if (document.documentElement.classList.contains('has-open-menu')) return;
 
       const nextScrollY = Math.max(0, window.scrollY);
       const delta = nextScrollY - previousScrollY;
@@ -270,28 +267,6 @@ function isActive(itemHref: string): boolean {
     sentinelObserver.observe(sentinel);
     window.addEventListener('scroll', scheduleScrollUpdate, { passive: true, signal });
 
-    const lockPageScroll = () => {
-      lockedScrollY = window.scrollY;
-      previousBodyTop = document.body.style.top;
-      document.body.style.top = `-${lockedScrollY}px`;
-      document.documentElement.classList.add('has-open-menu');
-    };
-
-    const unlockPageScroll = () => {
-      if (!document.documentElement.classList.contains('has-open-menu')) return;
-
-      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = 'auto';
-      document.documentElement.classList.remove('has-open-menu');
-      document.body.style.top = previousBodyTop;
-      window.scrollTo(0, lockedScrollY);
-      previousScrollY = lockedScrollY;
-
-      requestAnimationFrame(() => {
-        document.documentElement.style.scrollBehavior = previousScrollBehavior;
-      });
-    };
-
     const finishClose = (restoreFocus: boolean) => {
       if (closeTimer !== undefined) {
         window.clearTimeout(closeTimer);
@@ -305,7 +280,6 @@ function isActive(itemHref: string): boolean {
 
       isClosing = false;
       setExpanded(false);
-      unlockPageScroll();
 
       if (restoreFocus && activeOpener?.isConnected) {
         activeOpener.focus({ preventScroll: true });
@@ -356,7 +330,6 @@ function isActive(itemHref: string): boolean {
       afterClose = null;
       isClosing = false;
       dialog.classList.remove('is-closing', 'is-visible');
-      lockPageScroll();
       dialog.showModal();
       setExpanded(true);
       closeButton.focus({ preventScroll: true });
@@ -466,7 +439,8 @@ function isActive(itemHref: string): boolean {
   .site-header__wordmark {
     color: var(--ink-primary);
     font-family: var(--font-display);
-    font-size: clamp(1rem, 4.8vw, 1.25rem);
+    /* Sized so the nowrap masthead clears the menu button down to ~320px */
+    font-size: clamp(0.8125rem, 4.2vw, 1.25rem);
     font-weight: var(--w-semibold);
     line-height: 1.05;
     letter-spacing: 0.045em;
@@ -554,6 +528,8 @@ function isActive(itemHref: string): boolean {
     padding-inline: clamp(var(--sp-6), 6vw, var(--sp-16));
   }
 
+  /* Nav links — colour shift plus a hairline that grows from the centre.
+   * Compositor-friendly on purpose: no blur, no text-shadow, no repaints. */
   .site-header__nav-link {
     position: relative;
     display: inline-flex;
@@ -567,61 +543,36 @@ function isActive(itemHref: string): boolean {
     line-height: 1;
     letter-spacing: var(--tr-nav);
     text-transform: uppercase;
-    opacity: 0.62;
     user-select: none;
-    transition:
-      color var(--t-base),
-      opacity var(--t-base),
-      text-shadow var(--t-base);
+    transition: color var(--t-fast);
   }
 
   .site-header__nav-label {
     position: relative;
     display: inline-block;
-  }
-
-  .site-header__nav-label::after {
-    position: absolute;
-    inset: 0;
-    color: currentColor;
-    content: attr(data-label);
-    filter: blur(4px);
-    font-weight: var(--w-bold);
-    opacity: 0;
-    pointer-events: none;
-    text-shadow: 0 0 0.6rem color-mix(in srgb, var(--accent-crimson) 16%, transparent);
-    transform: scale(0.25);
-    transform-origin: center;
-    white-space: nowrap;
-    transition:
-      opacity 220ms cubic-bezier(0.2, 0, 0, 1),
-      transform 300ms cubic-bezier(0.2, 0, 0, 1),
-      filter 220ms cubic-bezier(0.2, 0, 0, 1);
+    padding-bottom: 0.45em;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 50% 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size var(--t-base);
   }
 
   .site-header__nav-link:hover {
     color: var(--accent-crimson);
-    opacity: 0.86;
+  }
+
+  .site-header__nav-link:hover .site-header__nav-label {
+    background-size: 100% 1px;
   }
 
   .site-header__nav-link.is-active {
     color: var(--ink-primary);
-    opacity: 1;
-    text-shadow:
-      -0.012em 0 color-mix(in srgb, var(--ink-primary) 18%, transparent),
-      0.012em 0 color-mix(in srgb, var(--ink-primary) 18%, transparent);
   }
 
-  .site-header__nav-link:hover .site-header__nav-label::after {
-    filter: blur(0);
-    opacity: 0.34;
-    transform: scale(1);
-  }
-
-  .site-header__nav-link.is-active .site-header__nav-label::after {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
+  .site-header__nav-link.is-active .site-header__nav-label {
+    background-image: linear-gradient(var(--accent-crimson), var(--accent-crimson));
+    background-size: 100% 1px;
   }
 
   .site-header__menu-toggle {
@@ -671,6 +622,8 @@ function isActive(itemHref: string): boolean {
     height: 1rem;
   }
 
+  /* Hamburger morph — three bars fold into an ✕ on a small spring.
+   * Transform and opacity only; the spring gives the fold its life. */
   .site-header__menu-icon span {
     position: absolute;
     top: 50%;
@@ -680,9 +633,8 @@ function isActive(itemHref: string): boolean {
     background: currentColor;
     transform-origin: center;
     transition:
-      transform 300ms cubic-bezier(0.2, 0, 0, 1),
-      opacity 180ms cubic-bezier(0.2, 0, 0, 1),
-      filter 220ms cubic-bezier(0.2, 0, 0, 1);
+      transform var(--t-spring-snap),
+      opacity 140ms var(--ease-out-quart);
   }
 
   .site-header__menu-icon span:nth-child(1) {
@@ -704,9 +656,8 @@ function isActive(itemHref: string): boolean {
 
   .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(2),
   .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(2) {
-    filter: blur(4px);
     opacity: 0;
-    transform: scaleX(0.25);
+    transform: scaleX(0.1);
   }
 
   .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(3),
@@ -740,26 +691,17 @@ function isActive(itemHref: string): boolean {
     background: transparent;
   }
 
+  /* The scrim is invisible — the panel is part of the page, not an overlay.
+   * Kept in the DOM as a click-capture target only. */
   .site-menu__scrim {
     position: fixed;
     inset: 0;
-    background: rgb(15 15 15 / 42%);
-    opacity: 0;
-    transition: opacity var(--t-base);
+    background: transparent;
+    cursor: default;
   }
 
-  .site-menu[open] .site-menu__scrim {
-    will-change: opacity;
-  }
-
-  .site-menu.is-visible .site-menu__scrim {
-    opacity: 1;
-  }
-
-  .site-menu.is-closing .site-menu__scrim {
-    transition: opacity var(--t-exit);
-  }
-
+  /* Panel slides in smoothly and lives as part of the page.
+   * Same paper background as the page; no shadow, no texture, no overshoot. */
   .site-menu__panel {
     position: relative;
     z-index: 1;
@@ -769,10 +711,9 @@ function isActive(itemHref: string): boolean {
     overflow-y: auto;
     overscroll-behavior: contain;
     border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-    background: var(--bg-page);
-    box-shadow: -0.5rem 0 1.5rem rgb(0 0 0 / 8%);
-    transform: translate3d(100%, 0, 0);
-    transition: transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: var(--bg-page);
+    transform: translate3d(104%, 0, 0);
+    transition: transform 280ms var(--ease-out-quart);
     contain: layout paint;
   }
 
@@ -785,7 +726,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-menu.is-closing .site-menu__panel {
-    transition: transform var(--t-exit);
+    transition: transform 220ms var(--ease-out-quart);
   }
 
   .site-menu__header {
@@ -836,52 +777,11 @@ function isActive(itemHref: string): boolean {
     gap: var(--sp-1);
   }
 
+  /* Items are always visible — no stagger, no transform.
+   * Emphasis comes from font-weight + background fade on hover/focus. */
   .site-menu__nav-item {
-    filter: blur(4px);
-    opacity: 0;
-    transform: translate3d(0, 0.5rem, 0);
-    transition:
-      opacity 240ms cubic-bezier(0.2, 0, 0, 1),
-      transform 300ms cubic-bezier(0.2, 0, 0, 1),
-      filter 240ms cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .site-menu[open] .site-menu__nav-item {
-    will-change: opacity, transform, filter;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item {
-    filter: blur(0);
     opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(1) {
-    transition-delay: 70ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(2) {
-    transition-delay: 98ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(3) {
-    transition-delay: 126ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(4) {
-    transition-delay: 154ms;
-  }
-
-  .site-menu.is-visible .site-menu__nav-item:nth-child(5) {
-    transition-delay: 182ms;
-  }
-
-  .site-menu.is-closing .site-menu__nav-item {
-    filter: blur(2px);
-    opacity: 0;
-    transform: translate3d(0, var(--sp-1), 0);
-    transition-delay: 0ms;
-    transition-duration: 140ms;
+    transform: none;
   }
 
   .site-menu__nav-link {
@@ -890,66 +790,50 @@ function isActive(itemHref: string): boolean {
     justify-content: space-between;
     gap: var(--sp-4);
     min-height: 3.25rem;
-    padding: var(--sp-2) var(--sp-1);
+    padding: var(--sp-2) var(--sp-4);
     color: var(--ink-secondary);
-    font-family: var(--font-display);
-    font-size: clamp(1.375rem, 5vw, 2rem);
-    font-weight: var(--w-semibold);
-    line-height: var(--lh-display);
-    opacity: 0.58;
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 3vw, 1.125rem);
+    font-weight: var(--w-medium);
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    /* Square-edged highlight — no rounded blob under the label. */
+    border-radius: 0;
     transition:
-      color var(--t-base),
-      opacity var(--t-base),
-      text-shadow var(--t-base);
+      font-weight var(--t-fast),
+      color var(--t-fast),
+      background-color var(--t-fast);
   }
 
-  .site-menu__nav-link:hover {
-    color: var(--accent-crimson);
-    opacity: 0.86;
+  .site-menu__nav-link:hover,
+  .site-menu__nav-link:focus-visible {
+    color: var(--ink-primary);
+    font-weight: var(--w-bold);
+    background-color: var(--bg-page-deep);
+    border-radius: 0;
+    outline: none;
   }
 
   .site-menu__nav-link.is-active {
     color: var(--ink-primary);
-    opacity: 1;
-    text-shadow:
-      -0.012em 0 color-mix(in srgb, var(--ink-primary) 18%, transparent),
-      0.012em 0 color-mix(in srgb, var(--ink-primary) 18%, transparent);
+    font-weight: var(--w-bold);
   }
 
+  /* No label transform — items stay put. */
   .site-menu__nav-label {
     position: relative;
     display: inline-block;
   }
 
-  .site-menu__nav-label::after {
+  .site-menu__nav-link.is-active .site-menu__nav-label::before {
+    content: '';
     position: absolute;
-    inset: 0;
-    color: currentColor;
-    content: attr(data-label);
-    filter: blur(4px);
-    font-weight: var(--w-bold);
-    opacity: 0;
-    pointer-events: none;
-    text-shadow: 0 0 0.7rem color-mix(in srgb, var(--accent-crimson) 16%, transparent);
-    transform: scale(0.25);
-    transform-origin: left center;
-    white-space: nowrap;
-    transition:
-      opacity 220ms cubic-bezier(0.2, 0, 0, 1),
-      transform 300ms cubic-bezier(0.2, 0, 0, 1),
-      filter 220ms cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .site-menu__nav-link:hover .site-menu__nav-label::after {
-    filter: blur(0);
-    opacity: 0.34;
-    transform: scale(1);
-  }
-
-  .site-menu__nav-link.is-active .site-menu__nav-label::after {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
+    top: 50%;
+    left: -1rem;
+    width: 0.45rem;
+    height: 1.5px;
+    background: var(--accent-crimson);
   }
 
   .site-menu__nav-index {
@@ -957,31 +841,22 @@ function isActive(itemHref: string): boolean {
     font-size: 0.625rem;
     font-weight: var(--w-medium);
     letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
     color: var(--ink-muted);
     opacity: 0.5;
     transition:
       color var(--t-base),
-      opacity var(--t-base),
-      text-shadow var(--t-base);
+      opacity var(--t-base);
   }
 
+  .site-menu__nav-link:hover .site-menu__nav-index,
   .site-menu__nav-link.is-active .site-menu__nav-index {
     color: var(--accent-crimson);
-    opacity: 0.78;
-    text-shadow: 0 0 0.5rem color-mix(in srgb, var(--accent-crimson) 18%, transparent);
+    opacity: 0.85;
   }
 
-  :global(html.has-open-menu) {
-    overflow: hidden;
-  }
-
-  :global(html.has-open-menu body) {
-    position: fixed;
-    right: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-  }
+  /* No body scroll lock — the panel sits as part of the page, not as
+   * a modal overlay. */
 
   @media (min-width: 48rem) {
     .site-header__masthead {
@@ -1032,15 +907,53 @@ function isActive(itemHref: string): boolean {
     }
   }
 
+  /* Desktop (≥1024px): the menu docks as a fixed right-column sidebar.
+   * It still slides in, but is permanently in the layout — body does not
+   * dim, body does not lock scroll. */
+  @media (min-width: 64rem) {
+    .site-menu[open] {
+      display: block;
+    }
+
+    .site-menu__panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(22rem, 26vw);
+      height: 100vh;
+      height: 100dvh;
+      transform: translate3d(100%, 0, 0);
+      transition: transform 320ms var(--ease-out-quart);
+    }
+
+    .site-menu.is-visible .site-menu__panel {
+      transform: translate3d(0, 0, 0);
+    }
+
+    .site-menu.is-closing .site-menu__panel {
+      transition: transform 240ms var(--ease-out-quart);
+    }
+
+    .site-menu__nav {
+      padding: var(--sp-8) var(--sp-4) var(--sp-10);
+    }
+
+    .site-menu__nav-link {
+      min-height: 2.75rem;
+      padding: var(--sp-2) var(--sp-3);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .site-header__reading-bar,
     .site-header__wordmark-link,
     .site-header__menu-icon span,
-    .site-header__nav-label::after,
+    .site-header__nav-label,
     .site-menu__scrim,
     .site-menu__panel,
     .site-menu__nav-item,
-    .site-menu__nav-label::after {
+    .site-menu__nav-label {
       transition-duration: 0.01ms;
       transition-delay: 0ms;
     }

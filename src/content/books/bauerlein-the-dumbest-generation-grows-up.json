@@ -3,6 +3,8 @@
   "author": "Mark Bauerlein",
   "year": 2022,
   "reviewEssayId": "2026-07-25-nguoi-bay-khong-chan-troi",
-  "coverImage": "",
-  "coverImageAlt": "Bìa sách The Dumbest Generation Grows Up"
+  "coverImage": "/images/books/bauerlein-the-dumbest-generation-grows-up.jpg",
+  "coverImageAlt": "Bìa sách The Dumbest Generation Grows Up",
+  "coverWidth": 640,
+  "coverHeight": 966
 }

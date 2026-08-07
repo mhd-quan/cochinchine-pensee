@@ -26,8 +26,15 @@ interface Props {
 const { essay, showExcerpt = false, variant = 'default' } = Astro.props;
 const formattedDate = essay.data.date.toLocaleDateString('en-US', {
   year: 'numeric',
-  month: 'short',
+  month: 'long',
   day: 'numeric',
+});
+// Issue eyebrow — "Summer 2026" / "Jul 2026" — lowercase text rendered in
+// small-caps so the month name keeps its proper-noun capitalization
+// instead of being shoved into ALL CAPS.
+const monthYear = essay.data.date.toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric',
 });
 
 const hasCover = !!essay.data.coverImage;
@@ -54,6 +61,8 @@ const coverTreatment = getCoverTreatment(essay.id);
   )}
 
   <div class="essay-card__body">
+    <p class="essay-card__issue">{monthYear}</p>
+
     {essay.data.series && (
       <p class="essay-card__kicker">From the series · {essay.data.series}</p>
     )}
@@ -152,6 +161,19 @@ const coverTreatment = getCoverTreatment(essay.id);
     letter-spacing: var(--tr-kicker);
     text-transform: uppercase;
     color: var(--ink-muted);
+  }
+
+  /* Issue eyebrow — month + year in small-caps so the month name
+   * keeps its proper-noun capitalization (CRB "SUMMER 2026 ISSUE"). */
+  .essay-card__issue {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    font-variant: small-caps;
+    color: var(--accent-crimson);
+    margin-bottom: var(--sp-1);
   }
 
   .essay-card__title {
