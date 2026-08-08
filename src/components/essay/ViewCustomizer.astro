@@ -687,6 +687,8 @@
       transform: scale(0.85);
     }
 
+    /* The scrim neither dims nor textures the page — it is an invisible
+     * click-capture target only, same as the site menu's. */
     .reader-tools__scrim {
       display: block;
       position: fixed;
@@ -695,19 +697,20 @@
       width: 100%;
       height: 100%;
       border: 0;
-      background: rgb(20 16 12 / 44%);
+      background: transparent;
       opacity: 0;
       visibility: hidden;
-      transition:
-        opacity var(--t-exit),
-        visibility 0s linear 240ms;
+      transition: visibility 0s linear 300ms;
     }
 
-    /* Bottom sheet — grabber, generous targets, spring entrance */
+    /* Bottom sheet — grabber, generous targets, one smooth slide.
+     * Plain paper: no grain image of its own, and z above the page's
+     * body::after grain overlay (--z-toast) so the overlay cannot paint
+     * on top of the sheet. No spring — accelerate, then settle. */
     .reader-tools__panel {
       position: fixed;
       inset: auto 0 0;
-      z-index: var(--z-modal);
+      z-index: calc(var(--z-toast) + 1);
       max-height: min(84vh, 38rem);
       overflow-y: auto;
       overscroll-behavior: contain;
@@ -715,14 +718,12 @@
       border-bottom: 0;
       padding: var(--sp-2) var(--gutter-mobile) max(var(--sp-6), env(safe-area-inset-bottom));
       background-color: var(--bg-page);
-      background-image: var(--texture-grain);
-      background-repeat: repeat;
       box-shadow: 0 -0.75rem 2rem rgb(15 15 15 / 10%);
       visibility: hidden;
       transform: translate3d(0, calc(100% + 1px), 0);
       transition:
-        transform 280ms var(--ease-in-soft),
-        visibility 0s linear 280ms,
+        transform var(--t-panel-exit),
+        visibility 0s linear 300ms,
         background-color var(--t-base),
         border-color var(--t-base);
       contain: layout paint;
@@ -731,16 +732,14 @@
     .reader-tools.is-open .reader-tools__scrim {
       opacity: 1;
       visibility: visible;
-      transition:
-        opacity 320ms var(--ease-out-quart),
-        visibility 0s;
+      transition: visibility 0s;
     }
 
     .reader-tools.is-open .reader-tools__panel {
       visibility: visible;
       transform: translate3d(0, 0, 0);
       transition:
-        transform var(--t-spring),
+        transform var(--t-panel),
         visibility 0s,
         background-color var(--t-base),
         border-color var(--t-base);
@@ -802,7 +801,7 @@
       height: 1.5px;
       background: currentColor;
       transform-origin: center;
-      transition: transform var(--t-spring-snap);
+      transition: transform var(--t-icon);
     }
 
     .reader-tools__close-icon span:first-child {

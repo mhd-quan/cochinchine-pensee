@@ -13,6 +13,7 @@ import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
 import SeriesCluster from '~/components/essay/SeriesCluster.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import { titleCaps } from '~/lib/titleCaps';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
 const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -54,7 +55,13 @@ const featuredClusters = featuredSeries
       <div class="container">
         <p class="hero__eyebrow">Latest Essay</p>
         <h2 class="hero__title">
-          <a href={`/essays/${heroEssay.id}`}>{heroEssay.data.title}</a>
+          <a href={`/essays/${heroEssay.id}`}>
+            {titleCaps(heroEssay.data.title).map((segment) => (
+              segment.small
+                ? <span class="title-caps__small">{segment.text}</span>
+                : <span>{segment.text}</span>
+            ))}
+          </a>
         </h2>
         {heroEssay.data.subtitle && (
           <p class="hero__subtitle">{heroEssay.data.subtitle}</p>
@@ -223,7 +230,7 @@ const featuredClusters = featuredSeries
     font-family: var(--font-display);
     font-size: clamp(2rem, 1.4rem + 2.5vw, 3.75rem);
     line-height: 1.05;
-    letter-spacing: var(--tr-display);
+    letter-spacing: 0.015em;
     color: var(--ink-primary);
     margin-bottom: var(--sp-4);
     text-wrap: balance;
