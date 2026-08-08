@@ -8,6 +8,7 @@
  * the planned date are exposed; the text stays behind `draft: true`.
  */
 import type { CollectionEntry } from 'astro:content';
+import { titleCaps } from '~/lib/titleCaps';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
@@ -25,7 +26,13 @@ const formattedDate = essay.data.date.toLocaleDateString('en-US', {
   <div class="coming-card__body">
     <p class="coming-card__badge">Coming soon</p>
 
-    <h4 class="coming-card__title">{essay.data.title}</h4>
+    <h4 class="coming-card__title">
+      {titleCaps(essay.data.title).map((segment) => (
+        segment.small
+          ? <span class="title-caps__small">{segment.text}</span>
+          : <span>{segment.text}</span>
+      ))}
+    </h4>
 
     <p class="coming-card__byline">
       <span class="coming-card__byline-by">expected</span>
@@ -64,7 +71,7 @@ const formattedDate = essay.data.date.toLocaleDateString('en-US', {
     font-family: var(--font-display);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
-    letter-spacing: var(--tr-headline);
+    letter-spacing: 0.02em;
     color: var(--ink-muted);
   }
 

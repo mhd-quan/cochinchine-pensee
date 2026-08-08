@@ -163,6 +163,9 @@
   --ease-out-quart:    cubic-bezier(0.25, 1, 0.5, 1);    /* hovers, colour shifts */
   --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);    /* larger movements */
   --ease-in-soft:      cubic-bezier(0.45, 0, 0.7, 0.4);  /* exits */
+  /* Panels: leaves rest at zero velocity, accelerates, then settles.
+   * Both control points stay inside [0,1] on y, so it never overshoots. */
+  --ease-panel:        cubic-bezier(0.45, 0, 0.2, 1);    /* sliding panels */
   --spring-gentle:     linear(0, 0.0517 5%, 0.1667 10%, 0.3037 15%, 0.4394 20%, 0.5617 25%, 0.6657 30%, 0.7506 35%, 0.8177 40%, 0.8694 45%, 0.9082 50%, 0.9369 55%, 0.9575 60%, 0.9722 65%, 0.9823 70%, 0.9892 75%, 0.9938 80%, 0.9967 85%, 0.9986 90%, 0.9996 95%, 1);
   --spring-snappy:     linear(0, 0.0653 6.25%, 0.2096 12.5%, 0.3781 18.75%, 0.5394 25%, 0.6779 31.25%, 0.7882 37.5%, 0.8707 43.75%, 0.929 50%, 0.9679 56.25%, 0.9919 62.5%, 1.0054 68.75%, 1.0118 75%, 1.0138 81.25%, 1.0132 87.5%, 1.0113 93.75%, 1);
 
@@ -173,6 +176,9 @@
   --t-exit:            200ms var(--ease-in-soft);
   --t-spring:          520ms var(--spring-gentle);
   --t-spring-snap:     400ms var(--spring-snappy);
+  --t-panel:           420ms var(--ease-panel);
+  --t-panel-exit:      300ms var(--ease-panel);
+  --t-icon:            260ms var(--ease-panel);
 
   /* ──────────────────────────────────────────────────────────────────
    * Radius — none, mostly. CRB austre.

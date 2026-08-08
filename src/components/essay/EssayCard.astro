@@ -16,6 +16,7 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
+import { titleCaps } from '~/lib/titleCaps';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
@@ -29,9 +30,8 @@ const formattedDate = essay.data.date.toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
-// Issue eyebrow — "Summer 2026" / "Jul 2026" — lowercase text rendered in
-// small-caps so the month name keeps its proper-noun capitalization
-// instead of being shoved into ALL CAPS.
+// Issue eyebrow — "MAY 2026". Set in full caps, like the issue line on a
+// printed masthead.
 const monthYear = essay.data.date.toLocaleDateString('en-US', {
   month: 'long',
   year: 'numeric',
@@ -68,7 +68,13 @@ const coverTreatment = getCoverTreatment(essay.id);
     )}
 
     <h4 class="essay-card__title">
-      <a href={`/essays/${essay.id}`}>{essay.data.title}</a>
+      <a href={`/essays/${essay.id}`}>
+        {titleCaps(essay.data.title).map((segment) => (
+          segment.small
+            ? <span class="title-caps__small">{segment.text}</span>
+            : <span>{segment.text}</span>
+        ))}
+      </a>
     </h4>
 
     {essay.data.subtitle && (
@@ -163,24 +169,26 @@ const coverTreatment = getCoverTreatment(essay.id);
     color: var(--ink-muted);
   }
 
-  /* Issue eyebrow — month + year in small-caps so the month name
-   * keeps its proper-noun capitalization (CRB "SUMMER 2026 ISSUE"). */
+  /* Issue eyebrow — month + year in full caps, as on the CRB issue line
+   * ("SUMMER 2026 ISSUE"). */
   .essay-card__issue {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
     letter-spacing: 0.16em;
-    text-transform: lowercase;
-    font-variant: small-caps;
+    text-transform: uppercase;
     color: var(--accent-crimson);
     margin-bottom: var(--sp-1);
   }
 
+  /* Title — CRB caps-and-small-caps: the words' true capitals stand
+   * full-height while every other letter renders as a smaller capital.
+   * No text-transform: the natural casing decides which letters lead. */
   .essay-card__title {
     font-family: var(--font-display);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
-    letter-spacing: var(--tr-headline);
+    letter-spacing: 0.02em;
   }
 
   .essay-card__title a {

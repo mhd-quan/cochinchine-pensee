@@ -316,10 +316,12 @@ function isActive(itemHref: string): boolean {
       };
 
       panel.addEventListener('transitionend', onPanelTransitionEnd);
+      // Safety net only — must outlast --t-panel-exit (300ms) so it never
+      // races the real transitionend and cuts the slide short.
       closeTimer = window.setTimeout(() => {
         panel.removeEventListener('transitionend', onPanelTransitionEnd);
         finishClose(restoreFocus);
-      }, 300);
+      }, 460);
     };
 
     const openMenu = (event: Event) => {
@@ -339,11 +341,12 @@ function isActive(itemHref: string): boolean {
         return;
       }
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (dialog.open) dialog.classList.add('is-visible');
-        });
-      });
+      // Commit the off-screen start position before the transition starts.
+      // A forced reflow does that in this frame; the two rAF ticks this
+      // replaces left the panel parked on-screen-but-untransitioned for two
+      // frames, which is what read as a hitch at the head of the slide.
+      void panel.offsetWidth;
+      dialog.classList.add('is-visible');
     };
 
     for (const button of openButtons) {
@@ -416,6 +419,9 @@ function isActive(itemHref: string): boolean {
     place-items: center;
     min-height: 4.5rem;
     padding: var(--sp-3) var(--gutter-mobile);
+    /* viewport-fit=cover lets the page run under the iOS status bar; the
+     * masthead must own that strip or raw page bleeds out above it. */
+    padding-top: calc(var(--sp-3) + env(safe-area-inset-top, 0px));
     border-bottom: 1px solid var(--rule-hair);
     text-align: center;
   }
@@ -464,6 +470,9 @@ function isActive(itemHref: string): boolean {
     grid-template-columns: 3.75rem minmax(0, 1fr) 3.75rem;
     align-items: center;
     min-height: 3.75rem;
+    /* Seal the bar to the physical top of the screen — without this the
+     * page shows through the status-bar strip above the bar on iOS. */
+    padding-top: env(safe-area-inset-top, 0px);
     border-bottom: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
     background: var(--bg-page);
     box-shadow: 0 0.35rem 1.2rem rgb(15 15 15 / 4%);
@@ -622,8 +631,9 @@ function isActive(itemHref: string): boolean {
     height: 1rem;
   }
 
-  /* Hamburger morph — three bars fold into an ✕ on a small spring.
-   * Transform and opacity only; the spring gives the fold its life. */
+  /* Hamburger morph — three bars fold into an ✕ on the same curve as the
+   * panel. Transform and opacity only, and no overshoot: the bars must not
+   * spring past the ✕ and rock back. */
   .site-header__menu-icon span {
     position: absolute;
     top: 50%;
@@ -633,8 +643,8 @@ function isActive(itemHref: string): boolean {
     background: currentColor;
     transform-origin: center;
     transition:
-      transform var(--t-spring-snap),
-      opacity 140ms var(--ease-out-quart);
+      transform var(--t-icon),
+      opacity 160ms var(--ease-panel);
   }
 
   .site-header__menu-icon span:nth-child(1) {
@@ -712,8 +722,11 @@ function isActive(itemHref: string): boolean {
     overscroll-behavior: contain;
     border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
     background-color: var(--bg-page);
+    /* Full-height drawer runs under the iOS status bar; keep the panel
+     * header out of the clock. */
+    padding-top: env(safe-area-inset-top, 0px);
     transform: translate3d(104%, 0, 0);
-    transition: transform 280ms var(--ease-out-quart);
+    transition: transform var(--t-panel);
     contain: layout paint;
   }
 
@@ -726,7 +739,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-menu.is-closing .site-menu__panel {
-    transition: transform 220ms var(--ease-out-quart);
+    transition: transform var(--t-panel-exit);
   }
 
   .site-menu__header {
@@ -798,20 +811,22 @@ function isActive(itemHref: string): boolean {
     line-height: 1.4;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    /* Square-edged highlight — no rounded blob under the label. */
-    border-radius: 0;
-    transition:
-      font-weight var(--t-fast),
-      color var(--t-fast),
-      background-color var(--t-fast);
+    background-color: transparent;
+    /* Weight is not transitioned: Be Vietnam Pro ships as static faces, so an
+     * interpolated font-weight snaps to the next face mid-transition. Switching
+     * it on pointer-down instead reads as crisp while the colour carries the
+     * fade. The label grows rightward inside a space-between row, so the index
+     * on the right edge does not move. */
+    transition: color var(--t-base);
   }
 
+  /* Hover is carried entirely by the type: the label gains weight and the
+   * ink fades to the house oxblood. No panel, no plate, no box behind it. */
   .site-menu__nav-link:hover,
   .site-menu__nav-link:focus-visible {
-    color: var(--ink-primary);
+    color: var(--accent-crimson);
     font-weight: var(--w-bold);
-    background-color: var(--bg-page-deep);
-    border-radius: 0;
+    background-color: transparent;
     outline: none;
   }
 
@@ -862,6 +877,7 @@ function isActive(itemHref: string): boolean {
     .site-header__masthead {
       min-height: 7.5rem;
       padding: var(--sp-5) var(--gutter-tablet);
+      padding-top: calc(var(--sp-5) + env(safe-area-inset-top, 0px));
       border-bottom: 0;
     }
 
@@ -924,7 +940,7 @@ function isActive(itemHref: string): boolean {
       height: 100vh;
       height: 100dvh;
       transform: translate3d(100%, 0, 0);
-      transition: transform 320ms var(--ease-out-quart);
+      transition: transform var(--t-panel);
     }
 
     .site-menu.is-visible .site-menu__panel {
@@ -932,7 +948,7 @@ function isActive(itemHref: string): boolean {
     }
 
     .site-menu.is-closing .site-menu__panel {
-      transition: transform 240ms var(--ease-out-quart);
+      transition: transform var(--t-panel-exit);
     }
 
     .site-menu__nav {

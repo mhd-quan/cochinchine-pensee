@@ -11,6 +11,7 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
+import { titleCaps } from '~/lib/titleCaps';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
@@ -38,7 +39,13 @@ const year = String(essay.data.date.getFullYear());
 
   <div class="essay-row__body">
     <h3 class="essay-row__title">
-      <a href={href}>{essay.data.title}</a>
+      <a href={href}>
+        {titleCaps(essay.data.title).map((segment) => (
+          segment.small
+            ? <span class="title-caps__small">{segment.text}</span>
+            : <span>{segment.text}</span>
+        ))}
+      </a>
     </h3>
     {essay.data.subtitle && (
       <p class="essay-row__subtitle">{essay.data.subtitle}</p>
@@ -98,11 +105,13 @@ const year = String(essay.data.date.getFullYear());
     color: var(--ink-faint);
   }
 
+  /* Caps and small caps, as on the EssayCard — the words' own capitals
+   * stand full-height, the rest render as smaller capitals. */
   .essay-row__title {
     font-family: var(--font-display);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
-    letter-spacing: var(--tr-headline);
+    letter-spacing: 0.02em;
     text-wrap: balance;
   }
 

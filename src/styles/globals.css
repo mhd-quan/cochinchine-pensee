@@ -178,6 +178,13 @@ html.has-reader-panel-open {
   margin-block: var(--sp-6);
 }
 
+/* Caps-and-small-caps headlines, built from spans because the display face
+ * ships no `smcp` feature. See src/lib/titleCaps.ts. */
+.title-caps__small {
+  font-size: 0.78em;
+  letter-spacing: 0.01em;
+}
+
 /* ──────────────────────────────────────────────────────────────────
  * View Transitions
  * Astro 7 + native CSS View Transitions API

@@ -3,6 +3,7 @@ import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
+import { titleCaps } from '~/lib/titleCaps';
 
 interface Props {
   title: string;
@@ -67,7 +68,13 @@ const isoDate = date.toISOString();
             </p>
           )}
 
-          <h1 class="essay__title">{title}</h1>
+          <h1 class="essay__title">
+            {titleCaps(title).map((segment) => (
+              segment.small
+                ? <span class="title-caps__small">{segment.text}</span>
+                : <span>{segment.text}</span>
+            ))}
+          </h1>
 
           {subtitle && <p class="essay__subtitle">{subtitle}</p>}
           {dek && <p class="essay__dek">{dek}</p>}
@@ -190,7 +197,7 @@ const isoDate = date.toISOString();
     font-family: var(--font-display);
     font-size: var(--fs-h1);
     line-height: var(--lh-headline);
-    letter-spacing: var(--tr-display);
+    letter-spacing: 0.015em;
     text-wrap: balance;
     color: var(--ink-primary);
   }
