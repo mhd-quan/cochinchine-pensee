@@ -487,16 +487,15 @@ function isActive(itemHref: string): boolean {
     background: var(--bg-page);
   }
 
-  /* Keep a dedicated cap above the visual viewport. The root canvas first
-   * fills the entire device backdrop; this second layer then masks any page
-   * content that Safari lets drift behind its status bar. Its solid colour
-   * matches the masthead after the global paper grain has been composited. */
+  /* This cap only masks content that Safari lets drift behind its status bar.
+   * Its colour is the same page token used by html, body and browser chrome;
+   * it does not introduce another visual surface. */
   .site-header__safe-area {
     position: fixed;
     z-index: var(--z-header);
     inset: calc(-1 * var(--sp-16)) 0 auto;
     height: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    background-color: var(--bg-viewport);
+    background-color: var(--bg-page);
     pointer-events: none;
     transition: background-color var(--t-base);
   }

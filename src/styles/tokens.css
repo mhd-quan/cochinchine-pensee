@@ -5,7 +5,7 @@
  * All component CSS uses var(--token). No magic numbers anywhere else.
  *
  * Refined 2026-08-06 (v0.4) — "Cochinchine" palette board:
- *   - Paper register (light): warm off-whites carrying a faint rag-paper grain
+ *   - Paper register (light): one continuous warm off-white canvas
  *   - Ink-well register (dark): two dark tones — lacquer cabinet + deep oxblood —
  *     used to punch contrast between sections (footer, feature bands)
  *   - Two-register typography: serif (Old Republic) + sans glyph (contemporary)
@@ -15,9 +15,8 @@
   /* ──────────────────────────────────────────────────────────────────
    * Surfaces — paper register
    * ────────────────────────────────────────────────────────────────── */
-  --bg-page:           #FAFAF7;   /* off-white subtle warm — gentler than pure white, less warm than ivory */
-  --bg-viewport:       #F1F1EE;   /* solid canvas match for the paper surface after grain */
-  --bg-page-deep:      #F2F0EA;   /* one step warmer for cards, newsletter, callouts */
+  --bg-page:           #EEEEEB;   /* single opaque paper canvas across page and Safari chrome */
+  --bg-page-deep:      #E7E5DF;   /* one step deeper for cards, newsletter, callouts */
   --bg-tinted:         #F4EFE6;   /* CRB-style promo/overlay tint */
   --bg-rule-soft:      #F5F5F4;   /* image placeholders */
 
@@ -56,12 +55,6 @@
    * Selection + touch feedback
    * ────────────────────────────────────────────────────────────────── */
   --selection-bg:      rgb(139 26 26 / 15%);  /* soft oxblood wash — text colour stays */
-
-  /* ──────────────────────────────────────────────────────────────────
-   * Paper grain — tiny tiled SVG noise, laid over every surface
-   * ────────────────────────────────────────────────────────────────── */
-  --texture-grain:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0.2 0.2 0 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
-  --texture-opacity:   0.16;      /* ~1.5% effective darkening — fibre, not static */
 
   /* ──────────────────────────────────────────────────────────────────
    * Rules and dividers

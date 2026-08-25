@@ -32,10 +32,11 @@
 html {
   font-family: var(--font-serif);
   color: var(--ink-primary);
-  /* Safari exposes the root canvas outside its visual viewport. Use the
-   * post-grain surface match here so its top and bottom chrome never fall
-   * back to the visibly lighter raw paper token. */
-  background-color: var(--bg-viewport);
+  min-height: 100%;
+  /* WebKit may source inset and browser-chrome pixels from either the root
+   * canvas or body depending on scroll state. Both therefore use the same
+   * opaque token, with no composited texture to create a second colour. */
+  background-color: var(--bg-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
@@ -50,53 +51,16 @@ body {
   line-height: var(--lh-body);
   background: var(--bg-page);
   color: var(--ink-primary);
-  isolation: isolate;
   transition:
     background-color var(--t-base),
     color var(--t-base);
 }
 
 /* ──────────────────────────────────────────────────────────────────
- * Viewport surface and paper grain — one continuous sheet for every page.
- * Both fixed layers overscan the visual viewport so Safari's translucent
- * status and toolbar regions sample the same themed paper as the page.
- * Multiply reads as fibre; night flips the grain to a screened tooth.
+ * No global surface pseudo-elements: Safari cannot reproduce a composited
+ * texture in its browser chrome. Root, body and chrome instead share one
+ * opaque colour token so every viewport state resolves to the same pixels.
  * ────────────────────────────────────────────────────────────────── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: calc(-1 * var(--sp-16)) 0;
-  z-index: -1;
-  background-color: var(--bg-page);
-  pointer-events: none;
-  transition: background-color var(--t-base);
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: calc(-1 * var(--sp-16)) 0;
-  z-index: var(--z-toast);
-  background-image: var(--texture-grain);
-  background-repeat: repeat;
-  opacity: var(--texture-opacity);
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-html[data-theme='night'] body::after {
-  mix-blend-mode: screen;
-  filter: invert(1);
-  opacity: 0.08;
-}
-
-@media print {
-  body::before,
-  body::after {
-    display: none;
-  }
-}
-
 .image-filter-defs {
   position: absolute;
   overflow: hidden;
@@ -113,16 +77,14 @@ html[data-measure='wide'] {
 }
 
 html[data-theme='sepia'] {
-  --bg-page: #F5EFE0;
-  --bg-viewport: #ECE6D8;
+  --bg-page: #ECE6D8;
   --bg-page-deep: #EBE3D0;
   --bg-tinted: #E9DFCA;
   --rule-hair: #D8CFBE;
 }
 
 html[data-theme='night'] {
-  --bg-page: #1B1816;
-  --bg-viewport: #1D1A18;
+  --bg-page: #1D1A18;
   --bg-page-deep: #14110F;
   --bg-tinted: #27211D;
   --ink-primary: #EDE6D6;

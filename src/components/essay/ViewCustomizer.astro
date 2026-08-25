@@ -202,7 +202,7 @@
       ? '#1D1A18'
       : prefs.theme === 'sepia'
         ? '#ECE6D8'
-        : '#F1F1EE';
+        : '#EEEEEB';
     document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
       ?.setAttribute('content', themeColor);
 
@@ -625,17 +625,17 @@
   }
 
   .reader-tools__swatch--paper {
-    background: #FAFAF7;
+    background: #EEEEEB;
     color: #0F0F0F;
   }
 
   .reader-tools__swatch--sepia {
-    background: #F5EFE0;
+    background: #ECE6D8;
     color: #4A3F2A;
   }
 
   .reader-tools__swatch--night {
-    background: #1B1816;
+    background: #1D1A18;
     color: #EDE6D6;
   }
 
@@ -704,9 +704,8 @@
     }
 
     /* Bottom sheet — grabber, generous targets, one smooth slide.
-     * Plain paper: no grain image of its own, and z above the page's
-     * body::after grain overlay (--z-toast) so the overlay cannot paint
-     * on top of the sheet. No spring — accelerate, then settle. */
+     * It shares the page's single opaque surface and stays above the rest of
+     * the reading chrome. No spring — accelerate, then settle. */
     .reader-tools__panel {
       position: fixed;
       inset: auto 0 0;
