@@ -11,7 +11,8 @@ interface Props {
   dek?: string;
   date: Date;
   author?: string;
-  tags?: string[];
+  lang?: 'vi' | 'en';
+  topics: string[];
   series?: string;
   dropcap?: boolean;
   excerpt?: string;
@@ -30,7 +31,8 @@ const {
   dek,
   date,
   author = 'M. Q. Doan',
-  tags = [],
+  lang = 'vi',
+  topics,
   series,
   dropcap = false,
   excerpt,
@@ -55,7 +57,7 @@ const isoDate = date.toISOString();
 <BaseLayout
   title={title}
   description={excerpt ?? dek ?? subtitle}
-  lang="vi"
+  lang={lang}
   ogImage={coverImage}
 >
   <article class="essay">
@@ -86,11 +88,12 @@ const isoDate = date.toISOString();
             <time datetime={isoDate}>{formattedDate}</time>
           </div>
 
-          {tags.length > 0 && (
-            <ul class="essay__tags" aria-label="Topics">
-              {tags.map((tag) => <li class="essay__tag">{tag}</li>)}
+          <div class="essay__topics">
+            <span class="essay__topics-label">Luận về</span>
+            <ul class="essay__topics-list" aria-label="Chủ đề">
+              {topics.map((topic) => <li class="essay__topic">{topic}</li>)}
             </ul>
-          )}
+          </div>
         </div>
 
         {coverImage && (
@@ -250,20 +253,40 @@ const isoDate = date.toISOString();
     color: var(--ink-faint);
   }
 
-  .essay__tags {
+  .essay__topics {
     display: flex;
+    align-items: baseline;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-3);
+    gap: var(--sp-2);
     margin-top: var(--sp-3);
   }
 
-  .essay__tag {
+  .essay__topics-label {
+    font-family: var(--font-display);
+    font-size: var(--fs-meta);
+    font-style: italic;
+    color: var(--ink-muted);
+  }
+
+  .essay__topics-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  .essay__topic {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     letter-spacing: var(--tr-kicker);
     text-transform: uppercase;
     color: var(--ink-muted);
+  }
+
+  .essay__topic + .essay__topic::before {
+    content: '·';
+    margin-inline: var(--sp-2);
+    color: var(--ink-faint);
   }
 
   .essay__cover {

@@ -28,7 +28,7 @@ npm run format       # biome format --write .
 
 ```
 .
-├── public/                  # static assets, favicon.svg, robots.txt
+├── public/                  # static assets, favicon.png, robots.txt
 ├── src/
 │   ├── content/             # MDX essays (one file per date-slug)
 │   ├── content.config.ts    # Content Collections + Zod schema
@@ -60,6 +60,11 @@ npm run format       # biome format --write .
 2. Fill frontmatter (see `src/content.config.ts` for valid schema)
 3. Write content in markdown/MDX
 4. The page appears automatically at `/essays/<slug>/`
+
+Every essay must declare one primary topic and may declare one secondary topic.
+The controlled vocabulary is: `Chính trị`, `Kinh tế`, `Căn tính`, `Xã hội`,
+`Tư tưởng`, and `Hiện đại`. Language belongs in `lang`, while editorial
+sequences belong in the separate series collection.
 
 ## Cloudflare Workers deployment
 
