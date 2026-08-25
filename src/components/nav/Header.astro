@@ -487,14 +487,14 @@ function isActive(itemHref: string): boolean {
     background: var(--bg-page);
   }
 
-  /* iOS paints page content beneath the status bar when viewport-fit=cover.
-   * Keep a dedicated masthead-coloured cap fixed in that physical safe area,
-   * including while the compact reading bar is transitioning. */
+  /* Safari can position the visual viewport between translucent browser bars,
+   * where env(safe-area-inset-top) resolves to zero. Overscan the masthead
+   * surface above that viewport so page artwork never shows behind the clock. */
   .site-header__safe-area {
     position: fixed;
     z-index: var(--z-header);
-    inset: 0 0 auto;
-    height: env(safe-area-inset-top, 0px);
+    inset: calc(-1 * var(--sp-16)) 0 auto;
+    height: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
     background-color: var(--bg-page);
     pointer-events: none;
     transition: background-color var(--t-base);
@@ -777,7 +777,7 @@ function isActive(itemHref: string): boolean {
     max-height: none;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
     border: 0;
     background: transparent;
     color: var(--ink-primary);
@@ -804,18 +804,16 @@ function isActive(itemHref: string): boolean {
   .site-menu__panel {
     position: fixed;
     z-index: 1;
-    inset: 0 0 0 auto;
+    inset: calc(-1 * var(--sp-16)) 0 calc(-1 * var(--sp-16)) auto;
     width: min(88vw, 28rem);
-    height: 100vh;
-    height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
     background-color: var(--bg-page);
-    /* Full-height drawer runs under the iOS status bar; keep the panel
-     * header out of the clock. */
-    padding-top: env(safe-area-inset-top, 0px);
+    /* The surface bleeds behind Safari's translucent top and bottom chrome;
+     * only the content is returned to the usable viewport. */
+    padding-top: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
     transform: translate3d(calc(100% + 1px), 0, 0);
     transition: transform var(--t-panel);
     backface-visibility: hidden;
@@ -874,7 +872,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-menu__nav {
-    padding: var(--sp-5) var(--sp-5) max(var(--sp-10), env(safe-area-inset-bottom));
+    padding: var(--sp-5) var(--sp-5) var(--sp-10);
   }
 
   .site-menu__nav-list {
