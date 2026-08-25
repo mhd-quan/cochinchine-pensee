@@ -85,5 +85,5 @@ All colors, fonts, and spacing live in `src/styles/tokens.css`. No magic numbers
 
 ## License
 
-Essays: © M. Q. Doan. All rights reserved.
+Essays: © their respective authors. All rights reserved.
 Code: no open-source license is currently included.
