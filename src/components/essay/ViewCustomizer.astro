@@ -199,10 +199,10 @@
     root.dataset.theme = prefs.theme;
     root.dataset.font = prefs.font;
     const themeColor = prefs.theme === 'night'
-      ? '#1B1816'
+      ? '#1D1A18'
       : prefs.theme === 'sepia'
-        ? '#F5EFE0'
-        : '#FAFAF7';
+        ? '#ECE6D8'
+        : '#F1F1EE';
     document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
       ?.setAttribute('content', themeColor);
 

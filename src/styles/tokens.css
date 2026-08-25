@@ -16,6 +16,7 @@
    * Surfaces — paper register
    * ────────────────────────────────────────────────────────────────── */
   --bg-page:           #FAFAF7;   /* off-white subtle warm — gentler than pure white, less warm than ivory */
+  --bg-viewport:       #F1F1EE;   /* solid canvas match for the paper surface after grain */
   --bg-page-deep:      #F2F0EA;   /* one step warmer for cards, newsletter, callouts */
   --bg-tinted:         #F4EFE6;   /* CRB-style promo/overlay tint */
   --bg-rule-soft:      #F5F5F4;   /* image placeholders */
