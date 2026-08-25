@@ -24,6 +24,8 @@ function isActive(itemHref: string): boolean {
 ---
 
 <header class="site-header" data-site-header data-scroll-direction="down">
+  <span class="site-header__safe-area" aria-hidden="true"></span>
+
   <div class="site-header__flow" data-header-flow>
     <div class="site-header__masthead">
       <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
@@ -118,7 +120,16 @@ function isActive(itemHref: string): boolean {
     </button>
   </div>
 
-  <dialog id="site-menu" class="site-menu" aria-labelledby="site-menu-title" data-site-menu>
+  <div
+    id="site-menu"
+    class="site-menu"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="site-menu-title"
+    aria-hidden="true"
+    inert
+    data-site-menu
+  >
     <div class="site-menu__scrim" aria-hidden="true"></div>
     <div class="site-menu__panel" data-menu-panel>
       <div class="site-menu__header">
@@ -158,7 +169,7 @@ function isActive(itemHref: string): boolean {
         </ul>
       </nav>
     </div>
-  </dialog>
+  </div>
 </header>
 
 <script>
@@ -171,7 +182,7 @@ function isActive(itemHref: string): boolean {
     const flow = header.querySelector<HTMLElement>('[data-header-flow]');
     const sentinel = header.querySelector<HTMLElement>('[data-header-sentinel]');
     const readingBar = header.querySelector<HTMLElement>('[data-reading-bar]');
-    const dialog = header.querySelector<HTMLDialogElement>('[data-site-menu]');
+    const dialog = header.querySelector<HTMLElement>('[data-site-menu]');
     const scrim = header.querySelector<HTMLElement>('.site-menu__scrim');
     const panel = header.querySelector<HTMLElement>('[data-menu-panel]');
     const closeButton = header.querySelector<HTMLButtonElement>('[data-menu-close]');
@@ -197,6 +208,9 @@ function isActive(itemHref: string): boolean {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let activeOpener: HTMLButtonElement | null = null;
     let afterClose: (() => void) | null = null;
+    let openFrame = 0;
+    let openTimer: number | undefined;
+    let openTransitionEnd: ((event: TransitionEvent) => void) | null = null;
     let closeTimer: number | undefined;
     let isClosing = false;
     let pointerStartedOnScrim = false;
@@ -204,6 +218,8 @@ function isActive(itemHref: string): boolean {
     let previousScrollY = Math.max(0, window.scrollY);
     let accumulatedDelta = 0;
     let currentDirection: 'up' | 'down' = 'down';
+
+    const isMenuOpen = () => dialog.classList.contains('is-open');
 
     const setExpanded = (expanded: boolean) => {
       for (const button of openButtons) {
@@ -267,7 +283,30 @@ function isActive(itemHref: string): boolean {
     sentinelObserver.observe(sentinel);
     window.addEventListener('scroll', scheduleScrollUpdate, { passive: true, signal });
 
+    const clearOpenCompletion = () => {
+      if (openFrame !== 0) {
+        window.cancelAnimationFrame(openFrame);
+        openFrame = 0;
+      }
+      if (openTimer !== undefined) {
+        window.clearTimeout(openTimer);
+        openTimer = undefined;
+      }
+      if (openTransitionEnd) {
+        panel.removeEventListener('transitionend', openTransitionEnd);
+        openTransitionEnd = null;
+      }
+    };
+
+    const finishOpen = () => {
+      clearOpenCompletion();
+      if (!isMenuOpen() || isClosing || !dialog.classList.contains('is-visible')) return;
+      if (dialog.contains(document.activeElement)) return;
+      closeButton.focus({ preventScroll: true });
+    };
+
     const finishClose = (restoreFocus: boolean) => {
+      clearOpenCompletion();
       if (closeTimer !== undefined) {
         window.clearTimeout(closeTimer);
         closeTimer = undefined;
@@ -275,8 +314,9 @@ function isActive(itemHref: string): boolean {
 
       const callback = afterClose;
       afterClose = null;
-      dialog.classList.remove('is-visible', 'is-closing');
-      if (dialog.open) dialog.close();
+      dialog.classList.remove('is-open', 'is-visible', 'is-closing');
+      dialog.setAttribute('aria-hidden', 'true');
+      dialog.setAttribute('inert', '');
 
       isClosing = false;
       setExpanded(false);
@@ -289,7 +329,7 @@ function isActive(itemHref: string): boolean {
     };
 
     const closeMenu = (restoreFocus = true, onClosed?: () => void) => {
-      if (!dialog.open) {
+      if (!isMenuOpen()) {
         onClosed?.();
         return;
       }
@@ -301,10 +341,12 @@ function isActive(itemHref: string): boolean {
 
       afterClose = onClosed ?? null;
       isClosing = true;
+      const wasVisible = dialog.classList.contains('is-visible');
+      clearOpenCompletion();
       dialog.classList.add('is-closing');
       dialog.classList.remove('is-visible');
 
-      if (reducedMotion.matches) {
+      if (reducedMotion.matches || !wasVisible) {
         finishClose(restoreFocus);
         return;
       }
@@ -316,37 +358,50 @@ function isActive(itemHref: string): boolean {
       };
 
       panel.addEventListener('transitionend', onPanelTransitionEnd);
-      // Safety net only — must outlast --t-panel-exit (300ms) so it never
+      // Safety net only — must outlast --t-panel-exit (240ms) so it never
       // races the real transitionend and cuts the slide short.
       closeTimer = window.setTimeout(() => {
         panel.removeEventListener('transitionend', onPanelTransitionEnd);
         finishClose(restoreFocus);
-      }, 460);
+      }, 380);
     };
 
     const openMenu = (event: Event) => {
       const opener = event.currentTarget;
-      if (!(opener instanceof HTMLButtonElement) || dialog.open) return;
+      if (!(opener instanceof HTMLButtonElement) || isMenuOpen()) return;
 
       activeOpener = opener;
       afterClose = null;
       isClosing = false;
       dialog.classList.remove('is-closing', 'is-visible');
-      dialog.showModal();
+      dialog.classList.add('is-open');
+      dialog.removeAttribute('aria-hidden');
+      dialog.removeAttribute('inert');
       setExpanded(true);
-      closeButton.focus({ preventScroll: true });
 
       if (reducedMotion.matches) {
         dialog.classList.add('is-visible');
+        finishOpen();
         return;
       }
 
-      // Commit the off-screen start position before the transition starts.
-      // A forced reflow does that in this frame; the two rAF ticks this
-      // replaces left the panel parked on-screen-but-untransitioned for two
-      // frames, which is what read as a hitch at the head of the slide.
-      void panel.offsetWidth;
-      dialog.classList.add('is-visible');
+      // The panel is permanently laid out off-canvas. One frame with
+      // will-change promotes it before motion starts, avoiding the native
+      // dialog relayout and off-screen focus jump that stutter on iOS Safari.
+      openFrame = window.requestAnimationFrame(() => {
+        openFrame = 0;
+        if (!isMenuOpen() || isClosing) return;
+
+        openTransitionEnd = (transitionEvent: TransitionEvent) => {
+          if (transitionEvent.target !== panel || transitionEvent.propertyName !== 'transform') {
+            return;
+          }
+          finishOpen();
+        };
+        panel.addEventListener('transitionend', openTransitionEnd);
+        dialog.classList.add('is-visible');
+        openTimer = window.setTimeout(finishOpen, 520);
+      });
     };
 
     for (const button of openButtons) {
@@ -354,9 +409,32 @@ function isActive(itemHref: string): boolean {
     }
 
     closeButton.addEventListener('click', () => closeMenu(), { signal });
-    dialog.addEventListener('cancel', (event) => {
-      event.preventDefault();
-      closeMenu();
+    document.addEventListener('keydown', (event) => {
+      if (!isMenuOpen()) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeMenu();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+      const focusable = [
+        closeButton,
+        ...dialog.querySelectorAll<HTMLAnchorElement>('a[href]'),
+      ];
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+
+      const activeElement = document.activeElement;
+      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        last.focus({ preventScroll: true });
+      } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        first.focus({ preventScroll: true });
+      }
     }, { signal });
 
     scrim.addEventListener('pointerdown', () => {
@@ -395,7 +473,7 @@ function isActive(itemHref: string): boolean {
       sentinelObserver.disconnect();
       if (scrollFrame !== 0) window.cancelAnimationFrame(scrollFrame);
       lifecycle.abort();
-      if (dialog.open) finishClose(false);
+      if (isMenuOpen()) finishClose(false);
     }, { once: true });
   }
 
@@ -407,6 +485,19 @@ function isActive(itemHref: string): boolean {
   .site-header {
     position: relative;
     background: var(--bg-page);
+  }
+
+  /* iOS paints page content beneath the status bar when viewport-fit=cover.
+   * Keep a dedicated masthead-coloured cap fixed in that physical safe area,
+   * including while the compact reading bar is transitioning. */
+  .site-header__safe-area {
+    position: fixed;
+    z-index: var(--z-header);
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    background-color: var(--bg-page);
+    pointer-events: none;
+    transition: background-color var(--t-base);
   }
 
   .site-header__flow {
@@ -690,15 +781,13 @@ function isActive(itemHref: string): boolean {
     border: 0;
     background: transparent;
     color: var(--ink-primary);
+    visibility: hidden;
+    pointer-events: none;
   }
 
-  .site-menu[open] {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .site-menu::backdrop {
-    background: transparent;
+  .site-menu.is-open {
+    visibility: visible;
+    pointer-events: auto;
   }
 
   /* The scrim is invisible — the panel is part of the page, not an overlay.
@@ -713,24 +802,27 @@ function isActive(itemHref: string): boolean {
   /* Panel slides in smoothly and lives as part of the page.
    * Same paper background as the page; no shadow, no texture, no overshoot. */
   .site-menu__panel {
-    position: relative;
+    position: fixed;
     z-index: 1;
-    grid-column: 2;
+    inset: 0 0 0 auto;
     width: min(88vw, 28rem);
-    height: 100%;
+    height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
     background-color: var(--bg-page);
     /* Full-height drawer runs under the iOS status bar; keep the panel
      * header out of the clock. */
     padding-top: env(safe-area-inset-top, 0px);
-    transform: translate3d(104%, 0, 0);
+    transform: translate3d(calc(100% + 1px), 0, 0);
     transition: transform var(--t-panel);
-    contain: layout paint;
+    backface-visibility: hidden;
+    contain: paint;
   }
 
-  .site-menu[open] .site-menu__panel {
+  .site-menu.is-open .site-menu__panel {
     will-change: transform;
   }
 
@@ -782,7 +874,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-menu__nav {
-    padding: var(--sp-5) var(--sp-5) var(--sp-10);
+    padding: var(--sp-5) var(--sp-5) max(var(--sp-10), env(safe-area-inset-bottom));
   }
 
   .site-menu__nav-list {
@@ -873,6 +965,18 @@ function isActive(itemHref: string): boolean {
   /* No body scroll lock — the panel sits as part of the page, not as
    * a modal overlay. */
 
+  @media (max-width: 22rem) {
+    .site-header__wordmark {
+      font-size: 0.72rem;
+      letter-spacing: 0.035em;
+    }
+
+    .site-menu__brand {
+      font-size: 0.75rem;
+      letter-spacing: 0.035em;
+    }
+  }
+
   @media (min-width: 48rem) {
     .site-header__masthead {
       min-height: 7.5rem;
@@ -927,28 +1031,8 @@ function isActive(itemHref: string): boolean {
    * It still slides in, but is permanently in the layout — body does not
    * dim, body does not lock scroll. */
   @media (min-width: 64rem) {
-    .site-menu[open] {
-      display: block;
-    }
-
     .site-menu__panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
       width: min(22rem, 26vw);
-      height: 100vh;
-      height: 100dvh;
-      transform: translate3d(100%, 0, 0);
-      transition: transform var(--t-panel);
-    }
-
-    .site-menu.is-visible .site-menu__panel {
-      transform: translate3d(0, 0, 0);
-    }
-
-    .site-menu.is-closing .site-menu__panel {
-      transition: transform var(--t-panel-exit);
     }
 
     .site-menu__nav {
