@@ -46,20 +46,32 @@ body {
   line-height: var(--lh-body);
   background: var(--bg-page);
   color: var(--ink-primary);
+  isolation: isolate;
   transition:
     background-color var(--t-base),
     color var(--t-base);
 }
 
 /* ──────────────────────────────────────────────────────────────────
- * Paper grain — one fixed, tiled noise layer over every surface.
- * Multiply keeps it reading as fibre in the paper rather than dirt
- * on the glass; night flips it to a faint screen-blended tooth.
+ * Viewport surface and paper grain — one continuous sheet for every page.
+ * Both fixed layers overscan the visual viewport so Safari's translucent
+ * status and toolbar regions sample the same themed paper as the page.
+ * Multiply reads as fibre; night flips the grain to a screened tooth.
  * ────────────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: calc(-1 * var(--sp-16)) 0;
+  z-index: -1;
+  background-color: var(--bg-page);
+  pointer-events: none;
+  transition: background-color var(--t-base);
+}
+
 body::after {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: calc(-1 * var(--sp-16)) 0;
   z-index: var(--z-toast);
   background-image: var(--texture-grain);
   background-repeat: repeat;
@@ -75,6 +87,7 @@ html[data-theme='night'] body::after {
 }
 
 @media print {
+  body::before,
   body::after {
     display: none;
   }

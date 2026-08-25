@@ -66,6 +66,10 @@ The controlled vocabulary is: `Chính trị`, `Kinh tế`, `Căn tính`, `Xã h�
 `Tư tưởng`, and `Hiện đại`. Language belongs in `lang`, while editorial
 sequences belong in the separate series collection.
 
+The optional `form` field controls the editorial lead above those topics:
+`essay` (the default) renders “Luận về”, while `pensee` renders “Pensée về”
+for shorter pieces whose thesis is deliberately less formal.
+
 ## Cloudflare Workers deployment
 
 Cloudflare Workers Builds should use:

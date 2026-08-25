@@ -24,8 +24,6 @@ function isActive(itemHref: string): boolean {
 ---
 
 <header class="site-header" data-site-header data-scroll-direction="down">
-  <span class="site-header__safe-area" aria-hidden="true"></span>
-
   <div class="site-header__flow" data-header-flow>
     <div class="site-header__masthead">
       <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
@@ -485,19 +483,6 @@ function isActive(itemHref: string): boolean {
   .site-header {
     position: relative;
     background: var(--bg-page);
-  }
-
-  /* Safari can position the visual viewport between translucent browser bars,
-   * where env(safe-area-inset-top) resolves to zero. Overscan the masthead
-   * surface above that viewport so page artwork never shows behind the clock. */
-  .site-header__safe-area {
-    position: fixed;
-    z-index: var(--z-header);
-    inset: calc(-1 * var(--sp-16)) 0 auto;
-    height: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    background-color: var(--bg-page);
-    pointer-events: none;
-    transition: background-color var(--t-base);
   }
 
   .site-header__flow {
