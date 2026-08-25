@@ -487,9 +487,9 @@ function isActive(itemHref: string): boolean {
     background: var(--bg-page);
   }
 
-  /* Safari can position the visual viewport between translucent browser bars,
-   * where env(safe-area-inset-top) resolves to zero. Overscan the masthead
-   * surface above that viewport so page artwork never shows behind the clock. */
+  /* This cap only masks content that Safari lets drift behind its status bar.
+   * Its colour is the same page token used by html, body and browser chrome;
+   * it does not introduce another visual surface. */
   .site-header__safe-area {
     position: fixed;
     z-index: var(--z-header);

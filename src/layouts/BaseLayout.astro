@@ -40,7 +40,7 @@ const fullTitle =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#FAFAF7" />
+    <meta name="theme-color" content="#EEEEEB" />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
 
@@ -53,7 +53,7 @@ const fullTitle =
         if (['serif', 'garamond', 'newyork'].includes(saved.font)) root.dataset.font = saved.font;
         if (['paper', 'sepia', 'night'].includes(saved.theme)) {
           root.dataset.theme = saved.theme;
-          const colors = { paper: '#FAFAF7', sepia: '#F5EFE0', night: '#1B1816' };
+          const colors = { paper: '#EEEEEB', sepia: '#ECE6D8', night: '#1D1A18' };
           document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors[saved.theme]);
         }
       } catch {

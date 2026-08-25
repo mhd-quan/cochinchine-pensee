@@ -4,8 +4,9 @@ import { glob } from 'astro/loaders';
 /**
  * Essay schema — enforced for every MDX file in src/content/essays/.
  *
- * All essays are bodies of long-form Vietnamese prose. The schema keeps
- * frontmatter honest: required title, optional subtitle, date, dek, topics.
+ * The collection holds long-form essays and shorter pensées. The schema
+ * keeps frontmatter honest: required title, optional subtitle, date, form,
+ * dek, and topics.
  *
  * Snake-case aliases accepted from imported Substack frontmatter:
  *   cover_image → coverImage
@@ -27,6 +28,7 @@ const essays = defineCollection({
       dek: z.string().optional(),
       date: z.coerce.date(),
       series: z.string().optional(),
+      form: z.enum(['essay', 'pensee']).default('essay'),
       topics: z.array(essayTopic).min(1).max(2),
       author: z.string().default('M. Q. Doan'),
       lang: z.enum(['vi', 'en']).default('vi'),
