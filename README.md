@@ -19,6 +19,7 @@ npm run format       # biome format --write .
 
 - **Output:** pure static (SSG) — no SSR
 - **Deploy target:** Cloudflare Workers Static Assets via direct Git integration
+- **Analytics:** Google Analytics 4, loaded once through the shared production layout
 - **Content:** MDX files in `src/content/essays/`, validated by Zod schema in `src/content.config.ts`
 - **Styling:** Vanilla CSS via `@import tokens.css; reset.css; prose.css;` in `globals.css`
 - **Fonts:** Self-hosted via `@fontsource/*` (no Google CDN)

@@ -1,0 +1,32 @@
+---
+/**
+ * Site-wide Google Analytics tag.
+ *
+ * BaseLayout includes this component once for every HTML page. Keeping it out
+ * of development avoids recording local browsing in the production property.
+ * GA4 Enhanced Measurement handles ClientRouter history changes, so this tag
+ * deliberately sends no additional manual page_view events.
+ */
+const measurementId = 'G-WDT4QZN4C6';
+const enabled = import.meta.env.PROD;
+---
+
+{
+  enabled && (
+    <>
+      <script
+        is:inline
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+      />
+      <script is:inline define:vars={{ measurementId }}>
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', measurementId);
+      </script>
+    </>
+  )
+}
