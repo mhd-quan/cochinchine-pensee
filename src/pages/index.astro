@@ -13,6 +13,7 @@ import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
 import SeriesCluster from '~/components/essay/SeriesCluster.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import SiteIdentity from '~/components/seo/SiteIdentity.astro';
 import { titleCaps } from '~/lib/titleCaps';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
@@ -20,6 +21,7 @@ const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.dat
 const essaysById = new Map(sortedEssays.map((e) => [e.id, e]));
 
 const heroEssay = sortedEssays[0];
+const siteDescription = 'The Cochinchine Pensées — tiểu luận tiếng Việt về chính trị, văn hóa và văn chương. Đọc bài viết mới, điểm sách và các loạt bài trên website của ấn phẩm.';
 // Max three rows on the widest grid (3 columns); CSS trims to 3 rows at
 // narrower breakpoints too. Everything else lives at /essays.
 const recentEssays = sortedEssays.slice(1, 10);
@@ -47,8 +49,10 @@ const featuredClusters = featuredSeries
 
 <BaseLayout
   title="The Cochinchine Pensées"
-  description="A Vietnamese editorial publication on politics, literature, and the Vietnamese intellectual tradition."
+  description={siteDescription}
+  canonicalUrl="/"
 >
+  <SiteIdentity slot="head" description={siteDescription} />
   {/* ── Hero essay ── */}
   {heroEssay && (
     <section class="hero">

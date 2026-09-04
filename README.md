@@ -11,6 +11,7 @@ npm run dev          # http://localhost:4321
 npm run build        # static output to ./dist
 npm run preview      # preview built site
 npm run check        # astro check (type-check)
+npm test             # reader lifecycle + SEO regressions (run build first)
 npm run lint         # biome check .
 npm run format       # biome format --write .
 ```
@@ -123,6 +124,26 @@ duplicate footer form. Both locations include a direct Substack link. The banner
 is a plain link beneath the wordmark and adds no JavaScript. The iframe reserves
 extra height on small phones so the publication name and legal copy can wrap.
 Publication URLs are configured in `src/lib/newsletter.ts`.
+
+## Reader preferences and search identity
+
+Reader theme, typeface, size and measure are restored only on `EssayLayout`
+pages. Other routes always render in Paper without overwriting the saved reader
+preferences. The early initializer also applies the destination's preferences
+before Astro swaps the document and when the browser restores a page.
+
+The homepage wordmark is its H1. Homepage JSON-LD identifies the publication,
+website and canonical homepage, with the Substack publication as a related
+identity. Navigation pages use website Open Graph metadata; essays use article
+metadata. Paginated archives retain self-canonicals and crawlable links to the
+first archive page. The unfinished About page is `noindex, follow` and excluded
+from the sitemap; remove that restriction and the sitemap exclusion together
+when its content is ready. Shared footer and newsletter copy use `data-nosnippet`
+so search descriptions can focus on page content.
+
+After deploying SEO changes, use Search Console URL Inspection for the homepage
+and request indexing, then submit or recheck `sitemap-index.xml`. Google chooses
+result ordering; these signals do not guarantee a ranking or an indexing date.
 
 ## Deferred feature slots
 

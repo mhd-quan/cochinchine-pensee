@@ -194,6 +194,7 @@
 
   function applyPrefs(prefs: ReaderPrefs): void {
     const root = document.documentElement;
+    if (root.dataset.reader !== 'true') return;
     root.dataset.fontSize = prefs.fontSize;
     root.dataset.measure = prefs.measure;
     root.dataset.theme = prefs.theme;
@@ -408,6 +409,9 @@
 
   initializeReaderTools();
   document.addEventListener('astro:page-load', initializeReaderTools);
+  window.addEventListener('pageshow', () => {
+    applyPrefs(loadPrefs());
+  });
 </script>
 
 <style>
