@@ -181,11 +181,26 @@ const featuredClusters = featuredSeries
         return one * Math.max(1, perView - 1);
       };
 
+      let frame = 0;
+      let nearby = false;
       const sync = () => {
+        frame = 0;
+        // Read layout together before changing either control.
         const max = track.scrollWidth - track.clientWidth;
-        prev.disabled = track.scrollLeft <= 1;
-        next.disabled = track.scrollLeft >= max - 1;
+        const position = track.scrollLeft;
+        prev.disabled = position <= 1;
+        next.disabled = position >= max - 1;
       };
+      const scheduleSync = () => {
+        if (nearby && !frame) frame = requestAnimationFrame(sync);
+      };
+      const visibility = new IntersectionObserver(([entry]) => {
+        nearby = entry.isIntersecting;
+        scheduleSync();
+      }, { rootMargin: '300px' });
+      visibility.observe(section);
+      const resize = new ResizeObserver(scheduleSync);
+      resize.observe(track);
 
       prev.addEventListener('click', () => {
         track.scrollBy({ left: -page(), behavior: 'smooth' });
@@ -195,15 +210,15 @@ const featuredClusters = featuredSeries
         track.scrollBy({ left: page(), behavior: 'smooth' });
       }, { signal });
 
-      track.addEventListener('scroll', sync, { passive: true, signal });
-      window.addEventListener('resize', sync, { passive: true, signal });
+      track.addEventListener('scroll', scheduleSync, { passive: true, signal });
 
       document.addEventListener('astro:before-swap', () => {
         lifecycle.abort();
+        visibility.disconnect();
+        resize.disconnect();
+        cancelAnimationFrame(frame);
         delete section.dataset.initialized;
       }, { once: true, signal });
-
-      sync();
     }
   }
 

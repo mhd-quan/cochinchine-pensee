@@ -11,7 +11,7 @@ npm run dev          # http://localhost:4321
 npm run build        # static output to ./dist
 npm run preview      # preview built site
 npm run check        # astro check (type-check)
-npm test             # reader lifecycle + SEO regressions (run build first)
+npm test             # image delivery, reader lifecycle and SEO (run build first)
 npm run lint         # biome check .
 npm run format       # biome format --write .
 ```
@@ -22,8 +22,8 @@ npm run format       # biome format --write .
 - **Deploy target:** Cloudflare Workers Static Assets via direct Git integration
 - **Analytics:** Google Analytics 4, loaded once through the shared production layout
 - **Content:** MDX files in `src/content/essays/`, validated by Zod schema in `src/content.config.ts`
-- **Styling:** Vanilla CSS via `@import tokens.css; reset.css; prose.css;` in `globals.css`
-- **Fonts:** Self-hosted via `@fontsource/*` (no Google CDN)
+- **Styling:** Vanilla CSS; shared tokens/reset in `globals.css`, prose loaded with `EssayLayout`
+- **Fonts:** Self-hosted `@fontsource/*`, subset at build time (no Google CDN)
 - **No frameworks:** zero React / Vue. View Customizer is vanilla TS in `<script>` block.
 
 ## Project layout
@@ -64,9 +64,15 @@ npm run format       # biome format --write .
 `npm run build` and `npm run dev` prepare responsive covers automatically. The
 pipeline reads published essay cover fields (`coverImage` or `cover_image`),
 Markdown body images (including reference-style images), and book records. It
-creates WebP variants at 240, 400, 640, 800, 1200 and 1600px,
+creates AVIF and WebP variants at 160, 240, 320, 400, 480, 640, 800, 1200 and 1600px,
 without enlarging smaller originals or changing their aspect ratio. Images use
-`srcset`, layout-specific `sizes`, and intrinsic dimensions.
+`picture`, `srcset`, layout-specific `sizes`, and intrinsic dimensions. AVIF is
+preferred where supported, with WebP fallback. Contained portraits advertise
+their painted width rather than the surrounding 16:9 frame; book sizes follow
+the shelf height and each jacket's aspect ratio. Device pixel ratio is left to
+the browser. Both formats are encoded from original source bytes, never from
+an already-compressed variant. A first build can take several minutes; cached
+variants are reused on subsequent builds.
 
 Original `/images/` URLs remain available for sharing and social metadata.
 Remote HTTPS covers are downloaded during preparation and served locally as
@@ -86,6 +92,23 @@ paper blending and book aspect ratios are preserved.
 The first recent-essay cover on the homepage and each article hero load eagerly
 with high fetch priority. Remaining covers and body images are lazy-loaded. No client-side image
 processing or additional JavaScript is required.
+
+### Font and loading preparation
+
+The build subsets the existing Source Serif 4, EB Garamond and Be Vietnam Pro
+files with HarfBuzz through `subset-font`. It retains OpenType shaping features,
+the characters found throughout `src/`, common Latin, Vietnamese, combining
+marks and punctuation. NFC/NFD and case variants are included. Font family,
+weights, styles and `font-display: swap` remain the same. Generated WOFF2/CSS
+and a size inventory live in `.astro/`; no system Python installation is needed.
+Restart development after adding content with new characters; every production
+build collects the current content again.
+
+Small route styles are inlined while the shared stylesheet and fonts stay
+external and cacheable. Hashed `/_astro/` assets have a one-year immutable cache
+policy; HTML continues to revalidate. Links prefetch on hover/focus/touch rather
+than simply entering the viewport. The home book shelf measures its controls
+when near the viewport and batches scroll/resize updates in animation frames.
 
 ### Publishing content
 
@@ -138,12 +161,17 @@ identity. Navigation pages use website Open Graph metadata; essays use article
 metadata. Paginated archives retain self-canonicals and crawlable links to the
 first archive page. The unfinished About page is `noindex, follow` and excluded
 from the sitemap; remove that restriction and the sitemap exclusion together
-when its content is ready. Shared footer and newsletter copy use `data-nosnippet`
-so search descriptions can focus on page content.
+when its content is ready. Shared header, menu and footer copy use
+`data-nosnippet` so search descriptions can focus on page content. The technical
+colophon has been removed. Archive, series, books and subscription descriptions
+describe their actual content; article descriptions prefer an editorial excerpt
+or dek, then the title, subtitle and author. Supply an `excerpt` in frontmatter
+to give an article a deliberately written search summary.
 
 After deploying SEO changes, use Search Console URL Inspection for the homepage
 and request indexing, then submit or recheck `sitemap-index.xml`. Google chooses
 result ordering; these signals do not guarantee a ranking or an indexing date.
+Google can also select a query-specific snippet instead of the meta description.
 
 ## Deferred feature slots
 
