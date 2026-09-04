@@ -1,10 +1,11 @@
 ---
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
+import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
 import { titleCaps } from '~/lib/titleCaps';
-import { HERO_IMAGE_SIZES, responsiveImage } from '~/lib/responsiveImage';
+import { HERO_IMAGE_SIZES, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
   title: string;
@@ -55,12 +56,14 @@ const formattedDate = date.toLocaleDateString('en-US', {
 });
 
 const isoDate = date.toISOString();
+const summaryLead = `${title}${subtitle ? ` — ${subtitle}` : ''}`.trim().replace(/[.!?…]+$/, '');
+const description = excerpt?.trim() || dek?.trim() || `${summaryLead}. ${form === 'pensee' ? 'Pensée' : 'Tiểu luận'} của ${author} trên The Cochinchine Pensées.`;
 const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 ---
 
 <BaseLayout
   title={title}
-  description={excerpt ?? dek ?? subtitle}
+  description={description}
   lang={lang}
   ogImage={coverImage}
   reader={true}
@@ -104,13 +107,16 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 
         {coverImage && (
           <figure class="essay__cover" data-cover-treatment={coverTreatment}>
-            <img
-              {...responsiveImage(coverImage, HERO_IMAGE_SIZES)}
-              alt={coverImageAlt}
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
+            <picture>
+              <source {...responsiveSource(coverImage, HERO_IMAGE_SIZES)} />
+              <img
+                {...responsiveImage(coverImage, HERO_IMAGE_SIZES)}
+                alt={coverImageAlt}
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </picture>
           </figure>
         )}
       </div>

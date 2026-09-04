@@ -28,7 +28,7 @@ function isActive(itemHref: string): boolean {
 <header class="site-header" data-site-header data-scroll-direction="down">
   <span class="site-header__safe-area" aria-hidden="true"></span>
 
-  <div class="site-header__flow" data-header-flow>
+  <div class="site-header__flow" data-header-flow data-nosnippet>
     <div class="site-header__masthead">
       <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
         <Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark>
@@ -106,6 +106,7 @@ function isActive(itemHref: string): boolean {
   <div
     class="site-header__reading-bar"
     data-reading-bar
+    data-nosnippet
     aria-hidden="true"
     inert
   >
@@ -143,6 +144,7 @@ function isActive(itemHref: string): boolean {
     aria-hidden="true"
     inert
     data-site-menu
+    data-nosnippet
   >
     <div class="site-menu__scrim" aria-hidden="true"></div>
     <div class="site-menu__panel" data-menu-panel>

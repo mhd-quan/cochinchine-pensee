@@ -11,8 +11,9 @@ const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const OUTPUT = path.join(ROOT, 'public/images/responsive');
 const CACHE = path.join(ROOT, '.cache/image-sources');
 const MANIFEST = path.join(ROOT, '.astro/responsive-images.json');
-const WIDTHS = [240, 400, 640, 800, 1200, 1600];
-const QUALITY = 82;
+const WIDTHS = [160, 240, 320, 400, 480, 640, 800, 1200, 1600];
+const QUALITY = 78;
+const AVIF_QUALITY = 55;
 const hash = (value) => createHash('sha256').update(value).digest('hex').slice(0, 20);
 const markdown = unified().use(remarkParse);
 
@@ -95,25 +96,38 @@ async function transformSource(source, refresh) {
   const key = hash(
     Buffer.concat([
       buffer,
-      Buffer.from(JSON.stringify({ quality: QUALITY, encoder: sharp.versions, orientation: true })),
+      Buffer.from(
+        JSON.stringify({
+          quality: QUALITY,
+          avifQuality: AVIF_QUALITY,
+          encoder: sharp.versions,
+          orientation: true,
+        }),
+      ),
     ]),
   );
   const variants = [];
+  const avifVariants = [];
   for (const size of widths) {
-    const name = `${key}-${size}.webp`;
-    const output = path.join(OUTPUT, name);
-    if (!(await fs.stat(output).catch(() => null))) {
-      const temporary = `${output}.${randomUUID()}.tmp`;
-      await sharp(buffer)
-        .autoOrient()
-        .resize({ width: size, withoutEnlargement: true })
-        .webp({ quality: QUALITY, effort: 4 })
-        .toFile(temporary);
-      await fs.rename(temporary, output);
+    for (const format of ['webp', 'avif']) {
+      const name = `${key}-${size}.${format}`;
+      const output = path.join(OUTPUT, name);
+      if (!(await fs.stat(output).catch(() => null))) {
+        const temporary = `${output}.${randomUUID()}.tmp`;
+        const image = sharp(buffer).autoOrient().resize({ width: size, withoutEnlargement: true });
+        await (format === 'webp'
+          ? image.webp({ quality: QUALITY, effort: 6 })
+          : image.avif({ quality: AVIF_QUALITY, effort: 4 })
+        ).toFile(temporary);
+        await fs.rename(temporary, output);
+      }
+      (format === 'webp' ? variants : avifVariants).push({
+        src: `/images/responsive/${name}`,
+        width: size,
+      });
     }
-    variants.push({ src: `/images/responsive/${name}`, width: size });
   }
-  return { width, height, variants };
+  return { width, height, variants, avifVariants };
 }
 
 export async function generateResponsiveImages({ refresh = false, logger = console } = {}) {
@@ -136,7 +150,7 @@ export async function generateResponsiveImages({ refresh = false, logger = conso
   );
   const manifest = Object.fromEntries(sources.map((source) => [source, entries.get(source)]));
   await writeIfChanged(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`);
-  logger.info(`Responsive images: ${sources.length} sources ready (WebP, up to 1600px).`);
+  logger.info(`Responsive images: ${sources.length} sources ready (AVIF + WebP, up to 1600px).`);
 }
 
 export default function responsiveImages() {

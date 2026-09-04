@@ -54,7 +54,10 @@ test('every page has a single self-canonical and pagination remains crawlable', 
     if (/^essays\/\d+\//.test(path)) {
       assert.doesNotMatch(page, /name="robots" content="noindex/);
       assert.match(page, /<h1[^>]*><a\b[^>]*href="\/essays"[^>]*>All Essays<\/a><\/h1>/);
-      assert.match(page, /description" content="Essay archive, page \d+ of \d+/);
+      assert.match(
+        page,
+        /description" content="Kho tiểu luận The Cochinchine Pensées, trang \d+\/\d+/,
+      );
     }
   }
 });

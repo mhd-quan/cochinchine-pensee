@@ -1,30 +1,21 @@
 /* ============================================================================
- * globals.css — Imports order matters. Tokens first, then reset, then prose.
+ * globals.css — Tokens, reset and shared typography. Prose loads with essays.
  * This file is imported once in BaseLayout.astro.
  * ========================================================================= */
 
 @import './tokens.css';
 @import './reset.css';
-@import './prose.css';
 
 /* ──────────────────────────────────────────────────────────────────
  * Fonts — self-hosted via @fontsource
- * Importing only what's used (weights + styles) to keep bundle small.
+ * Build-time subsets retain the publication's characters and OpenType features.
  * ────────────────────────────────────────────────────────────────── */
-@import '@fontsource/source-serif-4/400.css';
-@import '@fontsource/source-serif-4/400-italic.css';
-@import '@fontsource/source-serif-4/600.css';
-@import '@fontsource/source-serif-4/700.css';
+@import '../../.astro/fonts.css';
 
-@import '@fontsource/eb-garamond/400.css';
-@import '@fontsource/eb-garamond/400-italic.css';
-@import '@fontsource/eb-garamond/600.css';
-@import '@fontsource/eb-garamond/700.css';
-
-@import '@fontsource/be-vietnam-pro/400.css';
-@import '@fontsource/be-vietnam-pro/500.css';
-@import '@fontsource/be-vietnam-pro/600.css';
-@import '@fontsource/be-vietnam-pro/700.css';
+/* Format selection must not introduce a new layout box around existing art. */
+picture {
+  display: contents;
+}
 
 /* ──────────────────────────────────────────────────────────────────
  * Base typography
