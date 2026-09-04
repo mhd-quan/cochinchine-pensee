@@ -17,6 +17,7 @@ const navItems = [
 ];
 
 const currentPath = Astro.url.pathname;
+const Wordmark = currentPath === '/' ? 'h1' : 'span';
 
 function isActive(itemHref: string): boolean {
   if (itemHref === '/') return currentPath === '/';
@@ -30,7 +31,7 @@ function isActive(itemHref: string): boolean {
   <div class="site-header__flow" data-header-flow>
     <div class="site-header__masthead">
       <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
-        <span class="site-header__wordmark">The Cochinchine Pensées</span>
+        <Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark>
       </a>
 
       <button
@@ -56,8 +57,8 @@ function isActive(itemHref: string): boolean {
       rel="external"
       aria-label="Subscribe to The Cochinchine Pensées newsletter on Substack"
     >
-      <span class="site-header__newsletter-copy">Weekly essays, delivered by email.</span>
-      <span class="site-header__newsletter-action">
+      <span class="site-header__newsletter-copy" data-nosnippet>Weekly essays, delivered by email.</span>
+      <span class="site-header__newsletter-action" data-nosnippet>
         Subscribe on Substack <span aria-hidden="true">→</span>
       </span>
     </a>
@@ -602,6 +603,7 @@ function isActive(itemHref: string): boolean {
   }
 
   .site-header__wordmark {
+    margin: 0;
     color: var(--ink-primary);
     font-family: var(--font-display);
     /* Sized so the nowrap masthead clears the menu button down to ~320px */

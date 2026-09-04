@@ -24,7 +24,10 @@ export default defineConfig({
     responsiveImages(),
     mdx(),
     sitemap({
-      filter: (page) => !page.includes('/draft/'),
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/\/$/, '');
+        return !path.startsWith('/draft/') && !['/draft', '/about', '/404', '/404.html'].includes(path);
+      },
     }),
   ],
   build: {

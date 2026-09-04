@@ -1,10 +1,11 @@
 {
   "name": "cochinchine-pensee",
   "type": "module",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": true,
   "description": "The Cochinchine Pensée — a Vietnamese editorial essay publication in the Claremont Review of Books tradition",
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

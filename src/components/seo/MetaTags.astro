@@ -9,6 +9,7 @@ interface Props {
   canonicalUrl?: string;
   ogImage?: string;
   noindex?: boolean;
+  ogType?: 'website' | 'article';
 }
 
 const {
@@ -17,6 +18,7 @@ const {
   canonicalUrl,
   ogImage = '/og-default.png',
   noindex = false,
+  ogType = 'website',
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL('https://cochinchinepensees.studio');
@@ -29,9 +31,9 @@ const ogImageUrl = new URL(ogImage, siteUrl).toString();
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
-{noindex && <meta name="robots" content="noindex, nofollow" />}
+{noindex && <meta name="robots" content="noindex, follow" />}
 
-<meta property="og:type" content="article" />
+<meta property="og:type" content={ogType} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
