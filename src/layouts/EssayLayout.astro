@@ -4,6 +4,7 @@ import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
 import { titleCaps } from '~/lib/titleCaps';
+import { HERO_IMAGE_SIZES, responsiveImage } from '~/lib/responsiveImage';
 
 interface Props {
   title: string;
@@ -102,7 +103,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         {coverImage && (
           <figure class="essay__cover" data-cover-treatment={coverTreatment}>
             <img
-              src={coverImage}
+              {...responsiveImage(coverImage, HERO_IMAGE_SIZES)}
               alt={coverImageAlt}
               loading="eager"
               decoding="async"

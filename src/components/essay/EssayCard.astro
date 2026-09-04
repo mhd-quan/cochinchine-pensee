@@ -17,14 +17,20 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
 import { titleCaps } from '~/lib/titleCaps';
+import { CARD_IMAGE_SIZES, responsiveImage } from '~/lib/responsiveImage';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
   showExcerpt?: boolean;
   variant?: 'default' | 'featured';
+  priority?: boolean;
+  imageSizes?: string;
 }
 
-const { essay, showExcerpt = false, variant = 'default' } = Astro.props;
+const {
+  essay, showExcerpt = false, variant = 'default', priority = false,
+  imageSizes = CARD_IMAGE_SIZES,
+} = Astro.props;
 const formattedDate = essay.data.date.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
@@ -51,9 +57,10 @@ const coverTreatment = getCoverTreatment(essay.id);
     >
       <figure class="essay-card__cover" data-cover-treatment={coverTreatment}>
         <img
-          src={essay.data.coverImage}
+          {...responsiveImage(essay.data.coverImage!, imageSizes)}
           alt={essay.data.coverImageAlt ?? ''}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : undefined}
           decoding="async"
         />
       </figure>
