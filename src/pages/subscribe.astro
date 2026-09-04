@@ -1,31 +1,39 @@
 ---
+import SubstackSignup from '~/components/newsletter/SubstackSignup.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 ---
 
 <BaseLayout
   title="Subscribe"
-  description="Newsletter subscription — coming soon."
+  description="Subscribe to The Cochinchine Pensées newsletter on Substack."
 >
   <article class="subscribe">
     <div class="container">
       <header class="subscribe__header">
         <p class="subscribe__eyebrow">Newsletter</p>
         <h1 class="subscribe__title">Subscribe</h1>
+        <p class="subscribe__intro">
+          Weekly long-form Vietnamese essays, delivered directly to your inbox.
+        </p>
       </header>
 
-      <section class="subscribe__placeholder">
-        <p class="subscribe__glyph" aria-hidden="true">✦</p>
-        <h2 class="subscribe__placeholder-heading">Coming soon</h2>
-        <p class="subscribe__placeholder-body">
-          A weekly Vietnamese long-form essay delivered to your inbox is in
-          preparation. The publication is launching with its core reading
-          experience first; the newsletter will follow when the reading
-          experience is polished.
+      <section class="subscribe__form" aria-label="Newsletter signup">
+        <SubstackSignup eager={true} />
+        <p class="subscribe__fallback">
+          If the form does not appear,{' '}
+          <a href={SUBSTACK_SUBSCRIBE_URL} class="subscribe__link" rel="external">
+            subscribe directly on Substack
+          </a>.
         </p>
-        <p class="subscribe__placeholder-body">
-          In the meantime, you can follow every new essay via
-          <a href="/rss.xml" class="subscribe__link">RSS</a>,
-          <a href="/feed.json" class="subscribe__link">JSON Feed</a>, or simply
+      </section>
+
+      <section class="subscribe__feeds" aria-labelledby="subscribe-feeds-title">
+        <h2 id="subscribe-feeds-title" class="subscribe__feeds-title">Prefer a feed?</h2>
+        <p class="subscribe__feeds-copy">
+          Follow every new essay via{' '}
+          <a href="/rss.xml" class="subscribe__link">RSS</a>,{' '}
+          <a href="/feed.json" class="subscribe__link">JSON Feed</a>, or{' '}
           <a href="/" class="subscribe__link">return to the latest essay</a>.
         </p>
       </section>
@@ -39,8 +47,10 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
   }
 
   .subscribe__header {
+    max-width: var(--measure-prose);
+    margin-inline: auto;
     text-align: center;
-    margin-bottom: var(--sp-10);
+    margin-bottom: var(--sp-8);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
@@ -56,58 +66,71 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
   }
 
   .subscribe__title {
+    margin-bottom: var(--sp-4);
     font-family: var(--font-display);
     font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
     line-height: 1.1;
     color: var(--ink-primary);
+    text-wrap: balance;
   }
 
-  .subscribe__placeholder {
-    max-width: var(--measure-prose);
+  .subscribe__intro {
+    max-width: 32rem;
     margin-inline: auto;
-    padding-inline: var(--gutter-mobile);
-    text-align: center;
-    border: 1px solid var(--rule-hair);
-    padding-block: var(--sp-10);
-    background: var(--bg-page-deep);
-  }
-
-  @media (min-width: 768px) {
-    .subscribe__placeholder {
-      padding-inline: var(--gutter-tablet);
-    }
-  }
-
-  .subscribe__glyph {
-    font-family: var(--font-glyph);
-    font-size: 3rem;
-    color: var(--accent-crimson);
-    line-height: 1;
-    margin-bottom: var(--sp-5);
-  }
-
-  .subscribe__placeholder-heading {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--fs-h2);
-    line-height: var(--lh-headline);
-    color: var(--ink-primary);
-    margin-bottom: var(--sp-4);
-  }
-
-  .subscribe__placeholder-body {
+    color: var(--ink-secondary);
     font-family: var(--font-serif);
     font-size: var(--fs-body);
     line-height: var(--lh-body);
+    text-wrap: pretty;
+  }
+
+  .subscribe__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .subscribe__fallback {
+    margin-top: var(--sp-4);
+    color: var(--ink-muted);
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+    text-align: center;
+  }
+
+  .subscribe__feeds {
+    max-width: var(--measure-prose);
+    margin: var(--sp-10) auto 0;
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+    text-align: center;
+  }
+
+  .subscribe__feeds-title {
+    margin-bottom: var(--sp-2);
+    color: var(--ink-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-headline);
+  }
+
+  .subscribe__feeds-copy {
     color: var(--ink-secondary);
-    margin-bottom: var(--sp-4);
-    max-width: 32rem;
-    margin-inline: auto;
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    text-wrap: pretty;
   }
 
   .subscribe__link {
     color: var(--accent-crimson);
-    border-bottom: 1px solid currentColor;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-skip-ink: auto;
+    transition: color var(--t-fast);
   }
 
   .subscribe__link:hover {

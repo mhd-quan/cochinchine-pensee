@@ -1,11 +1,15 @@
 ---
 /**
- * Footer — 4-column with newsletter column, plus bottom strip with utility links.
+ * Footer — Substack signup band, 4-column directory, and utility strip.
  *
  * Now absorbs: utility nav (about, RSS, newsletter) + the issue line that used
  * to float in the header.
  */
+import SubstackSignup from '~/components/newsletter/SubstackSignup.astro';
+import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
+
 const year = new Date().getFullYear();
+const showNewsletterSignup = !Astro.url.pathname.startsWith('/subscribe');
 const romanYear = (() => {
   const num = new Date().getFullYear();
   const numerals: Array<[number, string]> = [
@@ -76,6 +80,32 @@ const footerColumns = [
 
 <footer class="site-footer">
   <div class="container">
+    {
+      showNewsletterSignup && (
+        <section class="site-footer__newsletter" aria-labelledby="footer-newsletter-title">
+          <div class="site-footer__newsletter-intro">
+            <h2 id="footer-newsletter-title" class="site-footer__newsletter-title">
+              Newsletter
+            </h2>
+            <p class="site-footer__newsletter-copy">
+              Weekly long-form Vietnamese essays, delivered directly to your inbox.
+            </p>
+            <a
+              href={SUBSTACK_SUBSCRIBE_URL}
+              class="site-footer__link site-footer__link--more"
+              rel="external"
+            >
+              Open on Substack →
+            </a>
+          </div>
+
+          <div class="site-footer__newsletter-form">
+            <SubstackSignup tone="dark" />
+          </div>
+        </section>
+      )
+    }
+
     <div class="site-footer__grid">
       {footerColumns.map((column) => (
         <div class="site-footer__column">
@@ -89,21 +119,6 @@ const footerColumns = [
           </ul>
         </div>
       ))}
-
-      {/* Newsletter column */}
-      <div class="site-footer__column">
-        <h4 class="site-footer__column-title">Newsletter</h4>
-        <p class="site-footer__newsletter-copy">
-          Weekly long-form Vietnamese essays delivered to your inbox.
-        </p>
-        <p class="site-footer__newsletter-status">
-          <span class="site-footer__newsletter-glyph" aria-hidden="true">✦</span>
-          <em>Newsletter coming soon</em>
-        </p>
-        <a href="/subscribe" class="site-footer__link site-footer__link--more">
-          Read more →
-        </a>
-      </div>
     </div>
 
     <div class="site-footer__bottom">
@@ -138,15 +153,68 @@ const footerColumns = [
     gap: var(--sp-8);
   }
 
+  .site-footer__newsletter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-6);
+    margin-bottom: var(--sp-8);
+    padding-bottom: var(--sp-8);
+    border-bottom: 1px solid var(--rule-on-dark);
+  }
+
+  .site-footer__newsletter-intro {
+    align-self: center;
+    max-width: 32rem;
+  }
+
+  .site-footer__newsletter-title {
+    margin-bottom: var(--sp-4);
+    color: var(--ink-on-dark);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-bold);
+    line-height: 1.3;
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+  }
+
+  .site-footer__newsletter-copy {
+    margin-bottom: var(--sp-4);
+    color: var(--ink-on-dark-muted);
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-style: italic;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .site-footer__newsletter-form {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
   @media (min-width: 640px) {
     .site-footer__grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
+  @media (min-width: 768px) {
+    .site-footer__newsletter {
+      grid-template-columns: minmax(14rem, 1fr) minmax(20rem, 30rem);
+      align-items: center;
+      gap: var(--sp-8);
+    }
+
+    .site-footer__newsletter-form {
+      justify-content: flex-end;
+    }
+  }
+
   @media (min-width: 1024px) {
     .site-footer__grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
@@ -186,36 +254,10 @@ const footerColumns = [
   }
 
   .site-footer__link--more {
-    margin-top: var(--sp-2);
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     letter-spacing: var(--tr-kicker);
     text-transform: uppercase;
-    color: var(--accent-on-dark);
-  }
-
-  .site-footer__newsletter-copy {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-meta);
-    color: var(--ink-on-dark-muted);
-    margin-bottom: var(--sp-3);
-    line-height: var(--lh-meta);
-  }
-
-  .site-footer__newsletter-status {
-    font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
-    color: var(--ink-on-dark-faint);
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-  }
-
-  .site-footer__newsletter-glyph {
-    font-family: var(--font-glyph);
     color: var(--accent-on-dark);
   }
 

@@ -35,6 +35,7 @@ npm run format       # biome format --write .
 │   ├── content.config.ts    # Content Collections + Zod schema
 │   ├── components/
 │   │   ├── essay/           # DropCap, ViewCustomizer, ShareLinks, EssayCard
+│   │   ├── newsletter/      # Substack signup embed
 │   │   ├── nav/             # Header, Footer
 │   │   └── seo/             # MetaTags
 │   ├── layouts/             # BaseLayout, EssayLayout
@@ -44,7 +45,7 @@ npm run format       # biome format --write .
 │   │   │   ├── index.astro  # archive
 │   │   │   └── [...slug].astro  # essay view
 │   │   ├── about.astro
-│   │   ├── subscribe.astro  # deferred feature slot
+│   │   ├── subscribe.astro  # Substack newsletter signup
 │   │   ├── 404.astro
 │   │   ├── rss.xml.ts
 │   │   ├── feed.json.ts
@@ -113,10 +114,19 @@ Cloudflare Workers Builds should use:
 `404.html` for missing routes, and keeps URLs aligned with Astro's
 `trailingSlash: 'never'` setting.
 
+## Newsletter
+
+The Substack signup form is embedded in the shared footer and on `/subscribe`.
+The masthead banner links directly to the publication's Substack subscribe page.
+The footer embed loads lazily; `/subscribe` loads it immediately and omits the
+duplicate footer form. Both locations include a direct Substack link. The banner
+is a plain link beneath the wordmark and adds no JavaScript. The iframe reserves
+extra height on small phones so the publication name and legal copy can wrap.
+Publication URLs are configured in `src/lib/newsletter.ts`.
+
 ## Deferred feature slots
 
 - **Comments:** frontmatter `commentsEnabled: false` + route `/comments/[slug]` ready to wire to Giscus. Flip the boolean when ready.
-- **Newsletter:** `/subscribe` page is a placeholder. Replace form action with Buttondown embed when ready.
 - **OG images:** route `/og/[slug].png` reserved. Implement with Satori + resvg-js when needed.
 
 ## Design tokens
