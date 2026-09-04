@@ -36,7 +36,6 @@ npm run format       # biome format --write .
 │   ├── content.config.ts    # Content Collections + Zod schema
 │   ├── components/
 │   │   ├── essay/           # DropCap, ViewCustomizer, ShareLinks, EssayCard
-│   │   ├── newsletter/      # Substack signup embed
 │   │   ├── nav/             # Header, Footer
 │   │   └── seo/             # MetaTags
 │   ├── layouts/             # BaseLayout, EssayLayout
@@ -140,12 +139,10 @@ Cloudflare Workers Builds should use:
 
 ## Newsletter
 
-The Substack signup form is embedded in the shared footer and on `/subscribe`.
-The masthead banner links directly to the publication's Substack subscribe page.
-The footer embed loads lazily; `/subscribe` loads it immediately and omits the
-duplicate footer form. Both locations include a direct Substack link. The banner
-is a plain link beneath the wordmark and adds no JavaScript. The iframe reserves
-extra height on small phones so the publication name and legal copy can wrap.
+The shared footer, `/subscribe`, and the masthead banner link directly to the
+publication's Substack subscribe page. Newsletter copy and links use the site's
+own typography on both desktop and mobile. No Substack form or iframe is loaded.
+The `/subscribe` page omits the duplicate newsletter section in its footer.
 Publication URLs are configured in `src/lib/newsletter.ts`.
 
 ## Reader preferences and search identity
