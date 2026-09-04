@@ -11,6 +11,7 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import EssayCard from '~/components/essay/EssayCard.astro';
+import { SERIES_IMAGE_SIZES } from '~/lib/responsiveImage';
 
 interface Props {
   series: CollectionEntry<'series'>;
@@ -33,7 +34,7 @@ const trio = essays.slice(0, 3);
   <ul class="series-cluster__trio">
     {trio.map((essay) => (
       <li>
-        <EssayCard essay={essay} />
+        <EssayCard essay={essay} imageSizes={SERIES_IMAGE_SIZES} />
       </li>
     ))}
   </ul>

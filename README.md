@@ -57,6 +57,36 @@ npm run format       # biome format --write .
 
 ## Adding an essay
 
+### Responsive cover images
+
+`npm run build` and `npm run dev` prepare responsive covers automatically. The
+pipeline reads published essay cover fields (`coverImage` or `cover_image`),
+Markdown body images (including reference-style images), and book records. It
+creates WebP variants at 240, 400, 640, 800, 1200 and 1600px,
+without enlarging smaller originals or changing their aspect ratio. Images use
+`srcset`, layout-specific `sizes`, and intrinsic dimensions.
+
+Original `/images/` URLs remain available for sharing and social metadata.
+Remote HTTPS covers are downloaded during preparation and served locally as
+optimized variants. Their source bytes are cached in `.cache/image-sources/`;
+generated files in `public/images/responsive/` and the manifest in `.astro/`
+are not committed. Variant URLs include a content/encoder hash, so replacing an
+original produces new URLs. A failed download or decode stops the build instead
+of publishing broken image references.
+Cloudflare serves these fingerprinted variants with a one-year immutable browser
+cache policy through `public/_headers`.
+
+Run `npm run images` to prepare images separately, or `npm run images -- --refresh`
+to refresh remote sources when an image changes at the same URL. Restart the dev
+server after adding or replacing a cover. Existing sketches, transparency,
+paper blending and book aspect ratios are preserved.
+
+The first recent-essay cover on the homepage and each article hero load eagerly
+with high fetch priority. Remaining covers and body images are lazy-loaded. No client-side image
+processing or additional JavaScript is required.
+
+### Publishing content
+
 1. Create `src/content/essays/YYYY-MM-DD-slug.mdx`
 2. Fill frontmatter (see `src/content.config.ts` for valid schema)
 3. Write content in markdown/MDX

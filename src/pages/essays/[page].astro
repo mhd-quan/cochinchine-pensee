@@ -15,6 +15,7 @@ import EssayCard from '~/components/essay/EssayCard.astro';
 import Pagination from '~/components/nav/Pagination.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { PER_PAGE } from '~/lib/pagination';
+import { ARCHIVE_IMAGE_SIZES } from '~/lib/responsiveImage';
 
 export const getStaticPaths = (async () => {
   const allEssays = await getCollection('essays', ({ data }) => !data.draft);
@@ -69,7 +70,7 @@ const nextUrl = currentPage < lastPage ? `/essays/${currentPage + 1}` : undefine
       <ul class="archive__list archive__list--grid" data-archive-grid>
         {essays.map((essay) => (
           <li>
-            <EssayCard essay={essay} />
+            <EssayCard essay={essay} imageSizes={ARCHIVE_IMAGE_SIZES} />
           </li>
         ))}
       </ul>

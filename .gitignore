@@ -37,3 +37,7 @@ _DELETE-ME-*/
 # one-shot cover fetch — the script is committed but its transient probes/results are not
 .test-*.mjs
 scripts/.fetch-covers-result.json
+
+# Responsive image outputs and immutable remote source cache
+public/images/responsive/
+.cache/image-sources/

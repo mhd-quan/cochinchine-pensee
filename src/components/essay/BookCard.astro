@@ -15,6 +15,7 @@
  * the title and author rather than leaving a broken <img>.
  */
 import type { CollectionEntry } from 'astro:content';
+import { responsiveImage } from '~/lib/responsiveImage';
 
 interface Props {
   book: CollectionEntry<'books'>;
@@ -30,10 +31,8 @@ const hasCover = Boolean(cover);
     {hasCover ? (
       <span class="book-card__jacket">
         <img
-          src={cover}
+          {...responsiveImage(cover!, '(min-width: 768px) 220px, 45vw', 400)}
           alt={book.data.coverImageAlt ?? `Bìa sách ${book.data.title}`}
-          width={book.data.coverWidth}
-          height={book.data.coverHeight}
           loading="lazy"
           decoding="async"
         />

@@ -89,9 +89,9 @@ const featuredClusters = featuredSeries
     </div>
 
     <ul class="recent__grid">
-      {recentEssays.map((essay) => (
+      {recentEssays.map((essay, index) => (
         <li>
-          <EssayCard essay={essay} />
+          <EssayCard essay={essay} priority={index === 0} />
         </li>
       ))}
     </ul>
