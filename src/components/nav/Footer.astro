@@ -1,259 +1,235 @@
 ---
-/**
- * Footer — newsletter link, 4-column directory, and utility strip.
- *
- * Now absorbs: utility nav (about, RSS, newsletter) + the issue line that used
- * to float in the header.
- */
 import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 
 const year = new Date().getFullYear();
-const showNewsletterSignup = !Astro.url.pathname.startsWith('/subscribe');
-const romanYear = (() => {
-  const num = new Date().getFullYear();
-  const numerals: Array<[number, string]> = [
-    [1000, 'M'],
-    [900, 'CM'],
-    [500, 'D'],
-    [400, 'CD'],
-    [100, 'C'],
-    [90, 'XC'],
-    [50, 'L'],
-    [40, 'XL'],
-    [10, 'X'],
-    [9, 'IX'],
-    [5, 'V'],
-    [4, 'IV'],
-    [1, 'I'],
-  ];
-  let result = '';
-  let n = num;
-  for (const [value, letter] of numerals) {
-    while (n >= value) {
-      result += letter;
-      n -= value;
-    }
-  }
-  return result;
-})();
-
-const footerColumns = [
-  {
-    title: 'Latest',
-    links: [
-      { href: '/', label: 'Most recent' },
-      { href: '/essays', label: 'All essays' },
-      { href: '/books', label: 'Book reviews' },
-      { href: '/rss.xml', label: 'Subscribe via RSS' },
-    ],
-  },
-  {
-    title: 'Browse',
-    links: [
-      { href: '/essays', label: 'By date' },
-      { href: '/series', label: 'By series' },
-      { href: '/series/dan-toc', label: 'Nationalism' },
-      { href: '/series/vuon-minh', label: 'Era of Rising' },
-    ],
-  },
-  {
-    title: 'Series',
-    links: [
-      { href: '/series/dan-toc', label: 'Chủ nghĩa dân tộc' },
-      { href: '/series/vuon-minh', label: 'Kỷ nguyên vươn mình' },
-      { href: '/series/kiet-suc', label: 'Thế hệ Kiệt sức' },
-      { href: '/series/tu-ban', label: 'Chủ nghĩa tư bản' },
-    ],
-  },
-  {
-    title: 'About',
-    links: [
-      { href: '/about', label: 'Masthead' },
-      { href: '/about/principles', label: 'Editorial principles' },
-      { href: '/about/contact', label: 'Contact' },
-      { href: '/feed.json', label: 'JSON Feed' },
-    ],
-  },
+const footerLinks = [
+  { href: '/', label: 'Latest' },
+  { href: '/archives', label: 'Archives' },
+  { href: '/books', label: 'Book Reviews' },
+  { href: '/essays', label: 'Essays' },
+  { href: '/pensees', label: 'Pensées' },
+  { href: '/authors', label: 'Authors' },
+  { href: '/about', label: 'About us' },
+  { href: '/masthead', label: 'Masthead' },
 ];
 ---
 
 <footer class="site-footer">
   <div class="container" data-nosnippet>
-    {
-      showNewsletterSignup && (
-        <section class="site-footer__newsletter" aria-labelledby="footer-newsletter-title">
-          <div class="site-footer__newsletter-intro">
-            <h2 id="footer-newsletter-title" class="site-footer__newsletter-title">
-              Newsletter
-            </h2>
-            <p class="site-footer__newsletter-copy">
-              Weekly long-form Vietnamese essays, delivered directly to your inbox.
-            </p>
-            <a
-              href={SUBSTACK_SUBSCRIBE_URL}
-              class="site-footer__link site-footer__link--more"
-              rel="external"
-            >
-              Open on Substack →
-            </a>
-          </div>
-        </section>
-      )
-    }
+    <div class="site-footer__top">
+      <nav class="site-footer__nav" aria-label="Footer">
+        <ul class="site-footer__links">
+          {footerLinks.map(({ href, label }) => (
+            <li><a href={href} class="site-footer__link">{label}</a></li>
+          ))}
+        </ul>
+      </nav>
 
-    <div class="site-footer__grid">
-      {footerColumns.map((column) => (
-        <div class="site-footer__column">
-          <h4 class="site-footer__column-title">{column.title}</h4>
-          <ul class="site-footer__column-list">
-            {column.links.map((link) => (
-              <li>
-                <a href={link.href} class="site-footer__link">{link.label}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <section class="site-footer__newsletter" aria-labelledby="footer-newsletter-title">
+        <h2 id="footer-newsletter-title" class="site-footer__newsletter-title">
+          Receive the weekly newsletter
+        </h2>
+        <a href={SUBSTACK_SUBSCRIBE_URL} class="site-footer__signup" rel="external">
+          Sign up on Substack
+        </a>
+      </section>
     </div>
+  </div>
 
-    <div class="site-footer__bottom">
-      <p class="site-footer__issue-line">
-        Vol I · {romanYear}
-      </p>
-      <p class="site-footer__copyright">
-        © {year} The Cochinchine Pensées. All essays property of their author.
-      </p>
+  <div class="site-footer__bottom">
+    <div class="container site-footer__closing" data-nosnippet>
+      <div class="site-footer__legal">
+        <p class="site-footer__copyright">© {year} The Cochinchine Pensées</p>
+        <p class="site-footer__disclaimer" lang="vi">
+          Quan điểm trong mỗi bài viết thuộc về tác giả, không nhất thiết đại diện
+          cho tập san hay các tác giả liên kết. Tập san không nhằm ủng hộ hay cản trở
+          nghị quyết hoặc tác động đến quyết định chính trị. Xin đọc với tinh thần phản tư.
+        </p>
+      </div>
+      <div class="site-footer__identity">
+        <p class="site-footer__edition">A Vietnamese journal of essays &amp; ideas</p>
+        <a href="/" class="site-footer__wordmark" aria-label="The Cochinchine Pensées — home">
+          The Cochinchine Pensées
+        </a>
+        <p class="site-footer__rights">All essays © their respective authors.</p>
+      </div>
     </div>
   </div>
 </footer>
 
 <style>
-  /* Ink-well register — the dark closing band of every page.
-   * A thin oxblood strip sits on top like a bound edge. */
   .site-footer {
-    border-top: 4px solid var(--bg-oxblood-well);
+    --footer-link-size: 0.875rem;
+    --footer-divider-space: clamp(2rem, 5vw, 5rem);
     margin-top: var(--sp-16);
-    padding-block: var(--sp-10) var(--sp-6);
-    background:
-      linear-gradient(180deg, var(--bg-ink-well) 0%, var(--bg-ink-well-deep) 100%);
-    color: var(--ink-on-dark-muted);
+    border-top: 4px solid var(--bg-oxblood-well);
+    background: var(--bg-ink-well);
+    color: var(--ink-on-dark);
   }
 
-  .site-footer__grid {
+  .site-footer__top,
+  .site-footer__closing {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--sp-8);
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .site-footer__newsletter {
-    margin-bottom: var(--sp-8);
-    padding-bottom: var(--sp-8);
-    border-bottom: 1px solid var(--rule-on-dark);
+  .site-footer .container {
+    padding-inline: clamp(1.25rem, 5vw, 5rem);
   }
 
-  .site-footer__newsletter-intro {
-    max-width: 32rem;
+  .site-footer__nav {
+    padding-block: var(--sp-8);
   }
 
-  .site-footer__newsletter-title {
-    margin-bottom: var(--sp-4);
-    color: var(--ink-on-dark);
+  .site-footer__links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(4, auto);
+    grid-auto-flow: column;
+    gap: var(--sp-3) var(--sp-5);
+  }
+
+  .site-footer__link,
+  .site-footer__signup {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    font-weight: var(--w-bold);
-    line-height: 1.3;
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
-  }
-
-  .site-footer__newsletter-copy {
-    margin-bottom: var(--sp-4);
-    color: var(--ink-on-dark-muted);
-    font-family: var(--font-display);
-    font-size: var(--fs-h4);
-    font-style: italic;
+    font-size: var(--footer-link-size);
+    font-weight: var(--w-semibold);
     line-height: 1.5;
-    text-wrap: pretty;
-  }
-
-  @media (min-width: 640px) {
-    .site-footer__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .site-footer__grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  .site-footer__column-title {
-    font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    font-weight: var(--w-bold);
-    letter-spacing: var(--tr-kicker);
+    letter-spacing: var(--tr-nav);
     text-transform: uppercase;
     color: var(--ink-on-dark);
-    margin-bottom: var(--sp-3);
-    padding-bottom: var(--sp-2);
-    border-bottom: 1px solid var(--rule-on-dark);
-  }
-
-  .site-footer__column-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
+    transition: color var(--t-fast), border-color var(--t-fast);
   }
 
   .site-footer__link {
-    font-family: var(--font-serif);
-    font-size: var(--fs-meta);
-    color: var(--ink-on-dark-muted);
-    border-bottom: 1px solid transparent;
-    transition:
-      color var(--t-base),
-      border-color var(--t-base);
-    display: inline-block;
-    padding-bottom: 1px;
+    padding-block: var(--sp-2);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
   }
 
   .site-footer__link:hover {
-    color: var(--ink-on-dark);
-    border-bottom-color: var(--accent-on-dark);
+    text-decoration-line: underline;
   }
 
-  .site-footer__link--more {
-    font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
+  .site-footer a:focus-visible {
+    outline: 2px solid var(--ink-on-dark);
+    outline-offset: 4px;
+  }
+
+  .site-footer__newsletter {
+    padding-block: var(--sp-8);
+    border-top: 1px solid var(--rule-on-dark);
+  }
+
+  .site-footer__newsletter-title {
+    max-width: 18ch;
+    margin-bottom: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    font-weight: var(--w-regular);
+    line-height: var(--lh-headline);
+    text-wrap: balance;
+  }
+
+  .site-footer__signup {
+    justify-content: center;
+    padding: var(--sp-3) var(--sp-5);
+    border: 1px solid var(--ink-on-dark);
+  }
+
+  .site-footer__signup:hover {
     color: var(--accent-on-dark);
+    border-color: var(--accent-on-dark);
   }
 
   .site-footer__bottom {
-    margin-top: var(--sp-10);
-    padding-top: var(--sp-5);
     border-top: 1px solid var(--rule-on-dark);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    align-items: center;
-    text-align: center;
   }
 
-  .site-footer__issue-line {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--fs-kicker);
-    color: var(--accent-on-dark);
-    letter-spacing: var(--tr-kicker);
+  .site-footer__closing {
+    gap: var(--sp-8);
+    padding-block: var(--sp-8);
+  }
+
+  .site-footer__copyright,
+  .site-footer__edition {
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    font-weight: var(--w-semibold);
+    line-height: 1.65;
+    letter-spacing: var(--tr-nav);
     text-transform: uppercase;
   }
 
-  .site-footer__copyright {
+  .site-footer__disclaimer {
+    max-width: 65ch;
+    margin-top: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--ink-on-dark-muted);
+    text-wrap: pretty;
+  }
+
+  .site-footer__wordmark {
+    display: inline-block;
+    max-width: 20ch;
+    margin-top: var(--sp-5);
+    padding-block: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--w-semibold);
+    font-variant-caps: small-caps;
+    line-height: var(--lh-headline);
+    color: var(--ink-on-dark);
+    text-wrap: balance;
+  }
+
+  .site-footer__rights {
+    margin-top: var(--sp-4);
     font-family: var(--font-serif);
     font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
     color: var(--ink-on-dark-muted);
+  }
+
+  @media (min-width: 56rem) {
+    .site-footer__top,
+    .site-footer__closing {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .site-footer__nav,
+    .site-footer__newsletter {
+      padding-block: var(--sp-10);
+    }
+
+    .site-footer__nav,
+    .site-footer__legal {
+      padding-inline-end: var(--footer-divider-space);
+    }
+
+    .site-footer__newsletter,
+    .site-footer__identity {
+      padding-inline-start: var(--footer-divider-space);
+    }
+
+    .site-footer__newsletter {
+      border-top: 0;
+      border-inline-start: 1px solid var(--rule-on-dark);
+    }
+
+    .site-footer__closing {
+      gap: 0;
+      padding-block: var(--sp-10);
+    }
+
+    .site-footer__identity {
+      text-align: end;
+    }
   }
 </style>

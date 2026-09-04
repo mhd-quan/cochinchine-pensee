@@ -142,8 +142,20 @@ Cloudflare Workers Builds should use:
 The shared footer, `/subscribe`, and the masthead banner link directly to the
 publication's Substack subscribe page. Newsletter copy and links use the site's
 own typography on both desktop and mobile. No Substack form or iframe is loaded.
-The `/subscribe` page omits the duplicate newsletter section in its footer.
+The footer keeps the same navigation and direct newsletter link on every page.
 Publication URLs are configured in `src/lib/newsletter.ts`.
+
+## Footer and directory
+
+The footer uses eight peer navigation links beside a direct Substack signup
+link, followed by an editorial disclaimer and publication identity. Desktop
+columns stack on mobile; no Substack iframe or social widget is loaded.
+
+`/archives` indexes published writing by month, `/pensees` follows the existing
+`form: pensee` metadata, and `/authors` groups published work by its byline.
+`/masthead` holds the confirmed editorial roles. About has a short introduction
+and reader note; its existing noindex setting remains until the full profile
+is ready. The existing `/essays` catalogue and all article URLs are retained.
 
 ## Reader preferences and search identity
 

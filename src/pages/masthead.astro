@@ -1,0 +1,57 @@
+---
+import DirectoryLayout from '~/layouts/DirectoryLayout.astro';
+
+const staff = [
+  { role: 'Managing Editor', name: 'M. Q. Doan' },
+  { role: 'Associate Editor', name: 'T. A. Vu' },
+  { role: 'Illustration', name: 'M. T Miller' },
+  { role: 'Contributing Editor', name: 'M. T Miller' },
+];
+---
+
+<DirectoryLayout title="Masthead" description="Ban biên tập The Cochinchine Pensées: M. Q. Doan, T. A. Vu và M. T Miller; biên tập, cộng tác biên tập và minh họa.">
+  <p slot="intro">The Cochinchine Pensées</p>
+  <dl class="masthead">
+    {staff.map(({ role, name }) => (
+      <div class="masthead__entry">
+        <dt>{role}</dt>
+        <dd>{name}</dd>
+      </div>
+    ))}
+  </dl>
+</DirectoryLayout>
+
+<style>
+  .masthead {
+    max-width: var(--measure-prose);
+    margin-inline: auto;
+  }
+
+  .masthead__entry {
+    display: grid;
+    gap: var(--sp-2);
+    padding-block: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .masthead dt {
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    color: var(--ink-secondary);
+  }
+
+  .masthead dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-headline);
+  }
+
+  @media (min-width: 40rem) {
+    .masthead__entry {
+      grid-template-columns: 1fr 1fr;
+      align-items: baseline;
+      gap: var(--sp-6);
+    }
+  }
+</style>
