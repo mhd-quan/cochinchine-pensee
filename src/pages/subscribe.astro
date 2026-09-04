@@ -1,5 +1,4 @@
 ---
-import SubstackSignup from '~/components/newsletter/SubstackSignup.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 ---
@@ -18,15 +17,11 @@ import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
         </p>
       </header>
 
-      <section class="subscribe__form" aria-label="Newsletter signup">
-        <SubstackSignup eager={true} />
-        <p class="subscribe__fallback">
-          If the form does not appear,{' '}
-          <a href={SUBSTACK_SUBSCRIBE_URL} class="subscribe__link" rel="external">
-            subscribe directly on Substack
-          </a>.
-        </p>
-      </section>
+      <p class="subscribe__action">
+        <a href={SUBSTACK_SUBSCRIBE_URL} class="subscribe__link subscribe__cta" rel="external">
+          Open on Substack →
+        </a>
+      </p>
 
       <section class="subscribe__feeds" aria-labelledby="subscribe-feeds-title">
         <h2 id="subscribe-feeds-title" class="subscribe__feeds-title">Prefer a feed?</h2>
@@ -84,19 +79,18 @@ import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
     text-wrap: pretty;
   }
 
-  .subscribe__form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .subscribe__action {
+    text-align: center;
   }
 
-  .subscribe__fallback {
-    margin-top: var(--sp-4);
-    color: var(--ink-muted);
-    font-family: var(--font-serif);
-    font-size: var(--fs-meta);
-    line-height: var(--lh-meta);
-    text-align: center;
+  .subscribe__cta {
+    display: inline-block;
+    padding-block: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    line-height: 1.5;
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
   }
 
   .subscribe__feeds {
