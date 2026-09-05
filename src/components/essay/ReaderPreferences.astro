@@ -1,0 +1,50 @@
+<!-- Run before styles paint, including on a direct visit with saved preferences. -->
+<script is:inline>
+  (() => {
+    function applyReaderPreferences(doc) {
+      const root = doc.documentElement;
+      const reading = root.dataset.reader === 'true';
+      const prefs = { fontSize: 'md', measure: 'standard', font: 'serif', theme: 'paper' };
+      const allowed = {
+        fontSize: ['md', 'lg', 'xl'],
+        measure: ['standard', 'wide'],
+        font: ['serif', 'garamond', 'newyork'],
+        theme: ['paper', 'sepia', 'night'],
+      };
+
+      if (reading) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('tcp-reader-prefs') || '{}');
+          if (saved && typeof saved === 'object') {
+            for (const key of Object.keys(prefs)) {
+              if (allowed[key].includes(saved[key])) prefs[key] = saved[key];
+            }
+          }
+        } catch {
+          // Invalid or unavailable storage uses the paper reader defaults.
+        }
+      }
+
+      root.dataset.theme = prefs.theme;
+      for (const key of ['fontSize', 'measure', 'font']) {
+        if (reading) root.dataset[key] = prefs[key];
+        else delete root.dataset[key];
+      }
+      if (!reading) root.classList.remove('has-reader-panel-open');
+
+      const colors = { paper: '#EEEEEB', sepia: '#ECE6D8', night: '#1D1A18' };
+      doc.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors[prefs.theme]);
+    }
+
+    applyReaderPreferences(document);
+
+    // Inline scripts may run again after navigation; register lifecycle hooks once.
+    if (window.__tcpReaderPreferencesReady) return;
+    window.__tcpReaderPreferencesReady = true;
+    document.addEventListener('astro:before-swap', (event) => {
+      applyReaderPreferences(event.newDocument);
+    });
+    document.addEventListener('astro:after-swap', () => applyReaderPreferences(document));
+    window.addEventListener('pageshow', () => applyReaderPreferences(document));
+  })();
+</script>

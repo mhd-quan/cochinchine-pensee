@@ -3,67 +3,102 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="About"
-  description="About The Cochinchine Pensées."
+  title="About us"
+  description="Về The Cochinchine Pensées — tập san tiểu luận, pensées và điểm sách bằng tiếng Việt — cùng lời lưu ý dành cho độc giả."
+  noindex={true}
 >
-  <article class="about">
-    <div class="container">
-      <header class="about__header">
-        <p class="about__eyebrow">About</p>
-        <h1 class="about__title">About</h1>
-        <p class="about__status" role="status">Under construction</p>
-        <p class="about__asterism" aria-hidden="true">✦ ✦ ✦</p>
-      </header>
+  <article class="about container">
+    <header class="about__header">
+      <h1>About us</h1>
+    </header>
+    <div class="about__body" lang="vi">
+      <p>
+        The Cochinchine Pensées là một tập san tiếng Việt dành cho tiểu luận,
+        pensées và điểm sách. Các bài viết bàn về đời sống, văn hóa, xã hội,
+        chính trị và tư tưởng, từ những suy tưởng cá nhân đến những vấn đề chung.
+      </p>
+      <section aria-labelledby="reader-note-title">
+        <h2 id="reader-note-title">Gửi bạn đọc</h2>
+        <p>
+          Quan điểm của tác giả bài viết không nhất thiết phản ánh hay đại diện
+          cho quan điểm của The Cochinchine Pensées và các tác giả liên kết.
+          Tập san không có ý định hỗ trợ hoặc cản trở bất kỳ nghị quyết nào,
+          hay gây tác động đến bất kỳ quyết định chính trị nào.
+        </p>
+        <p>
+          Xin đọc với tinh thần phản tư: cân nhắc lập luận, đối chiếu dẫn chứng
+          và dành chỗ cho những cách nhìn khác, kể cả khi chúng khác với quan điểm của mình.
+        </p>
+      </section>
+      <p class="about__links">
+        <a href="/masthead">Ban biên tập</a>
+        <a href="/authors">Các tác giả</a>
+      </p>
     </div>
   </article>
 </BaseLayout>
 
 <style>
   .about {
-    padding-block: var(--sp-12) var(--sp-16);
+    padding-block: var(--sp-12) var(--sp-10);
+  }
+
+  .about__header,
+  .about__body {
+    max-width: var(--measure-prose);
+    margin-inline: auto;
   }
 
   .about__header {
+    margin-bottom: var(--sp-10);
     text-align: center;
-    padding-bottom: var(--sp-10);
   }
 
-  .about__eyebrow {
-    font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    font-weight: var(--w-semibold);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
-    color: var(--accent-crimson);
-    margin-bottom: var(--sp-3);
-  }
-
-  .about__title {
+  .about h1 {
+    margin-bottom: var(--sp-4);
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
-    line-height: 1.1;
-    color: var(--ink-primary);
+    font-size: var(--fs-h1);
+    line-height: var(--lh-headline);
   }
 
-  .about__status {
-    display: inline-block;
-    margin-top: var(--sp-4);
-    padding: var(--sp-2) var(--sp-4);
-    border: 1px solid var(--accent-crimson);
-    font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    font-weight: var(--w-semibold);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
+  .about__header p {
+    color: var(--ink-secondary);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-style: italic;
+  }
+
+  .about__body p {
+    margin-bottom: var(--sp-5);
+    line-height: var(--lh-body);
+    text-wrap: pretty;
+  }
+
+  .about__body section {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .about h2 {
+    margin-bottom: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-headline);
+  }
+
+  .about__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+  }
+
+  .about__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     color: var(--accent-crimson);
-  }
-
-  .about__asterism {
-    margin-top: var(--sp-10);
-    font-family: var(--font-glyph);
-    font-size: 0.875rem;
-    letter-spacing: 1em;
-    padding-left: 1em;
-    color: var(--ink-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 </style>

@@ -19,12 +19,11 @@ const countFor = (ids: string[]) => ids.filter((id) => publishedIds.has(id)).len
 
 <BaseLayout
   title="Series"
-  description="Essay series in The Cochinchine Pensées."
+  description="Các loạt tiểu luận của The Cochinchine Pensées: chủ nghĩa dân tộc, thế hệ kiệt sức, chủ nghĩa tư bản và kỷ nguyên vươn mình. Đọc theo từng chủ đề."
 >
   <section class="series">
     <div class="container">
       <header class="series__header">
-        <p class="series__eyebrow">Series</p>
         <h1 class="series__title">Series</h1>
       </header>
 
@@ -76,7 +75,7 @@ const countFor = (ids: string[]) => ids.filter((id) => publishedIds.has(id)).len
 
   .series__title {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    font-size: var(--fs-h1);
     line-height: 1.1;
     color: var(--ink-primary);
     margin-bottom: var(--sp-3);

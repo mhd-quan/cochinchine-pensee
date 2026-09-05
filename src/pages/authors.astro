@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleList from '~/components/directory/ArticleList.astro';
+import DirectoryLayout from '~/layouts/DirectoryLayout.astro';
+
+const published = (await getCollection('essays', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const authors = [...new Set(published.map(({ data }) => data.author))]
+  .sort((a, b) => a.localeCompare(b, 'vi'))
+  .map((name) => ({
+    name,
+    id: `author-${name.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')}`,
+    entries: published.filter(({ data }) => data.author === name),
+  }));
+---
+
+<DirectoryLayout title="Authors" description="Các tác giả trên The Cochinchine Pensées và danh mục bài viết đã xuất bản của từng người.">
+  <nav class="directory-jump" aria-label="Authors">
+    {authors.map(({ name, id }) => <a href={`#${id}`}>{name}</a>)}
+  </nav>
+  {authors.map(({ name, id, entries }) => (
+    <section id={id} aria-labelledby={`${id}-title`}>
+      <h2 id={`${id}-title`}>{name}</h2>
+      <ArticleList entries={entries} />
+    </section>
+  ))}
+</DirectoryLayout>

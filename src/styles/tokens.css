@@ -37,7 +37,7 @@
    * ────────────────────────────────────────────────────────────────── */
   --ink-primary:       #0F0F0F;   /* near-black for body and headings */
   --ink-secondary:     #4A4A4A;   /* metadata, byline, dek */
-  --ink-muted:         #8A8A8A;   /* kicker, dateline, small caps */
+  --ink-muted:         #6B6B6B;   /* kicker, dateline, small caps */
   --ink-faint:         #B5B5B5;   /* disabled UI states */
   --ink-inverse:       #FAFAF7;
 
@@ -85,6 +85,10 @@
   --fs-h4:             1.125rem;       /* 18px sub-section / pull-quote attribution */
   --fs-body:           1.0625rem;      /* 17px prose */
   --fs-body-larger:    1.1875rem;      /* 19px Substack-style long read */
+  --fs-nav:           0.75rem;
+  --nav-rule-width:   2px;
+  --nav-rule-offset:  0.45em;
+  --t-nav:           140ms cubic-bezier(0.2, 0, 0, 1);
   --fs-meta:           0.8125rem;      /* 13px byline/dates */
   --fs-kicker:         0.75rem;        /* 12px small-caps eyebrow */
   --fs-caption:        0.75rem;

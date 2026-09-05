@@ -6,7 +6,9 @@
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import EssayLayout from '~/layouts/EssayLayout.astro';
+import { vietnameseSearchAliases } from '~/lib/searchText';
 import { getCoverTreatment } from '~/lib/coverTreatment';
+import ArticleImage from '~/components/essay/ArticleImage.astro';
 
 export const getStaticPaths = (async () => {
   const essays = await getCollection('essays', ({ data }) => !data.draft);
@@ -37,6 +39,7 @@ const { Content } = await render(essay);
 
 <EssayLayout
   title={essay.data.title}
+  searchAliases={vietnameseSearchAliases(`${essay.data.title} ${essay.data.author} ${essay.body ?? ""}`)}
   subtitle={essay.data.subtitle}
   dek={essay.data.dek}
   date={essay.data.date}
@@ -55,5 +58,5 @@ const { Content } = await render(essay);
   prevEssay={prevEssay}
   nextEssay={nextEssay}
 >
-  <Content />
+  <Content components={{ img: ArticleImage }} />
 </EssayLayout>

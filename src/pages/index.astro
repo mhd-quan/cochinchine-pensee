@@ -4,15 +4,16 @@
  *   1. Hero essay (latest, with cover image)
  *   2. "Recent Essays" grid
  *   3. "From the Stacks" book reviews grid
- *   4. Series clusters (the trio of essays in each series)
+ *   4. One browsable series carousel
  *
  * No right rail, no utility nav, no floating issue line in header.
  */
 import { getCollection } from 'astro:content';
 import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
-import SeriesCluster from '~/components/essay/SeriesCluster.astro';
+import SeriesCarousel from '~/components/essay/SeriesCarousel.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import SiteIdentity from '~/components/seo/SiteIdentity.astro';
 import { titleCaps } from '~/lib/titleCaps';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
@@ -20,6 +21,7 @@ const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.dat
 const essaysById = new Map(sortedEssays.map((e) => [e.id, e]));
 
 const heroEssay = sortedEssays[0];
+const siteDescription = 'The Cochinchine Pensées — tiểu luận tiếng Việt về chính trị, văn hóa và văn chương. Đọc bài viết mới, điểm sách và các loạt bài trên website của ấn phẩm.';
 // Max three rows on the widest grid (3 columns); CSS trims to 3 rows at
 // narrower breakpoints too. Everything else lives at /essays.
 const recentEssays = sortedEssays.slice(1, 10);
@@ -42,13 +44,16 @@ const featuredClusters = featuredSeries
       .map((id) => essaysById.get(id))
       .filter((essay) => essay !== undefined),
   }))
-  .filter(({ essays }) => essays.length > 0);
+  .filter(({ essays }) => essays.length > 0)
+  .sort((a, b) => Math.max(...b.essays.map((essay) => +essay.data.date)) - Math.max(...a.essays.map((essay) => +essay.data.date)));
 ---
 
 <BaseLayout
   title="The Cochinchine Pensées"
-  description="A Vietnamese editorial publication on politics, literature, and the Vietnamese intellectual tradition."
+  description={siteDescription}
+  canonicalUrl="/"
 >
+  <SiteIdentity slot="head" description={siteDescription} />
   {/* ── Hero essay ── */}
   {heroEssay && (
     <section class="hero">
@@ -89,9 +94,9 @@ const featuredClusters = featuredSeries
     </div>
 
     <ul class="recent__grid">
-      {recentEssays.map((essay) => (
+      {recentEssays.map((essay, index) => (
         <li>
-          <EssayCard essay={essay} />
+          <EssayCard essay={essay} priority={index === 0} />
         </li>
       ))}
     </ul>
@@ -138,12 +143,7 @@ const featuredClusters = featuredSeries
     </section>
   )}
 
-  {/* ── Series clusters ── */}
-  <div class="clusters container">
-    {featuredClusters.map(({ series, essays }) => (
-      <SeriesCluster series={series} essays={essays} />
-    ))}
-  </div>
+  <SeriesCarousel clusters={featuredClusters} />
 </BaseLayout>
 
 <script>
@@ -177,29 +177,44 @@ const featuredClusters = featuredSeries
         return one * Math.max(1, perView - 1);
       };
 
+      let frame = 0;
+      let nearby = false;
       const sync = () => {
+        frame = 0;
+        // Read layout together before changing either control.
         const max = track.scrollWidth - track.clientWidth;
-        prev.disabled = track.scrollLeft <= 1;
-        next.disabled = track.scrollLeft >= max - 1;
+        const position = track.scrollLeft;
+        prev.disabled = position <= 1;
+        next.disabled = position >= max - 1;
       };
+      const scheduleSync = () => {
+        if (nearby && !frame) frame = requestAnimationFrame(sync);
+      };
+      const visibility = new IntersectionObserver(([entry]) => {
+        nearby = entry.isIntersecting;
+        scheduleSync();
+      }, { rootMargin: '300px' });
+      visibility.observe(section);
+      const resize = new ResizeObserver(scheduleSync);
+      resize.observe(track);
 
       prev.addEventListener('click', () => {
-        track.scrollBy({ left: -page(), behavior: 'smooth' });
+        track.scrollBy({ left: -page(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }, { signal });
 
       next.addEventListener('click', () => {
-        track.scrollBy({ left: page(), behavior: 'smooth' });
+        track.scrollBy({ left: page(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }, { signal });
 
-      track.addEventListener('scroll', sync, { passive: true, signal });
-      window.addEventListener('resize', sync, { passive: true, signal });
+      track.addEventListener('scroll', scheduleSync, { passive: true, signal });
 
       document.addEventListener('astro:before-swap', () => {
         lifecycle.abort();
+        visibility.disconnect();
+        resize.disconnect();
+        cancelAnimationFrame(frame);
         delete section.dataset.initialized;
       }, { once: true, signal });
-
-      sync();
     }
   }
 
@@ -283,6 +298,7 @@ const featuredClusters = featuredSeries
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    flex-wrap: wrap;
     margin-bottom: var(--sp-6);
     padding-bottom: var(--sp-3);
     border-bottom: 2px solid var(--ink-primary);
@@ -375,8 +391,8 @@ const featuredClusters = featuredSeries
   .stacks__arrow {
     display: grid;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--rule-hair);
     color: var(--ink-primary);
     font-family: var(--font-sans);
@@ -442,8 +458,4 @@ const featuredClusters = featuredSeries
     color: var(--ink-primary);
   }
 
-  /* Series cluster container */
-  .clusters {
-    padding-block: 0 var(--sp-12);
-  }
 </style>

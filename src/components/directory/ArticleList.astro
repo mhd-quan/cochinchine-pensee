@@ -1,0 +1,74 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props {
+  entries: CollectionEntry<'essays'>[];
+}
+const { entries } = Astro.props;
+---
+
+<ul class="article-list">
+  {entries.map(({ id, data }) => (
+    <li class="article-list__row">
+      <time datetime={data.date.toISOString().slice(0, 10)}>
+        {data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}
+      </time>
+      <div>
+        <a href={`/essays/${id}`} class="article-list__title" lang={data.lang}>{data.title}</a>
+        <p class="article-list__author">{data.author}</p>
+      </div>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .article-list__row {
+    display: grid;
+    gap: var(--sp-2);
+    padding-block: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .article-list__row:last-child {
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .article-list time,
+  .article-list__author {
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+    color: var(--ink-secondary);
+  }
+
+  .article-list time {
+    padding-top: var(--sp-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .article-list__title {
+    display: inline-block;
+    padding-block: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    line-height: var(--lh-headline);
+    color: var(--ink-primary);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .article-list__title:hover {
+    text-decoration-line: underline;
+    color: var(--accent-crimson);
+  }
+
+  .article-list__author {
+    margin-top: var(--sp-1);
+  }
+
+  @media (min-width: 40rem) {
+    .article-list__row {
+      grid-template-columns: 8rem minmax(0, 1fr);
+      column-gap: var(--sp-6);
+    }
+  }
+</style>

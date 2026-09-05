@@ -17,14 +17,20 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
 import { titleCaps } from '~/lib/titleCaps';
+import { CARD_IMAGE_SIZES, containedImageSizes, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
   showExcerpt?: boolean;
   variant?: 'default' | 'featured';
+  priority?: boolean;
+  imageSizes?: string;
 }
 
-const { essay, showExcerpt = false, variant = 'default' } = Astro.props;
+const {
+  essay, showExcerpt = false, variant = 'default', priority = false,
+  imageSizes = CARD_IMAGE_SIZES,
+} = Astro.props;
 const formattedDate = essay.data.date.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
@@ -38,6 +44,7 @@ const monthYear = essay.data.date.toLocaleDateString('en-US', {
 });
 
 const hasCover = !!essay.data.coverImage;
+const sizes = hasCover ? containedImageSizes(essay.data.coverImage!, imageSizes) : imageSizes;
 const coverTreatment = getCoverTreatment(essay.id);
 ---
 
@@ -50,12 +57,16 @@ const coverTreatment = getCoverTreatment(essay.id);
       tabindex="-1"
     >
       <figure class="essay-card__cover" data-cover-treatment={coverTreatment}>
-        <img
-          src={essay.data.coverImage}
-          alt={essay.data.coverImageAlt ?? ''}
-          loading="lazy"
-          decoding="async"
-        />
+        <picture>
+          <source {...responsiveSource(essay.data.coverImage!, sizes)} />
+          <img
+            {...responsiveImage(essay.data.coverImage!, sizes)}
+            alt={essay.data.coverImageAlt ?? ''}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchpriority={priority ? 'high' : undefined}
+            decoding="async"
+          />
+        </picture>
       </figure>
     </a>
   )}

@@ -1,11 +1,8 @@
 ---
-/**
- * Header — CRB-inspired masthead and navigation.
- *
- * Desktop: centered wordmark, spacious primary-navigation tier, and a
- * right-edge menu button. Mobile: compact wordmark, no navigation strip,
- * and a top-right menu button. Both buttons open the same accessible drawer.
- */
+import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
+import HeaderSearch from '~/components/search/HeaderSearch.astro';
+import SearchForm from '~/components/search/SearchForm.astro';
+import SearchIcon from '~/components/search/SearchIcon.astro';
 
 const navItems = [
   { href: '/', label: 'Latest' },
@@ -14,469 +11,248 @@ const navItems = [
   { href: '/books', label: 'Books' },
   { href: '/about', label: 'About' },
 ];
-
 const currentPath = Astro.url.pathname;
-
-function isActive(itemHref: string): boolean {
-  if (itemHref === '/') return currentPath === '/';
-  return currentPath.startsWith(itemHref);
-}
+const Wordmark = currentPath === '/' ? 'h1' : 'span';
+const isActive = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
-<header class="site-header" data-site-header data-scroll-direction="down">
-  <span class="site-header__safe-area" aria-hidden="true"></span>
-
-  <div class="site-header__flow" data-header-flow>
-    <div class="site-header__masthead">
-      <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
-        <span class="site-header__wordmark">The Cochinchine Pensées</span>
-      </a>
-
-      <button
-        type="button"
-        class="site-header__menu-toggle site-header__menu-toggle--mobile"
-        aria-controls="site-menu"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-        aria-label="Open navigation"
-        data-menu-open
-      >
-        <span class="site-header__menu-icon" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
-      </button>
-    </div>
-
-    <div class="site-header__nav-tier">
-      <div class="site-header__nav-inner">
-        <nav class="site-header__desktop-nav" aria-label="Primary">
-          <ul class="site-header__nav-list">
-            {navItems.map((item) => (
-              <li>
-                <a
-                  href={item.href}
-                  class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
-                  aria-label={item.label}
-                >
-                  <span class="site-header__nav-label" data-label={item.label}>{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <button
-          type="button"
-          class="site-header__menu-toggle site-header__menu-toggle--desktop"
-          aria-controls="site-menu"
-          aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-label="Open navigation"
-          data-menu-open
-        >
-          <span class="site-header__menu-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
+<header class="site-header" data-site-header>
+  <div class="site-header__flow" data-header-flow data-nosnippet>
+    <div class="site-header__stage" data-header-stage>
+      <div class="site-header__masthead" data-masthead>
+        <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="masthead-search" aria-expanded="false" data-search-open><SearchIcon /></a>
+        <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark></a>
+        <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
         </button>
       </div>
+      <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external" data-newsletter-banner>
+        <span class="site-header__newsletter-copy" lang="vi">Nhận thông tin bài viết mới</span>
+        <span class="site-header__newsletter-action">Subscribe on Substack <span aria-hidden="true">→</span></span>
+      </a>
+      <HeaderSearch id="masthead-search" />
     </div>
+    <nav class="site-header__desktop-nav" aria-label="Primary">
+      <ul class="site-header__nav-list">
+        {navItems.map((item) => <li><a href={item.href} class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>)}
+      </ul>
+    </nav>
   </div>
-
   <span class="site-header__sentinel" data-header-sentinel aria-hidden="true"></span>
 
-  <div
-    class="site-header__reading-bar"
-    data-reading-bar
-    aria-hidden="true"
-    inert
-  >
-    <a
-      href="/"
-      class="site-header__wordmark-link site-header__wordmark-link--reading"
-      aria-label="The Cochinchine Pensées — home"
-    >
-      <span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span>
-    </a>
-
-    <button
-      type="button"
-      class="site-header__menu-toggle site-header__menu-toggle--reading"
-      aria-controls="site-menu"
-      aria-haspopup="dialog"
-      aria-expanded="false"
-      aria-label="Open navigation"
-      data-menu-open
-    >
-      <span class="site-header__menu-icon" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
+  <div class="site-header__reading-bar" data-reading-bar aria-hidden="true" inert data-nosnippet>
+    <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="reading-search" aria-expanded="false" data-search-open><SearchIcon /></a>
+    <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
+    <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
     </button>
+    <HeaderSearch id="reading-search" compact />
   </div>
 
-  <div
-    id="site-menu"
-    class="site-menu"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="site-menu-title"
-    aria-hidden="true"
-    inert
-    data-site-menu
-  >
-    <div class="site-menu__scrim" aria-hidden="true"></div>
-    <div class="site-menu__panel" data-menu-panel>
-      <div class="site-menu__header">
-        <h2 id="site-menu-title" class="site-menu__brand">
-          <span class="site-menu__brand-wordmark" aria-hidden="true">The Cochinchine Pensées</span>
-          <span class="sr-only">Navigation</span>
-        </h2>
-        <button
-          type="button"
-          class="site-menu__close"
-          aria-label="Close navigation"
-          data-menu-close
-        >
-          <span class="site-header__menu-icon site-menu__close-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-      </div>
-
-      <nav class="site-menu__nav" aria-label="Menu">
-        <ul class="site-menu__nav-list">
-          {navItems.map((item, index) => (
-            <li class="site-menu__nav-item">
-              <a
-                href={item.href}
-                class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]}
-                aria-current={isActive(item.href) ? 'page' : undefined}
-                aria-label={item.label}
-              >
-                <span class="site-menu__nav-label" data-label={item.label}>{item.label}</span>
-                <span class="site-menu__nav-index" aria-hidden="true">0{index + 1}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
-  </div>
+  <nav id="site-menu" class="site-menu" aria-label="Menu" aria-hidden="true" inert data-site-menu data-nosnippet>
+    <SearchForm id="menu-search" variant="menu" />
+    <ul>
+      {navItems.map((item) => <li><a href={item.href} class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>)}
+    </ul>
+  </nav>
 </header>
 
 <script>
-  import { navigate } from 'astro:transitions/client';
-
   function initHeader() {
     const header = document.querySelector<HTMLElement>('[data-site-header]');
-    if (!header || header.dataset.initialized === 'true') return;
-
-    const flow = header.querySelector<HTMLElement>('[data-header-flow]');
-    const sentinel = header.querySelector<HTMLElement>('[data-header-sentinel]');
-    const readingBar = header.querySelector<HTMLElement>('[data-reading-bar]');
-    const dialog = header.querySelector<HTMLElement>('[data-site-menu]');
-    const scrim = header.querySelector<HTMLElement>('.site-menu__scrim');
-    const panel = header.querySelector<HTMLElement>('[data-menu-panel]');
-    const closeButton = header.querySelector<HTMLButtonElement>('[data-menu-close]');
-    const openButtons = Array.from(
-      header.querySelectorAll<HTMLButtonElement>('[data-menu-open]'),
-    );
-
-    if (
-      !flow ||
-      !sentinel ||
-      !readingBar ||
-      !dialog ||
-      !scrim ||
-      !panel ||
-      !closeButton ||
-      openButtons.length === 0
-    ) return;
-
-    header.dataset.initialized = 'true';
-
+    if (!header || header.dataset.ready) return;
+    header.dataset.ready = 'true';
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let activeOpener: HTMLButtonElement | null = null;
-    let afterClose: (() => void) | null = null;
-    let openFrame = 0;
-    let openTimer: number | undefined;
-    let openTransitionEnd: ((event: TransitionEvent) => void) | null = null;
-    let closeTimer: number | undefined;
-    let isClosing = false;
-    let pointerStartedOnScrim = false;
-    let scrollFrame = 0;
-    let previousScrollY = Math.max(0, window.scrollY);
-    let accumulatedDelta = 0;
-    let currentDirection: 'up' | 'down' = 'down';
+    const flow = header.querySelector<HTMLElement>('[data-header-flow]')!;
+    const stage = header.querySelector<HTMLElement>('[data-header-stage]')!;
+    const masthead = header.querySelector<HTMLElement>('[data-masthead]')!;
+    const banner = header.querySelector<HTMLElement>('[data-newsletter-banner]')!;
+    const bar = header.querySelector<HTMLElement>('[data-reading-bar]')!;
+    const menu = header.querySelector<HTMLElement>('[data-site-menu]')!;
+    const desktop = matchMedia('(min-width: 48rem)');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    let compact = false;
+    let menuOpen = false;
+    let search: HTMLElement | null = null;
+    let searchTrigger: HTMLElement | null = null;
+    let menuTrigger: HTMLElement | null = null;
+    let focusTimer: ReturnType<typeof setTimeout>;
+    const pageInert = new Map<HTMLElement, boolean>();
 
-    const isMenuOpen = () => dialog.classList.contains('is-open');
-
-    const setExpanded = (expanded: boolean) => {
-      for (const button of openButtons) {
-        button.setAttribute('aria-expanded', String(expanded));
-        button.setAttribute('aria-label', expanded ? 'Close navigation' : 'Open navigation');
-      }
+    const updateMenuTop = () => {
+      if (!menuOpen) return;
+      const bottom = compact ? bar.offsetHeight : masthead.getBoundingClientRect().bottom;
+      header.style.setProperty('--menu-top', `${Math.max(0, bottom)}px`);
     };
-
-    const setReadingBarVisible = (visible: boolean) => {
-      readingBar.classList.toggle('is-visible', visible);
-      readingBar.toggleAttribute('inert', !visible);
-      flow.toggleAttribute('inert', visible);
-
-      if (visible) {
-        readingBar.removeAttribute('aria-hidden');
-        flow.setAttribute('aria-hidden', 'true');
-      } else {
-        readingBar.setAttribute('aria-hidden', 'true');
-        flow.removeAttribute('aria-hidden');
+    const closeMenu = (restore = true) => {
+      if (!menuOpen) return;
+      menuOpen = false;
+      header.classList.remove('is-menu-open');
+      menu.inert = true;
+      menu.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('has-site-menu');
+      for (const button of header.querySelectorAll('[data-menu-toggle]')) {
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', 'Open navigation');
       }
+      for (const [element, previous] of pageInert) element.inert = previous;
+      pageInert.clear();
+      if (restore && menuTrigger?.isConnected) menuTrigger.focus({ preventScroll: true });
+      menuTrigger = null;
     };
-
-    const setScrollDirection = (direction: 'up' | 'down') => {
-      if (currentDirection === direction) return;
-      currentDirection = direction;
-      header.dataset.scrollDirection = direction;
+    const closeSearch = (restore = true) => {
+      clearTimeout(focusTimer);
+      if (!search) return;
+      const region = search.closest<HTMLElement>('[data-header-stage], [data-reading-bar]')!;
+      search.classList.remove('is-open');
+      search.inert = true;
+      search.setAttribute('aria-hidden', 'true');
+      region.classList.remove('is-search-open');
+      for (const element of region.querySelectorAll<HTMLElement>(
+        '[data-masthead-logo], [data-search-open], [data-newsletter-banner]',
+      )) {
+        element.inert = false;
+        element.removeAttribute('aria-hidden');
+      }
+      searchTrigger?.setAttribute('aria-expanded', 'false');
+      if (restore && searchTrigger?.isConnected) searchTrigger.focus({ preventScroll: true });
+      search = null;
+      searchTrigger = null;
     };
-
-    const updateScrollDirection = () => {
-      scrollFrame = 0;
-
-      const nextScrollY = Math.max(0, window.scrollY);
-      const delta = nextScrollY - previousScrollY;
-      previousScrollY = nextScrollY;
-
-      if (Math.abs(delta) < 1) return;
-      if (Math.sign(delta) !== Math.sign(accumulatedDelta)) accumulatedDelta = 0;
-      accumulatedDelta += delta;
-
-      if (accumulatedDelta >= 12) {
-        setScrollDirection('down');
-        accumulatedDelta = 0;
-      } else if (accumulatedDelta <= -12) {
-        setScrollDirection('up');
-        accumulatedDelta = 0;
+    const openSearch = (trigger: HTMLElement) => {
+      closeMenu(false);
+      closeSearch(false);
+      const region = trigger.closest<HTMLElement>('[data-header-stage], [data-reading-bar]')!;
+      search = region.querySelector<HTMLElement>('[data-header-search]')!;
+      searchTrigger = trigger;
+      region.classList.add('is-search-open');
+      search.inert = false;
+      search.setAttribute('aria-hidden', 'false');
+      search.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      for (const element of region.querySelectorAll<HTMLElement>(
+        '[data-masthead-logo], [data-search-open], [data-newsletter-banner]',
+      )) {
+        element.inert = true;
+        element.setAttribute('aria-hidden', 'true');
       }
+      // Focus after the slide so keyboard focus cannot scroll the clipped form.
+      const opened = search;
+      focusTimer = setTimeout(
+        () => {
+          if (search === opened) opened.querySelector('input')?.focus({ preventScroll: true });
+        },
+        reduced.matches ? 0 : 240,
+      );
     };
-
-    const scheduleScrollUpdate = () => {
-      if (scrollFrame !== 0) return;
-      scrollFrame = window.requestAnimationFrame(updateScrollDirection);
-    };
-
-    const sentinelObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        setReadingBarVisible(!entry.isIntersecting && window.scrollY > 0);
-      },
-      { threshold: 0 },
-    );
-    sentinelObserver.observe(sentinel);
-    window.addEventListener('scroll', scheduleScrollUpdate, { passive: true, signal });
-
-    const clearOpenCompletion = () => {
-      if (openFrame !== 0) {
-        window.cancelAnimationFrame(openFrame);
-        openFrame = 0;
-      }
-      if (openTimer !== undefined) {
-        window.clearTimeout(openTimer);
-        openTimer = undefined;
-      }
-      if (openTransitionEnd) {
-        panel.removeEventListener('transitionend', openTransitionEnd);
-        openTransitionEnd = null;
-      }
-    };
-
-    const finishOpen = () => {
-      clearOpenCompletion();
-      if (!isMenuOpen() || isClosing || !dialog.classList.contains('is-visible')) return;
-      if (dialog.contains(document.activeElement)) return;
-      closeButton.focus({ preventScroll: true });
-    };
-
-    const finishClose = (restoreFocus: boolean) => {
-      clearOpenCompletion();
-      if (closeTimer !== undefined) {
-        window.clearTimeout(closeTimer);
-        closeTimer = undefined;
-      }
-
-      const callback = afterClose;
-      afterClose = null;
-      dialog.classList.remove('is-open', 'is-visible', 'is-closing');
-      dialog.setAttribute('aria-hidden', 'true');
-      dialog.setAttribute('inert', '');
-
-      isClosing = false;
-      setExpanded(false);
-
-      if (restoreFocus && activeOpener?.isConnected) {
-        activeOpener.focus({ preventScroll: true });
-      }
-      activeOpener = null;
-      callback?.();
-    };
-
-    const closeMenu = (restoreFocus = true, onClosed?: () => void) => {
-      if (!isMenuOpen()) {
-        onClosed?.();
-        return;
-      }
-
-      if (isClosing) {
-        if (onClosed) afterClose = onClosed;
-        return;
-      }
-
-      afterClose = onClosed ?? null;
-      isClosing = true;
-      const wasVisible = dialog.classList.contains('is-visible');
-      clearOpenCompletion();
-      dialog.classList.add('is-closing');
-      dialog.classList.remove('is-visible');
-
-      if (reducedMotion.matches || !wasVisible) {
-        finishClose(restoreFocus);
-        return;
-      }
-
-      const onPanelTransitionEnd = (event: TransitionEvent) => {
-        if (event.target !== panel || event.propertyName !== 'transform') return;
-        panel.removeEventListener('transitionend', onPanelTransitionEnd);
-        finishClose(restoreFocus);
-      };
-
-      panel.addEventListener('transitionend', onPanelTransitionEnd);
-      // Safety net only — must outlast --t-panel-exit (240ms) so it never
-      // races the real transitionend and cuts the slide short.
-      closeTimer = window.setTimeout(() => {
-        panel.removeEventListener('transitionend', onPanelTransitionEnd);
-        finishClose(restoreFocus);
-      }, 380);
-    };
-
-    const openMenu = (event: Event) => {
-      const opener = event.currentTarget;
-      if (!(opener instanceof HTMLButtonElement) || isMenuOpen()) return;
-
-      activeOpener = opener;
-      afterClose = null;
-      isClosing = false;
-      dialog.classList.remove('is-closing', 'is-visible');
-      dialog.classList.add('is-open');
-      dialog.removeAttribute('aria-hidden');
-      dialog.removeAttribute('inert');
-      setExpanded(true);
-
-      if (reducedMotion.matches) {
-        dialog.classList.add('is-visible');
-        finishOpen();
-        return;
-      }
-
-      // The panel is permanently laid out off-canvas. One frame with
-      // will-change promotes it before motion starts, avoiding the native
-      // dialog relayout and off-screen focus jump that stutter on iOS Safari.
-      openFrame = window.requestAnimationFrame(() => {
-        openFrame = 0;
-        if (!isMenuOpen() || isClosing) return;
-
-        openTransitionEnd = (transitionEvent: TransitionEvent) => {
-          if (transitionEvent.target !== panel || transitionEvent.propertyName !== 'transform') {
-            return;
-          }
-          finishOpen();
-        };
-        panel.addEventListener('transitionend', openTransitionEnd);
-        dialog.classList.add('is-visible');
-        openTimer = window.setTimeout(finishOpen, 520);
-      });
-    };
-
-    for (const button of openButtons) {
-      button.addEventListener('click', openMenu, { signal });
-    }
-
-    closeButton.addEventListener('click', () => closeMenu(), { signal });
-    document.addEventListener('keydown', (event) => {
-      if (!isMenuOpen()) return;
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
+    const toggleMenu = (trigger: HTMLElement) => {
+      if (menuOpen) {
         closeMenu();
         return;
       }
-
-      if (event.key !== 'Tab') return;
-      const focusable = [
-        closeButton,
-        ...dialog.querySelectorAll<HTMLAnchorElement>('a[href]'),
-      ];
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-
-      const activeElement = document.activeElement;
-      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
-        event.preventDefault();
-        last.focus({ preventScroll: true });
-      } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
-        event.preventDefault();
-        first.focus({ preventScroll: true });
+      closeSearch(false);
+      menuTrigger = trigger;
+      menuOpen = true;
+      updateMenuTop();
+      menu.inert = false;
+      menu.setAttribute('aria-hidden', 'false');
+      header.classList.add('is-menu-open');
+      document.documentElement.classList.add('has-site-menu');
+      for (const button of header.querySelectorAll('[data-menu-toggle]')) {
+        button.setAttribute('aria-expanded', 'true');
+        button.setAttribute('aria-label', 'Close navigation');
       }
-    }, { signal });
-
-    scrim.addEventListener('pointerdown', () => {
-      pointerStartedOnScrim = true;
-    }, { signal });
-    scrim.addEventListener('pointercancel', () => {
-      pointerStartedOnScrim = false;
-    }, { signal });
-    scrim.addEventListener('pointerup', () => {
-      if (pointerStartedOnScrim) closeMenu();
-      pointerStartedOnScrim = false;
-    }, { signal });
-
-    for (const link of dialog.querySelectorAll<HTMLAnchorElement>('a[href]')) {
-      link.addEventListener('click', (event) => {
-        if (
-          event.defaultPrevented ||
-          event.button !== 0 ||
-          event.metaKey ||
-          event.ctrlKey ||
-          event.shiftKey ||
-          event.altKey
-        ) return;
-
-        const destination = new URL(link.href);
-        if (destination.origin !== window.location.origin) return;
-
-        event.preventDefault();
-        closeMenu(false, () => {
-          void navigate(`${destination.pathname}${destination.search}${destination.hash}`);
-        });
-      }, { signal });
+      // The masthead remains usable; background links leave keyboard navigation.
+      for (const element of document.querySelectorAll<HTMLElement>(
+        'main, .site-footer, .site-header__desktop-nav, [data-newsletter-banner]',
+      )) {
+        pageInert.set(element, element.inert);
+        element.inert = true;
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      const next = entry.boundingClientRect.bottom <= 0;
+      if (next !== compact) {
+        closeSearch(false);
+        closeMenu(false);
+      }
+      compact = next;
+      bar.classList.toggle('is-visible', compact);
+      bar.inert = !compact;
+      bar.setAttribute('aria-hidden', String(!compact));
+      flow.inert = compact;
+      if (compact) flow.setAttribute('aria-hidden', 'true');
+      else flow.removeAttribute('aria-hidden');
+    });
+    observer.observe(header.querySelector('[data-header-sentinel]')!);
+    const resize = new ResizeObserver(updateMenuTop);
+    resize.observe(masthead);
+    resize.observe(bar);
+    desktop.addEventListener(
+      'change',
+      () => {
+        closeSearch(false);
+        updateMenuTop();
+      },
+      { signal },
+    );
+    for (const trigger of header.querySelectorAll<HTMLElement>('[data-search-open]')) {
+      trigger.addEventListener(
+        'click',
+        (event) => {
+          if (
+            event instanceof MouseEvent &&
+            (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+          )
+            return;
+          if (!desktop.matches) return;
+          event.preventDefault();
+          openSearch(trigger);
+        },
+        { signal },
+      );
     }
-
-    document.addEventListener('astro:before-swap', () => {
-      sentinelObserver.disconnect();
-      if (scrollFrame !== 0) window.cancelAnimationFrame(scrollFrame);
-      lifecycle.abort();
-      if (isMenuOpen()) finishClose(false);
-    }, { once: true });
+    for (const button of header.querySelectorAll<HTMLElement>('[data-menu-toggle]')) {
+      button.addEventListener('click', () => toggleMenu(button), { signal });
+    }
+    for (const button of header.querySelectorAll('[data-search-close]')) {
+      button.addEventListener('click', () => closeSearch(), { signal });
+    }
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Escape' || event.isComposing) return;
+        if (search || menuOpen) {
+          event.preventDefault();
+          closeSearch();
+          closeMenu();
+        }
+      },
+      { signal },
+    );
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (!(event.target instanceof Node) || header.contains(event.target)) return;
+        closeMenu(false);
+        closeSearch(false);
+      },
+      { signal },
+    );
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        closeSearch(false);
+        closeMenu(false);
+        observer.disconnect();
+        resize.disconnect();
+        lifecycle.abort();
+      },
+      { once: true, signal },
+    );
   }
-
   document.addEventListener('astro:page-load', initHeader);
   initHeader();
 </script>
@@ -486,574 +262,285 @@ function isActive(itemHref: string): boolean {
     position: relative;
     background: var(--bg-page);
   }
-
-  /* This cap only masks content that Safari lets drift behind its status bar.
-   * Its colour is the same page token used by html, body and browser chrome;
-   * it does not introduce another visual surface. */
-  .site-header__safe-area {
-    position: fixed;
-    z-index: var(--z-header);
-    inset: calc(-1 * var(--sp-16)) 0 auto;
-    height: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    background-color: var(--bg-page);
-    pointer-events: none;
-    transition: background-color var(--t-base);
+  .site-header__stage {
+    --header-edge: 3rem;
+    position: relative;
   }
-
-  .site-header__flow {
+  .site-header__masthead,
+  .site-header__reading-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--header-edge);
+    align-items: center;
     background: var(--bg-page);
+    padding-top: env(safe-area-inset-top, 0px);
   }
-
   .site-header__masthead {
     position: relative;
+    z-index: 1;
+    min-height: 4rem;
+  }
+  .header-control {
     display: grid;
     place-items: center;
-    min-height: 4.5rem;
-    padding: var(--sp-3) var(--gutter-mobile);
-    /* viewport-fit=cover lets the page run under the iOS status bar; the
-     * masthead must own that strip or raw page bleeds out above it. */
-    padding-top: calc(var(--sp-3) + env(safe-area-inset-top, 0px));
-    border-bottom: 1px solid var(--rule-hair);
-    text-align: center;
-  }
-
-  .site-header__wordmark-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: calc(100% - 7rem);
-    transform-origin: center;
-    transition:
-      opacity var(--t-base),
-      transform var(--t-slow),
-      filter var(--t-base);
-  }
-
-  .site-header__wordmark-link:hover {
-    opacity: 0.82;
-  }
-
-  .site-header__wordmark {
+    width: 100%;
+    min-height: 3rem;
     color: var(--ink-primary);
+    background: var(--bg-page);
+    transition: color var(--t-nav);
+  }
+  .header-control:hover {
+    color: var(--accent-crimson);
+  }
+  .header-control--search {
+    display: none;
+  }
+  .header-control--menu {
+    position: relative;
+    z-index: 3;
+    align-self: stretch;
+  }
+  .site-header__wordmark-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-inline-start: var(--gutter-mobile);
+    min-width: 0;
+    min-height: 44px;
+    color: var(--ink-primary);
+  }
+  .site-header__wordmark {
     font-family: var(--font-display);
-    /* Sized so the nowrap masthead clears the menu button down to ~320px */
-    font-size: clamp(0.8125rem, 4.2vw, 1.25rem);
+    font-size: clamp(0.78rem, 3.4vw, 1.2rem);
     font-weight: var(--w-semibold);
-    line-height: 1.05;
+    line-height: 1.2;
     letter-spacing: 0.045em;
     text-transform: uppercase;
     white-space: nowrap;
   }
-
+  .site-header__newsletter-banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: var(--sp-3);
+    row-gap: var(--sp-1);
+    min-height: 44px;
+    padding: var(--sp-2) var(--gutter-mobile);
+    color: var(--ink-on-dark);
+    background: var(--bg-oxblood-well);
+    text-align: center;
+    transition:
+      background-color var(--t-fast),
+      opacity 180ms var(--ease-panel);
+  }
+  .site-header__newsletter-banner:hover {
+    background: var(--accent-crimson);
+  }
+  .site-header__newsletter-banner:focus-visible {
+    outline: 2px solid var(--ink-on-dark);
+    outline-offset: -4px;
+  }
+  .site-header__newsletter-copy {
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    line-height: 1.4;
+  }
+  .site-header__newsletter-action {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    line-height: 1.4;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .is-search-open .site-header__newsletter-banner {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .is-menu-open .site-header__newsletter-banner {
+    opacity: 0;
+  }
+  .site-header__desktop-nav {
+    display: none;
+    border-bottom: 1px solid var(--rule-hair);
+  }
+  .site-header__nav-list {
+    display: flex;
+    justify-content: space-between;
+    max-width: 70rem;
+    margin-inline: auto;
+    padding-inline: var(--gutter-tablet);
+  }
+  .site-header__nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 3.25rem;
+    color: var(--ink-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--fs-nav);
+    font-weight: var(--w-semibold);
+    line-height: 1.4;
+    letter-spacing: var(--tr-nav);
+    text-transform: uppercase;
+    transition: color var(--t-nav);
+  }
+  .nav-label {
+    position: relative;
+    display: inline-block;
+  }
+  .nav-label::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 calc(-1 * var(--nav-rule-offset));
+    height: var(--nav-rule-width);
+    background: var(--accent-crimson);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--t-nav);
+  }
+  .is-active {
+    color: var(--ink-primary);
+  }
+  .is-active > .nav-label::after,
+  a:hover > .nav-label::after,
+  a:focus-visible > .nav-label::after {
+    transform: scaleX(1);
+  }
+  .site-header__nav-link:hover,
+  .site-menu__nav-link:hover {
+    color: var(--accent-crimson);
+  }
   .site-header__sentinel {
     display: block;
-    width: 100%;
     height: 1px;
     margin-top: -1px;
     pointer-events: none;
   }
-
   .site-header__reading-bar {
+    --header-edge: 3rem;
     position: fixed;
     z-index: var(--z-header);
     inset: 0 0 auto;
-    display: grid;
-    grid-template-columns: 3.75rem minmax(0, 1fr) 3.75rem;
-    align-items: center;
-    min-height: 3.75rem;
-    /* Seal the bar to the physical top of the screen — without this the
-     * page shows through the status-bar strip above the bar on iOS. */
-    padding-top: env(safe-area-inset-top, 0px);
-    border-bottom: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-    background: var(--bg-page);
-    box-shadow: 0 0.35rem 1.2rem rgb(15 15 15 / 4%);
+    min-height: 3.5rem;
+    border-bottom: 1px solid var(--rule-hair);
     opacity: 0;
     pointer-events: none;
-    transform: translate3d(0, -110%, 0);
+    transform: translateY(-100%);
     transition:
-      transform 320ms cubic-bezier(0.2, 0, 0, 1),
-      opacity 180ms cubic-bezier(0.2, 0, 0, 1),
-      background-color var(--t-base),
-      border-color var(--t-base);
-    contain: layout paint;
+      transform 200ms var(--ease-panel),
+      opacity 160ms var(--ease-panel);
   }
-
   .site-header__reading-bar.is-visible {
     opacity: 1;
     pointer-events: auto;
-    transform: translate3d(0, 0, 0);
-    will-change: transform, opacity;
+    transform: translateY(0);
   }
-
-  .site-header__wordmark-link--reading {
-    grid-column: 2;
-    max-width: 100%;
-    transform: scale(0.76);
-  }
-
-  .site-header[data-scroll-direction='up'] .site-header__wordmark-link--reading {
-    transform: scale(0.88);
-  }
-
   .site-header__wordmark--reading {
-    font-size: clamp(0.875rem, 3.5vw, 1.05rem);
+    font-size: clamp(0.78rem, 3.3vw, 1rem);
   }
-
-  .site-header__nav-tier {
-    display: none;
-  }
-
-  .site-header__nav-inner {
-    display: grid;
-    grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
-    min-height: 4.5rem;
-  }
-
-  .site-header__nav-inner::before {
-    content: '';
-  }
-
-  .site-header__desktop-nav {
-    display: grid;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .site-header__nav-list {
-    display: grid;
-    grid-template-columns: repeat(5, max-content);
-    justify-content: space-between;
-    justify-self: center;
-    width: min(100%, 72rem);
-    padding-inline: clamp(var(--sp-6), 6vw, var(--sp-16));
-  }
-
-  /* Nav links — colour shift plus a hairline that grows from the centre.
-   * Compositor-friendly on purpose: no blur, no text-shadow, no repaints. */
-  .site-header__nav-link {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    padding-block: var(--sp-2);
-    color: var(--ink-muted);
-    font-family: var(--font-sans);
-    font-size: var(--fs-meta);
-    font-weight: var(--w-semibold);
-    line-height: 1;
-    letter-spacing: var(--tr-nav);
-    text-transform: uppercase;
-    user-select: none;
-    transition: color var(--t-fast);
-  }
-
-  .site-header__nav-label {
-    position: relative;
-    display: inline-block;
-    padding-bottom: 0.45em;
-    background-image: linear-gradient(currentColor, currentColor);
-    background-position: 50% 100%;
-    background-repeat: no-repeat;
-    background-size: 0 1px;
-    transition: background-size var(--t-base);
-  }
-
-  .site-header__nav-link:hover {
-    color: var(--accent-crimson);
-  }
-
-  .site-header__nav-link:hover .site-header__nav-label {
-    background-size: 100% 1px;
-  }
-
-  .site-header__nav-link.is-active {
-    color: var(--ink-primary);
-  }
-
-  .site-header__nav-link.is-active .site-header__nav-label {
-    background-image: linear-gradient(var(--accent-crimson), var(--accent-crimson));
-    background-size: 100% 1px;
-  }
-
-  .site-header__menu-toggle {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--ink-primary);
-    user-select: none;
-    transition:
-      color var(--t-base),
-      transform var(--t-fast);
-  }
-
-  .site-header__menu-toggle:hover {
-    color: var(--accent-crimson);
-  }
-
-  .site-header__menu-toggle:active,
-  .site-menu__close:active {
-    transform: scale(0.96);
-  }
-
-  .site-header__menu-toggle--mobile {
-    position: absolute;
-    top: 50%;
-    right: var(--gutter-mobile);
-    translate: 0 -50%;
-  }
-
-  .site-header__menu-toggle--desktop {
-    display: none;
-  }
-
-  .site-header__menu-toggle--reading {
-    grid-column: 3;
-    justify-self: stretch;
-    width: 3.75rem;
-    height: 3.75rem;
-    border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-  }
-
-  .site-header__menu-icon {
-    position: relative;
-    display: block;
-    width: 1.5rem;
-    height: 1rem;
-  }
-
-  /* Hamburger morph — three bars fold into an ✕ on the same curve as the
-   * panel. Transform and opacity only, and no overshoot: the bars must not
-   * spring past the ✕ and rock back. */
-  .site-header__menu-icon span {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: currentColor;
+  .menu-line {
     transform-origin: center;
     transition:
-      transform var(--t-icon),
-      opacity 160ms var(--ease-panel);
+      transform 180ms var(--ease-panel),
+      opacity 140ms var(--ease-panel);
   }
-
-  .site-header__menu-icon span:nth-child(1) {
-    transform: translateY(-0.375rem);
+  .is-menu-open .menu-line--top {
+    transform: rotate(45deg) translateY(7px);
   }
-
-  .site-header__menu-icon span:nth-child(2) {
-    transform: scaleX(0.72);
-  }
-
-  .site-header__menu-icon span:nth-child(3) {
-    transform: translateY(0.375rem);
-  }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(1),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(1) {
-    transform: rotate(45deg) scaleX(0.82);
-  }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(2),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(2) {
+  .is-menu-open .menu-line--middle {
     opacity: 0;
-    transform: scaleX(0.1);
   }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(3),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(3) {
-    transform: rotate(-45deg) scaleX(0.82);
+  .is-menu-open .menu-line--bottom {
+    transform: rotate(-45deg) translateY(-7px);
   }
-
   .site-menu {
     position: fixed;
-    z-index: var(--z-modal);
-    inset: 0;
-    width: 100%;
-    max-width: none;
-    height: 100vh;
-    height: 100dvh;
-    max-height: none;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    background: transparent;
+    z-index: var(--z-header);
+    top: var(--menu-top, 4rem);
+    right: 0;
+    width: min(80vw, 22rem);
+    height: calc(100dvh - var(--menu-top, 4rem));
+    padding: var(--sp-6) var(--sp-5) calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
+    border-inline-start: 1px solid var(--rule-hair);
+    border-block: 1px solid var(--rule-hair);
+    background: var(--bg-page);
     color: var(--ink-primary);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .site-menu.is-open {
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  /* The scrim is invisible — the panel is part of the page, not an overlay.
-   * Kept in the DOM as a click-capture target only. */
-  .site-menu__scrim {
-    position: fixed;
-    inset: 0;
-    background: transparent;
-    cursor: default;
-  }
-
-  /* Panel slides in smoothly and lives as part of the page.
-   * Same paper background as the page; no shadow, no texture, no overshoot. */
-  .site-menu__panel {
-    position: fixed;
-    z-index: 1;
-    inset: calc(-1 * var(--sp-16)) 0 calc(-1 * var(--sp-16)) auto;
-    width: min(88vw, 28rem);
     overflow-y: auto;
     overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-    background-color: var(--bg-page);
-    /* The surface bleeds behind Safari's translucent top and bottom chrome;
-     * only the content is returned to the usable viewport. */
-    padding-top: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    transform: translate3d(calc(100% + 1px), 0, 0);
-    transition: transform var(--t-panel);
-    backface-visibility: hidden;
-    contain: paint;
-  }
-
-  .site-menu.is-open .site-menu__panel {
-    will-change: transform;
-  }
-
-  .site-menu.is-visible .site-menu__panel {
-    transform: translate3d(0, 0, 0);
-  }
-
-  .site-menu.is-closing .site-menu__panel {
-    transition: transform var(--t-panel-exit);
-  }
-
-  .site-menu__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 4.5rem;
-    padding-inline: var(--sp-5) var(--sp-3);
-    border-bottom: 1px solid var(--rule-hair);
-  }
-
-  .site-menu__brand {
-    min-width: 0;
-    color: var(--ink-primary);
-    font-family: var(--font-display);
-    font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.05rem);
-    font-weight: var(--w-semibold);
-    line-height: 1.05;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
-  }
-
-  .site-menu__brand-wordmark {
-    white-space: nowrap;
-  }
-
-  .site-menu__close {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--ink-primary);
+    visibility: hidden;
+    transform: translateX(100%);
     transition:
-      color var(--t-base),
-      transform var(--t-fast);
+      transform 180ms var(--ease-panel),
+      visibility 0s 180ms;
   }
-
-  .site-menu__close:hover {
-    color: var(--accent-crimson);
+  .is-menu-open .site-menu {
+    visibility: visible;
+    transform: translateX(0);
+    transition-duration: 240ms, 0s;
+    transition-delay: 0s;
   }
-
-  .site-menu__nav {
-    padding: var(--sp-5) var(--sp-5) var(--sp-10);
+  .site-menu ul {
+    margin-top: var(--sp-5);
   }
-
-  .site-menu__nav-list {
-    display: grid;
-    gap: var(--sp-1);
-  }
-
-  /* Items are always visible — no stagger, no transform.
-   * Emphasis comes from font-weight + background fade on hover/focus. */
-  .site-menu__nav-item {
-    opacity: 1;
-    transform: none;
-  }
-
   .site-menu__nav-link {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-4);
+    align-items: center;
     min-height: 3.25rem;
-    padding: var(--sp-2) var(--sp-4);
-    color: var(--ink-secondary);
     font-family: var(--font-sans);
-    font-size: clamp(1rem, 3vw, 1.125rem);
-    font-weight: var(--w-medium);
-    line-height: 1.4;
-    letter-spacing: 0.18em;
+    font-size: var(--fs-nav);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-nav);
+    color: var(--ink-secondary);
     text-transform: uppercase;
-    background-color: transparent;
-    /* Weight is not transitioned: Be Vietnam Pro ships as static faces, so an
-     * interpolated font-weight snaps to the next face mid-transition. Switching
-     * it on pointer-down instead reads as crisp while the colour carries the
-     * fade. The label grows rightward inside a space-between row, so the index
-     * on the right edge does not move. */
-    transition: color var(--t-base);
+    transition: color var(--t-nav);
   }
-
-  /* Hover is carried entirely by the type: the label gains weight and the
-   * ink fades to the house oxblood. No panel, no plate, no box behind it. */
-  .site-menu__nav-link:hover,
-  .site-menu__nav-link:focus-visible {
-    color: var(--accent-crimson);
-    font-weight: var(--w-bold);
-    background-color: transparent;
-    outline: none;
-  }
-
   .site-menu__nav-link.is-active {
     color: var(--ink-primary);
-    font-weight: var(--w-bold);
   }
-
-  /* No label transform — items stay put. */
-  .site-menu__nav-label {
-    position: relative;
-    display: inline-block;
-  }
-
-  .site-menu__nav-link.is-active .site-menu__nav-label::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -1rem;
-    width: 0.45rem;
-    height: 1.5px;
-    background: var(--accent-crimson);
-  }
-
-  .site-menu__nav-index {
-    font-family: var(--font-sans);
-    font-size: 0.625rem;
-    font-weight: var(--w-medium);
-    letter-spacing: 0.12em;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-muted);
-    opacity: 0.5;
-    transition:
-      color var(--t-base),
-      opacity var(--t-base);
-  }
-
-  .site-menu__nav-link:hover .site-menu__nav-index,
-  .site-menu__nav-link.is-active .site-menu__nav-index {
-    color: var(--accent-crimson);
-    opacity: 0.85;
-  }
-
-  /* No body scroll lock — the panel sits as part of the page, not as
-   * a modal overlay. */
-
-  @media (max-width: 22rem) {
-    .site-header__wordmark {
-      font-size: 0.72rem;
-      letter-spacing: 0.035em;
-    }
-
-    .site-menu__brand {
-      font-size: 0.75rem;
-      letter-spacing: 0.035em;
+  @media (min-width: 32rem) {
+    .site-header__newsletter-action {
+      padding-inline-start: var(--sp-3);
+      border-inline-start: 1px solid var(--rule-on-dark);
     }
   }
-
   @media (min-width: 48rem) {
-    .site-header__masthead {
-      min-height: 7.5rem;
-      padding: var(--sp-5) var(--gutter-tablet);
-      padding-top: calc(var(--sp-5) + env(safe-area-inset-top, 0px));
-      border-bottom: 0;
+    .site-header__stage {
+      --header-edge: 4.5rem;
     }
-
-    .site-header__wordmark-link {
-      max-width: none;
-    }
-
-    .site-header__wordmark {
-      font-size: clamp(1.5rem, 1.15rem + 1vw, 2rem);
-      letter-spacing: 0.06em;
-    }
-
+    .site-header__masthead,
     .site-header__reading-bar {
-      grid-template-columns: 4.25rem minmax(0, 1fr) 4.25rem;
-      min-height: 4.25rem;
+      grid-template-columns: var(--header-edge) minmax(0, 1fr) var(--header-edge);
     }
-
-    .site-header__wordmark--reading {
-      font-size: clamp(1rem, 0.8rem + 0.65vw, 1.35rem);
-      letter-spacing: 0.055em;
+    .site-header__masthead {
+      min-height: 5.5rem;
     }
-
-    .site-header__nav-tier {
-      display: block;
-      border-top: 1px solid var(--rule-hair);
-      border-bottom: 1px solid var(--rule-hair);
+    .header-control {
+      min-height: 4rem;
     }
-
-    .site-header__menu-toggle--mobile {
-      display: none;
-    }
-
-    .site-header__menu-toggle--desktop {
+    .header-control--search {
       display: grid;
-      width: 4.5rem;
-      height: 4.5rem;
-      border-left: 1px solid var(--rule-hair);
     }
-
-    .site-header__menu-toggle--reading {
-      width: 4.25rem;
-      height: 4.25rem;
+    .site-header__wordmark-link {
+      justify-content: center;
+      padding-inline-start: 0;
     }
-  }
-
-  /* Desktop (≥1024px): the menu docks as a fixed right-column sidebar.
-   * It still slides in, but is permanently in the layout — body does not
-   * dim, body does not lock scroll. */
-  @media (min-width: 64rem) {
-    .site-menu__panel {
-      width: min(22rem, 26vw);
+    .site-header__wordmark {
+      font-size: clamp(1.35rem, 1rem + 0.8vw, 1.7rem);
+      letter-spacing: 0.065em;
     }
-
-    .site-menu__nav {
-      padding: var(--sp-8) var(--sp-4) var(--sp-10);
+    .site-header__desktop-nav {
+      display: block;
     }
-
-    .site-menu__nav-link {
-      min-height: 2.75rem;
-      padding: var(--sp-2) var(--sp-3);
+    .site-header__reading-bar {
+      --header-edge: 3.75rem;
+      min-height: 3.75rem;
     }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .site-header__reading-bar,
-    .site-header__wordmark-link,
-    .site-header__menu-icon span,
-    .site-header__nav-label,
-    .site-menu__scrim,
-    .site-menu__panel,
-    .site-menu__nav-item,
-    .site-menu__nav-label {
-      transition-duration: 0.01ms;
-      transition-delay: 0ms;
+    .site-header__reading-bar .header-control {
+      min-height: 3.75rem;
+    }
+    .site-header__wordmark--reading {
+      font-size: 1.1rem;
     }
   }
 </style>

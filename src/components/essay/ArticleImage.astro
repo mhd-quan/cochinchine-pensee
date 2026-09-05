@@ -1,0 +1,22 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { responsiveImage, responsiveSource } from '~/lib/responsiveImage';
+
+interface Props extends HTMLAttributes<'img'> {
+  src: string;
+}
+
+const { src, alt = '', ...attributes } = Astro.props;
+const sizes = '(min-width: 900px) 820px, calc(100vw - 2.5rem)';
+---
+
+<picture>
+  <source {...responsiveSource(src, sizes)} />
+  <img
+    {...attributes}
+    {...responsiveImage(src, sizes)}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+  />
+</picture>

@@ -1,30 +1,21 @@
 /* ============================================================================
- * globals.css — Imports order matters. Tokens first, then reset, then prose.
+ * globals.css — Tokens, reset and shared typography. Prose loads with essays.
  * This file is imported once in BaseLayout.astro.
  * ========================================================================= */
 
 @import './tokens.css';
 @import './reset.css';
-@import './prose.css';
 
 /* ──────────────────────────────────────────────────────────────────
  * Fonts — self-hosted via @fontsource
- * Importing only what's used (weights + styles) to keep bundle small.
+ * Build-time subsets retain the publication's characters and OpenType features.
  * ────────────────────────────────────────────────────────────────── */
-@import '@fontsource/source-serif-4/400.css';
-@import '@fontsource/source-serif-4/400-italic.css';
-@import '@fontsource/source-serif-4/600.css';
-@import '@fontsource/source-serif-4/700.css';
+@import '../../.astro/fonts.css';
 
-@import '@fontsource/eb-garamond/400.css';
-@import '@fontsource/eb-garamond/400-italic.css';
-@import '@fontsource/eb-garamond/600.css';
-@import '@fontsource/eb-garamond/700.css';
-
-@import '@fontsource/be-vietnam-pro/400.css';
-@import '@fontsource/be-vietnam-pro/500.css';
-@import '@fontsource/be-vietnam-pro/600.css';
-@import '@fontsource/be-vietnam-pro/700.css';
+/* Format selection must not introduce a new layout box around existing art. */
+picture {
+  display: contents;
+}
 
 /* ──────────────────────────────────────────────────────────────────
  * Base typography
@@ -72,18 +63,18 @@ html {
   --reader-font-scale: 1;
 }
 
-html[data-measure='wide'] {
+html[data-reader='true'][data-measure='wide'] {
   --reader-measure: var(--measure-long);
 }
 
-html[data-theme='sepia'] {
+html[data-reader='true'][data-theme='sepia'] {
   --bg-page: #ECE6D8;
   --bg-page-deep: #EBE3D0;
   --bg-tinted: #E9DFCA;
   --rule-hair: #D8CFBE;
 }
 
-html[data-theme='night'] {
+html[data-reader='true'][data-theme='night'] {
   --bg-page: #1D1A18;
   --bg-page-deep: #14110F;
   --bg-tinted: #27211D;
@@ -101,25 +92,31 @@ html[data-theme='night'] {
 }
 
 /* Reading type size — resolved through vars so size and typeface compose */
-html[data-font-size='lg'] {
+html[data-reader='true'][data-font-size='lg'] {
   --reader-font-size: 1.1875rem;
 }
 
-html[data-font-size='xl'] {
+html[data-reader='true'][data-font-size='xl'] {
   --reader-font-size: 1.3125rem;
 }
 
 /* Reading typeface — applies to essay prose only; chrome keeps its registers */
-html[data-font='garamond'] {
+html[data-reader='true'][data-font='garamond'] {
   --reader-font-scale: 1.09; /* EB Garamond runs small on the body; compensate */
 }
 
-html[data-font='garamond'] .prose {
+html[data-reader='true'][data-font='garamond'] .prose {
   font-family: 'EB Garamond', 'Cormorant Garamond', Garamond, Georgia, serif;
 }
 
-html[data-font='newyork'] .prose {
+html[data-reader='true'][data-font='newyork'] .prose {
   font-family: ui-serif, 'New York', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+}
+
+/* Astro keeps the root element across navigations: browse pages must switch
+ * straight to Paper instead of animating through the previous reader color. */
+html:not([data-reader='true']) {
+  transition: none;
 }
 
 html.has-reader-panel-open {
@@ -208,3 +205,7 @@ html.has-reader-panel-open {
     animation: none !important;
   }
 }
+
+/* Keep the masthead and its attached navigation aligned while the menu is open. */
+html.has-site-menu { overflow: hidden; }
+.skip-link:focus-visible { position: fixed; z-index: var(--z-toast); top: var(--sp-3); left: var(--sp-3); width: auto; height: auto; padding: var(--sp-3) var(--sp-4); clip: auto; overflow: visible; white-space: normal; background: var(--bg-page); color: var(--ink-primary); }
