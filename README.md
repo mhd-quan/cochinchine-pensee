@@ -160,9 +160,11 @@ is ready. The existing `/essays` catalogue and all article URLs are retained.
 
 ## Site search and series
 
-Search opens from the left side of the masthead or compact reading bar, with a
-standalone `/search?q=...` page for shareable queries and progressively loaded
-results. The build indexes only published essay bodies with Pagefind; navigation
+Desktop search slides horizontally within the masthead/banner footprint or
+compact reading bar. Mobile search sits at the top of the attached hamburger
+menu; the logo and close toggle remain in the masthead. These lightweight native
+forms submit to `/search?q=...` for shareable, progressively loaded results.
+Opening the header search never loads the search engine or adds page height. The build indexes only published essay bodies with Pagefind; navigation
 and reader controls are excluded. The index, worker and WASM load only after a
 nonempty query. Use `npm run build` followed by `npm run preview` to exercise the
 search index locally; `npm run dev` alone does not generate it.

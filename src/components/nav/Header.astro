@@ -1,6 +1,8 @@
 ---
 import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
-import SearchResults from '~/components/search/SearchResults.astro';
+import HeaderSearch from '~/components/search/HeaderSearch.astro';
+import SearchForm from '~/components/search/SearchForm.astro';
+import SearchIcon from '~/components/search/SearchIcon.astro';
 
 const navItems = [
   { href: '/', label: 'Latest' },
@@ -11,79 +13,48 @@ const navItems = [
 ];
 const currentPath = Astro.url.pathname;
 const Wordmark = currentPath === '/' ? 'h1' : 'span';
-const isActive = (href: string) =>
-  href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+const isActive = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
 <header class="site-header" data-site-header>
   <div class="site-header__flow" data-header-flow data-nosnippet>
-    <div class="site-header__masthead">
-      <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-haspopup="dialog" aria-controls="site-search" data-search-open>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
+    <div class="site-header__stage" data-header-stage>
+      <div class="site-header__masthead" data-masthead>
+        <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="masthead-search" aria-expanded="false" data-search-open><SearchIcon /></a>
+        <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark></a>
+        <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
+        </button>
+      </div>
+      <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external" data-newsletter-banner>
+        <span class="site-header__newsletter-copy" lang="vi">Nhận thông tin bài viết mới</span>
+        <span class="site-header__newsletter-action">Subscribe on Substack <span aria-hidden="true">→</span></span>
       </a>
-      <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
-        <Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark>
-      </a>
-      <button type="button" class="header-control" aria-controls="site-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="Open navigation" data-menu-open>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 5h20M2 12h20M2 19h20"/></svg>
-      </button>
+      <HeaderSearch id="masthead-search" />
     </div>
-
-    <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external">
-      <span class="site-header__newsletter-copy" lang="vi">Nhận thông tin bài viết mới</span>
-      <span class="site-header__newsletter-action">Subscribe on Substack <span aria-hidden="true">→</span></span>
-    </a>
-
     <nav class="site-header__desktop-nav" aria-label="Primary">
       <ul class="site-header__nav-list">
-        {navItems.map((item) => (
-          <li><a href={item.href} class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>
-            <span class="nav-label">{item.label}</span>
-          </a></li>
-        ))}
+        {navItems.map((item) => <li><a href={item.href} class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>)}
       </ul>
     </nav>
   </div>
   <span class="site-header__sentinel" data-header-sentinel aria-hidden="true"></span>
 
   <div class="site-header__reading-bar" data-reading-bar aria-hidden="true" inert data-nosnippet>
-    <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-haspopup="dialog" aria-controls="site-search" data-search-open>
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
-    </a>
-    <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home"><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
-    <button type="button" class="header-control" aria-controls="site-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="Open navigation" data-menu-open>
-      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 5h20M2 12h20M2 19h20"/></svg>
+    <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="reading-search" aria-expanded="false" data-search-open><SearchIcon /></a>
+    <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
+    <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
     </button>
+    <HeaderSearch id="reading-search" compact />
   </div>
 
-  <dialog id="site-menu" class="site-menu" aria-labelledby="site-menu-title" data-site-dialog data-nosnippet>
-    <div class="site-menu__header">
-      <h2 id="site-menu-title">The Cochinchine Pensées</h2>
-      <button type="button" class="dialog-close" aria-label="Close navigation" data-dialog-close>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 5 14 14M5 19 19 5"/></svg>
-      </button>
-    </div>
-    <nav aria-label="Menu" class="site-menu__nav">
-      <ul>
-        {navItems.map((item) => (
-          <li><a href={item.href} class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>
-        ))}
-      </ul>
-      <a href="/search" class="site-menu__search-link" data-search-open>Tìm kiếm <span aria-hidden="true">→</span></a>
-    </nav>
-  </dialog>
-
-  <dialog id="site-search" class="site-search" aria-labelledby="site-search-title" data-site-dialog data-nosnippet>
-    <div class="site-search__inner">
-      <div class="site-search__header">
-        <h2 id="site-search-title" lang="vi">Tìm kiếm</h2>
-        <button type="button" class="dialog-close" aria-label="Đóng tìm kiếm" data-dialog-close>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 5 14 14M5 19 19 5"/></svg>
-        </button>
-      </div>
-      <SearchResults id="header-search" compact />
-    </div>
-  </dialog>
+  <nav id="site-menu" class="site-menu" aria-label="Menu" aria-hidden="true" inert data-site-menu data-nosnippet>
+    <SearchForm id="menu-search" variant="menu" />
+    <ul>
+      {navItems.map((item) => <li><a href={item.href} class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>)}
+    </ul>
+  </nav>
 </header>
 
 <script>
@@ -94,79 +65,140 @@ const isActive = (href: string) =>
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
     const flow = header.querySelector<HTMLElement>('[data-header-flow]')!;
+    const stage = header.querySelector<HTMLElement>('[data-header-stage]')!;
+    const masthead = header.querySelector<HTMLElement>('[data-masthead]')!;
+    const banner = header.querySelector<HTMLElement>('[data-newsletter-banner]')!;
     const bar = header.querySelector<HTMLElement>('[data-reading-bar]')!;
-    const sentinel = header.querySelector('[data-header-sentinel]')!;
-    const menu = header.querySelector<HTMLDialogElement>('#site-menu')!;
-    const search = header.querySelector<HTMLDialogElement>('#site-search')!;
-    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    let opener: HTMLElement | null = null;
-    let activeDialog: HTMLDialogElement | null = null;
-    let closeTimer: ReturnType<typeof setTimeout>;
-    let openFrame = 0;
+    const menu = header.querySelector<HTMLElement>('[data-site-menu]')!;
+    const desktop = matchMedia('(min-width: 48rem)');
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    let compact = false;
+    let menuOpen = false;
+    let search: HTMLElement | null = null;
+    let searchTrigger: HTMLElement | null = null;
+    let menuTrigger: HTMLElement | null = null;
+    let focusTimer: ReturnType<typeof setTimeout>;
+    const pageInert = new Map<HTMLElement, boolean>();
 
-    // The compact bar has a stable size. No per-scroll animation or layout reads.
+    const updateMenuTop = () => {
+      if (!menuOpen) return;
+      const bottom = compact ? bar.offsetHeight : masthead.getBoundingClientRect().bottom;
+      header.style.setProperty('--menu-top', `${Math.max(0, bottom)}px`);
+    };
+    const closeMenu = (restore = true) => {
+      if (!menuOpen) return;
+      menuOpen = false;
+      header.classList.remove('is-menu-open');
+      menu.inert = true;
+      menu.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('has-site-menu');
+      for (const button of header.querySelectorAll('[data-menu-toggle]')) {
+        button.setAttribute('aria-expanded', 'false');
+        button.setAttribute('aria-label', 'Open navigation');
+      }
+      for (const [element, previous] of pageInert) element.inert = previous;
+      pageInert.clear();
+      if (restore && menuTrigger?.isConnected) menuTrigger.focus({ preventScroll: true });
+      menuTrigger = null;
+    };
+    const closeSearch = (restore = true) => {
+      clearTimeout(focusTimer);
+      if (!search) return;
+      const region = search.closest<HTMLElement>('[data-header-stage], [data-reading-bar]')!;
+      search.classList.remove('is-open');
+      search.inert = true;
+      search.setAttribute('aria-hidden', 'true');
+      region.classList.remove('is-search-open');
+      for (const element of region.querySelectorAll<HTMLElement>(
+        '[data-masthead-logo], [data-search-open], [data-newsletter-banner]',
+      )) {
+        element.inert = false;
+        element.removeAttribute('aria-hidden');
+      }
+      searchTrigger?.setAttribute('aria-expanded', 'false');
+      if (restore && searchTrigger?.isConnected) searchTrigger.focus({ preventScroll: true });
+      search = null;
+      searchTrigger = null;
+    };
+    const openSearch = (trigger: HTMLElement) => {
+      closeMenu(false);
+      closeSearch(false);
+      const region = trigger.closest<HTMLElement>('[data-header-stage], [data-reading-bar]')!;
+      search = region.querySelector<HTMLElement>('[data-header-search]')!;
+      searchTrigger = trigger;
+      region.classList.add('is-search-open');
+      search.inert = false;
+      search.setAttribute('aria-hidden', 'false');
+      search.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      for (const element of region.querySelectorAll<HTMLElement>(
+        '[data-masthead-logo], [data-search-open], [data-newsletter-banner]',
+      )) {
+        element.inert = true;
+        element.setAttribute('aria-hidden', 'true');
+      }
+      // Focus after the slide so keyboard focus cannot scroll the clipped form.
+      const opened = search;
+      focusTimer = setTimeout(
+        () => {
+          if (search === opened) opened.querySelector('input')?.focus({ preventScroll: true });
+        },
+        reduced.matches ? 0 : 240,
+      );
+    };
+    const toggleMenu = (trigger: HTMLElement) => {
+      if (menuOpen) {
+        closeMenu();
+        return;
+      }
+      closeSearch(false);
+      menuTrigger = trigger;
+      menuOpen = true;
+      updateMenuTop();
+      menu.inert = false;
+      menu.setAttribute('aria-hidden', 'false');
+      header.classList.add('is-menu-open');
+      document.documentElement.classList.add('has-site-menu');
+      for (const button of header.querySelectorAll('[data-menu-toggle]')) {
+        button.setAttribute('aria-expanded', 'true');
+        button.setAttribute('aria-label', 'Close navigation');
+      }
+      // The masthead remains usable; background links leave keyboard navigation.
+      for (const element of document.querySelectorAll<HTMLElement>(
+        'main, .site-footer, .site-header__desktop-nav, [data-newsletter-banner]',
+      )) {
+        pageInert.set(element, element.inert);
+        element.inert = true;
+      }
+    };
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry) return;
-      const visible = entry.boundingClientRect.bottom <= 0;
-      bar.classList.toggle('is-visible', visible);
-      bar.inert = !visible;
-      bar.setAttribute('aria-hidden', String(!visible));
-      flow.inert = visible;
-      if (visible) flow.setAttribute('aria-hidden', 'true');
+      const next = entry.boundingClientRect.bottom <= 0;
+      if (next !== compact) {
+        closeSearch(false);
+        closeMenu(false);
+      }
+      compact = next;
+      bar.classList.toggle('is-visible', compact);
+      bar.inert = !compact;
+      bar.setAttribute('aria-hidden', String(!compact));
+      flow.inert = compact;
+      if (compact) flow.setAttribute('aria-hidden', 'true');
       else flow.removeAttribute('aria-hidden');
     });
-    observer.observe(sentinel);
-
-    const finishClose = (restoreFocus = true) => {
-      clearTimeout(closeTimer);
-      cancelAnimationFrame(openFrame);
-      if (!activeDialog) return;
-      const closedDialog = activeDialog;
-      activeDialog = null;
-      closedDialog.classList.remove('is-visible');
-      closedDialog.close();
-      document.documentElement.classList.remove('has-site-dialog');
-      for (const button of header.querySelectorAll('[data-menu-open]'))
-        button.setAttribute('aria-expanded', 'false');
-      if (restoreFocus && opener?.isConnected) {
-        // Scrolling or a viewport resize can hide the original opener.
-        const visibleOpener = opener.closest('[inert]')
-          ? bar.querySelector<HTMLElement>('[data-menu-open]')
-          : opener;
-        visibleOpener?.focus({ preventScroll: true });
-      }
-      opener = null;
-    };
-    const close = () => {
-      if (!activeDialog) return;
-      activeDialog.classList.remove('is-visible');
-      clearTimeout(closeTimer);
-      if (reducedMotion.matches) finishClose();
-      else closeTimer = setTimeout(finishClose, 180);
-    };
-    const open = (dialog: HTMLDialogElement, trigger: HTMLElement) => {
-      const returnTo = trigger.closest('dialog') ? opener : trigger;
-      finishClose(false);
-      opener = returnTo;
-      activeDialog = dialog;
-      document.documentElement.classList.add('has-site-dialog');
-      dialog.showModal();
-      for (const button of header.querySelectorAll('[data-menu-open]'))
-        button.setAttribute('aria-expanded', String(dialog === menu));
-      const focus = dialog.querySelector<HTMLElement>(
-        dialog === search ? 'input' : '[data-dialog-close]',
-      );
-      focus?.focus({ preventScroll: true });
-      // Commit the resting position before the transition. Transitions remain interruptible.
-      openFrame = requestAnimationFrame(() => {
-        openFrame = requestAnimationFrame(() => {
-          if (activeDialog === dialog) dialog.classList.add('is-visible');
-        });
-      });
-    };
-    for (const trigger of header.querySelectorAll<HTMLElement>(
-      '[data-menu-open], [data-search-open]',
-    )) {
+    observer.observe(header.querySelector('[data-header-sentinel]')!);
+    const resize = new ResizeObserver(updateMenuTop);
+    resize.observe(masthead);
+    resize.observe(bar);
+    desktop.addEventListener(
+      'change',
+      () => {
+        closeSearch(false);
+        updateMenuTop();
+      },
+      { signal },
+    );
+    for (const trigger of header.querySelectorAll<HTMLElement>('[data-search-open]')) {
       trigger.addEventListener(
         'click',
         (event) => {
@@ -175,60 +207,47 @@ const isActive = (href: string) =>
             (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
           )
             return;
+          if (!desktop.matches) return;
           event.preventDefault();
-          open(trigger.hasAttribute('data-search-open') ? search : menu, trigger);
+          openSearch(trigger);
         },
         { signal },
       );
     }
-    for (const dialog of [menu, search]) {
-      dialog.querySelector('[data-dialog-close]')!.addEventListener('click', close, { signal });
-      dialog.addEventListener(
-        'cancel',
-        (event) => {
-          event.preventDefault();
-          close();
-        },
-        { signal },
-      );
-      let onBackdrop = false;
-      const outside = (event: PointerEvent) => {
-        const rect = dialog.getBoundingClientRect();
-        return (
-          event.clientX < rect.left ||
-          event.clientX > rect.right ||
-          event.clientY < rect.top ||
-          event.clientY > rect.bottom
-        );
-      };
-      dialog.addEventListener(
-        'pointerdown',
-        (event) => {
-          onBackdrop = outside(event);
-        },
-        { signal },
-      );
-      dialog.addEventListener(
-        'pointerup',
-        (event) => {
-          if (onBackdrop && outside(event)) close();
-          onBackdrop = false;
-        },
-        { signal },
-      );
-      dialog.addEventListener(
-        'pointercancel',
-        () => {
-          onBackdrop = false;
-        },
-        { signal },
-      );
+    for (const button of header.querySelectorAll<HTMLElement>('[data-menu-toggle]')) {
+      button.addEventListener('click', () => toggleMenu(button), { signal });
     }
+    for (const button of header.querySelectorAll('[data-search-close]')) {
+      button.addEventListener('click', () => closeSearch(), { signal });
+    }
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Escape' || event.isComposing) return;
+        if (search || menuOpen) {
+          event.preventDefault();
+          closeSearch();
+          closeMenu();
+        }
+      },
+      { signal },
+    );
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (!(event.target instanceof Node) || header.contains(event.target)) return;
+        closeMenu(false);
+        closeSearch(false);
+      },
+      { signal },
+    );
     document.addEventListener(
       'astro:before-swap',
       () => {
-        finishClose(false);
+        closeSearch(false);
+        closeMenu(false);
         observer.disconnect();
+        resize.disconnect();
         lifecycle.abort();
       },
       { once: true, signal },
@@ -243,16 +262,21 @@ const isActive = (href: string) =>
     position: relative;
     background: var(--bg-page);
   }
+  .site-header__stage {
+    --header-edge: 3rem;
+    position: relative;
+  }
   .site-header__masthead,
   .site-header__reading-bar {
     display: grid;
-    grid-template-columns: var(--header-edge) minmax(0, 1fr) var(--header-edge);
+    grid-template-columns: minmax(0, 1fr) var(--header-edge);
     align-items: center;
     background: var(--bg-page);
     padding-top: env(safe-area-inset-top, 0px);
   }
   .site-header__masthead {
-    --header-edge: 3rem;
+    position: relative;
+    z-index: 1;
     min-height: 4rem;
   }
   .header-control {
@@ -261,16 +285,25 @@ const isActive = (href: string) =>
     width: 100%;
     min-height: 3rem;
     color: var(--ink-primary);
-    transition: color var(--t-fast);
+    background: var(--bg-page);
+    transition: color var(--t-nav);
   }
-  .header-control:hover,
-  .dialog-close:hover {
+  .header-control:hover {
     color: var(--accent-crimson);
+  }
+  .header-control--search {
+    display: none;
+  }
+  .header-control--menu {
+    position: relative;
+    z-index: 3;
+    align-self: stretch;
   }
   .site-header__wordmark-link {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-inline-start: var(--gutter-mobile);
     min-width: 0;
     min-height: 44px;
     color: var(--ink-primary);
@@ -296,7 +329,9 @@ const isActive = (href: string) =>
     color: var(--ink-on-dark);
     background: var(--bg-oxblood-well);
     text-align: center;
-    transition: background-color var(--t-fast);
+    transition:
+      background-color var(--t-fast),
+      opacity 180ms var(--ease-panel);
   }
   .site-header__newsletter-banner:hover {
     background: var(--accent-crimson);
@@ -318,6 +353,13 @@ const isActive = (href: string) =>
     letter-spacing: 0.07em;
     text-transform: uppercase;
     white-space: nowrap;
+  }
+  .is-search-open .site-header__newsletter-banner {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .is-menu-open .site-header__newsletter-banner {
+    opacity: 0;
   }
   .site-header__desktop-nav {
     display: none;
@@ -341,7 +383,7 @@ const isActive = (href: string) =>
     line-height: 1.4;
     letter-spacing: var(--tr-nav);
     text-transform: uppercase;
-    transition: color var(--t-fast);
+    transition: color var(--t-nav);
   }
   .nav-label {
     position: relative;
@@ -397,60 +439,49 @@ const isActive = (href: string) =>
   .site-header__wordmark--reading {
     font-size: clamp(0.78rem, 3.3vw, 1rem);
   }
-  dialog {
-    position: fixed;
-    border: 0;
-    color: var(--ink-primary);
-    background: var(--bg-page);
-    max-width: none;
-    max-height: none;
-    overscroll-behavior: contain;
+  .menu-line {
+    transform-origin: center;
+    transition:
+      transform 180ms var(--ease-panel),
+      opacity 140ms var(--ease-panel);
   }
-  dialog::backdrop {
-    background: rgb(15 15 15 / 12%);
+  .is-menu-open .menu-line--top {
+    transform: rotate(45deg) translateY(7px);
   }
-  .dialog-close {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    color: var(--ink-primary);
-    transition: color var(--t-fast);
+  .is-menu-open .menu-line--middle {
+    opacity: 0;
+  }
+  .is-menu-open .menu-line--bottom {
+    transform: rotate(-45deg) translateY(-7px);
   }
   .site-menu {
-    inset: 0 0 0 auto;
-    margin: 0;
-    width: min(88vw, 22rem);
-    height: 100dvh;
-    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    position: fixed;
+    z-index: var(--z-header);
+    top: var(--menu-top, 4rem);
+    right: 0;
+    width: min(80vw, 22rem);
+    height: calc(100dvh - var(--menu-top, 4rem));
+    padding: var(--sp-6) var(--sp-5) calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
     border-inline-start: 1px solid var(--rule-hair);
+    border-block: 1px solid var(--rule-hair);
+    background: var(--bg-page);
+    color: var(--ink-primary);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    visibility: hidden;
     transform: translateX(100%);
-    transition: transform 180ms var(--ease-panel);
+    transition:
+      transform 180ms var(--ease-panel),
+      visibility 0s 180ms;
   }
-  .site-menu.is-visible {
+  .is-menu-open .site-menu {
+    visibility: visible;
     transform: translateX(0);
-    transition-duration: 240ms;
+    transition-duration: 240ms, 0s;
+    transition-delay: 0s;
   }
-  .site-menu__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--sp-2);
-    min-height: 4rem;
-    padding-inline: var(--sp-5) var(--sp-2);
-    border-bottom: 1px solid var(--rule-hair);
-  }
-  .site-menu__header h2 {
-    font-family: var(--font-display);
-    font-weight: var(--w-semibold);
-    font-size: 0.875rem;
-    line-height: 1.3;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-  }
-  .site-menu__nav {
-    padding: var(--sp-5);
+  .site-menu ul {
+    margin-top: var(--sp-5);
   }
   .site-menu__nav-link {
     display: flex;
@@ -462,49 +493,10 @@ const isActive = (href: string) =>
     letter-spacing: var(--tr-nav);
     color: var(--ink-secondary);
     text-transform: uppercase;
-    transition: color var(--t-fast);
+    transition: color var(--t-nav);
   }
   .site-menu__nav-link.is-active {
     color: var(--ink-primary);
-  }
-  .site-menu__search-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 44px;
-    margin-top: var(--sp-5);
-    border-top: 1px solid var(--rule-hair);
-    font-family: var(--font-sans);
-    font-size: var(--fs-meta);
-    color: var(--accent-crimson);
-  }
-  .site-search {
-    inset: 0 0 auto;
-    margin: 0;
-    width: 100%;
-    max-height: 90dvh;
-    padding: calc(var(--sp-3) + env(safe-area-inset-top, 0px)) var(--gutter-mobile) var(--sp-6);
-    overflow-y: auto;
-    border-bottom: 1px solid var(--rule-hair);
-    opacity: 0;
-    transition: opacity 160ms var(--ease-panel);
-  }
-  .site-search.is-visible {
-    opacity: 1;
-  }
-  .site-search__inner {
-    max-width: 48rem;
-    margin-inline: auto;
-  }
-  .site-search__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .site-search__header h2 {
-    font-family: var(--font-display);
-    font-size: var(--fs-h3);
-    font-weight: var(--w-semibold);
   }
   @media (min-width: 32rem) {
     .site-header__newsletter-action {
@@ -513,12 +505,25 @@ const isActive = (href: string) =>
     }
   }
   @media (min-width: 48rem) {
-    .site-header__masthead {
+    .site-header__stage {
       --header-edge: 4.5rem;
+    }
+    .site-header__masthead,
+    .site-header__reading-bar {
+      grid-template-columns: var(--header-edge) minmax(0, 1fr) var(--header-edge);
+    }
+    .site-header__masthead {
       min-height: 5.5rem;
     }
     .header-control {
       min-height: 4rem;
+    }
+    .header-control--search {
+      display: grid;
+    }
+    .site-header__wordmark-link {
+      justify-content: center;
+      padding-inline-start: 0;
     }
     .site-header__wordmark {
       font-size: clamp(1.35rem, 1rem + 0.8vw, 1.7rem);

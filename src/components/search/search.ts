@@ -37,9 +37,7 @@ class PublicationSearch extends HTMLElement {
     const status = this.querySelector<HTMLElement>('.search-status')!;
     const list = this.querySelector<HTMLOListElement>('ol')!;
     const more = this.querySelector<HTMLButtonElement>('.search-more')!;
-    const all = this.querySelector<HTMLAnchorElement>('.search-all')!;
-    const compact = this.dataset.compact === 'true';
-    const pageSize = compact ? 5 : 10;
+    const pageSize = 10;
     let hits: SearchHit[] = [];
     let shown = 0;
     let generation = 0;
@@ -81,7 +79,7 @@ class PublicationSearch extends HTMLElement {
       list.append(fragment);
       shown += data.length;
       more.disabled = false;
-      more.hidden = compact || shown >= hits.length;
+      more.hidden = shown >= hits.length;
     };
 
     const run = async () => {
@@ -89,14 +87,11 @@ class PublicationSearch extends HTMLElement {
       const ticket = ++generation;
       const query = input.value.trim().slice(0, 200);
       more.hidden = true;
-      all.hidden = true;
       list.replaceChildren();
       shown = 0;
-      if (!compact) {
-        const url = new URL(location.href);
-        query ? url.searchParams.set('q', query) : url.searchParams.delete('q');
-        history.replaceState(history.state, '', url);
-      }
+      const url = new URL(location.href);
+      query ? url.searchParams.set('q', query) : url.searchParams.delete('q');
+      history.replaceState(history.state, '', url);
       if (!query) {
         status.textContent = '';
         this.removeAttribute('aria-busy');
@@ -114,8 +109,6 @@ class PublicationSearch extends HTMLElement {
         status.textContent = hits.length
           ? `${hits.length} kết quả`
           : `Không tìm thấy kết quả cho “${query}”. Thử từ khóa khác.`;
-        all.href = `/search?q=${encodeURIComponent(query)}`;
-        all.hidden = !compact || hits.length === 0;
       } catch {
         if (ticket !== generation || signal.aborted) return;
         list.replaceChildren();
@@ -175,10 +168,8 @@ class PublicationSearch extends HTMLElement {
       { signal },
     );
     signal.addEventListener('abort', () => clearTimeout(timer), { once: true });
-    if (!compact) {
-      input.value = new URLSearchParams(location.search).get('q')?.slice(0, 200) ?? '';
-      if (input.value) void run();
-    }
+    input.value = new URLSearchParams(location.search).get('q')?.slice(0, 200) ?? '';
+    if (input.value) void run();
   }
   lifecycle?: AbortController;
   disconnectedCallback() {

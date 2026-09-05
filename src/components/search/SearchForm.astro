@@ -1,0 +1,107 @@
+---
+import SearchIcon from './SearchIcon.astro';
+interface Props { id: string; variant?: 'page' | 'header' | 'compact' | 'menu' }
+const { id, variant = 'page' } = Astro.props;
+---
+
+<form action="/search" method="get" role="search" class:list={['search-form', `search-form--${variant}`]} lang="vi">
+  <label for={id} class:list={['search-form__label', { 'sr-only': variant === 'page' || variant === 'compact' }]}>Tìm kiếm</label>
+  <div class="search-form__field">
+    <button type="submit" aria-label="Tìm kiếm" class="search-form__submit"><SearchIcon /></button>
+    <input id={id} name="q" type="search" placeholder="Tìm bài viết…" aria-label="Tìm bài viết" autocomplete="off" maxlength="200" />
+  </div>
+</form>
+
+<style>
+  .search-form {
+    min-width: 0;
+  }
+  .search-form__label {
+    display: block;
+    margin-bottom: var(--sp-2);
+    font-family: var(--font-sans);
+    font-size: var(--fs-nav);
+    font-weight: var(--w-semibold);
+    line-height: 1.4;
+    letter-spacing: var(--tr-nav);
+    text-transform: uppercase;
+    color: var(--ink-primary);
+  }
+  .search-form__field {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    border-bottom: 1px solid var(--rule-hair);
+    transition: border-color var(--t-nav);
+  }
+  .search-form__field:focus-within {
+    border-bottom-color: var(--accent-crimson);
+  }
+  input {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: var(--sp-2) 0;
+    border: 0;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+    color: var(--ink-primary);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: var(--w-regular);
+    line-height: 1.5;
+  }
+  input:focus,
+  input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+  input::placeholder {
+    color: var(--ink-muted);
+    opacity: 1;
+    font-size: var(--fs-nav);
+    font-weight: var(--w-regular);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  input::-webkit-search-cancel-button,
+  input::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  .search-form__submit {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 48px;
+    color: var(--ink-primary);
+    transition: color var(--t-nav);
+  }
+  .search-form__submit:hover,
+  .search-form__submit:focus-visible {
+    color: var(--accent-crimson);
+  }
+  .search-form--header .search-form__label {
+    margin-inline-start: calc(44px + var(--sp-3));
+  }
+  .search-form--header .search-form__field,
+  .search-form--compact .search-form__field {
+    border-bottom-color: transparent;
+  }
+  .search-form--header .search-form__field:focus-within,
+  .search-form--compact .search-form__field:focus-within {
+    border-bottom-color: var(--accent-crimson);
+  }
+  .search-form--compact input {
+    min-height: 44px;
+  }
+  .search-form--menu .search-form__field {
+    gap: var(--sp-1);
+  }
+  .search-form--menu .search-form__submit {
+    order: 1;
+  }
+</style>

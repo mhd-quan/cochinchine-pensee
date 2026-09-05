@@ -1,21 +1,14 @@
 ---
-interface Props {
-  id: string;
-  compact?: boolean;
-}
-const { id, compact = false } = Astro.props;
+import SearchForm from './SearchForm.astro';
+interface Props { id: string }
+const { id } = Astro.props;
 ---
 
-<publication-search data-compact={compact ? 'true' : undefined} lang="vi">
-  <form action="/search" role="search" class="search-form">
-    <label for={id} class="sr-only">Tìm bài viết</label>
-    <input id={id} name="q" type="search" placeholder="Tìm bài viết…" autocomplete="off" maxlength="200" />
-    <button type="submit">Tìm kiếm</button>
-  </form>
+<publication-search lang="vi">
+  <SearchForm id={id} />
   <p class="search-status" role="status" aria-live="polite"></p>
   <ol class="search-results"></ol>
   <button type="button" class="search-more" hidden>Xem thêm kết quả</button>
-  <a class="search-all" href="/search" hidden>Xem tất cả kết quả →</a>
   <noscript><p>Bật JavaScript để tìm kiếm, hoặc <a href="/archives">xem kho bài viết</a>.</p></noscript>
 </publication-search>
 
@@ -27,36 +20,6 @@ const { id, compact = false } = Astro.props;
   publication-search {
     display: block;
     min-width: 0;
-  }
-  .search-form {
-    display: flex;
-    border-bottom: 2px solid var(--ink-primary);
-    gap: var(--sp-3);
-  }
-  input {
-    width: 100%;
-    min-width: 0;
-    min-height: 3.5rem;
-    padding: var(--sp-3) 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--ink-primary);
-    font-family: var(--font-serif);
-    font-size: 1rem;
-  }
-  input::placeholder {
-    color: var(--ink-secondary);
-    opacity: 1;
-  }
-  .search-form button {
-    flex-shrink: 0;
-    min-height: 44px;
-    padding-inline: var(--sp-2);
-    color: var(--accent-crimson);
-    font-family: var(--font-sans);
-    font-size: var(--fs-meta);
-    font-weight: var(--w-semibold);
   }
   .search-status {
     margin-block: var(--sp-4);
@@ -97,8 +60,7 @@ const { id, compact = false } = Astro.props;
     background: var(--selection-bg);
     color: inherit;
   }
-  .search-more,
-  .search-all {
+  .search-more {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
