@@ -4,14 +4,14 @@
  *   1. Hero essay (latest, with cover image)
  *   2. "Recent Essays" grid
  *   3. "From the Stacks" book reviews grid
- *   4. Series clusters (the trio of essays in each series)
+ *   4. One browsable series carousel
  *
  * No right rail, no utility nav, no floating issue line in header.
  */
 import { getCollection } from 'astro:content';
 import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
-import SeriesCluster from '~/components/essay/SeriesCluster.astro';
+import SeriesCarousel from '~/components/essay/SeriesCarousel.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import SiteIdentity from '~/components/seo/SiteIdentity.astro';
 import { titleCaps } from '~/lib/titleCaps';
@@ -44,7 +44,8 @@ const featuredClusters = featuredSeries
       .map((id) => essaysById.get(id))
       .filter((essay) => essay !== undefined),
   }))
-  .filter(({ essays }) => essays.length > 0);
+  .filter(({ essays }) => essays.length > 0)
+  .sort((a, b) => Math.max(...b.essays.map((essay) => +essay.data.date)) - Math.max(...a.essays.map((essay) => +essay.data.date)));
 ---
 
 <BaseLayout
@@ -142,12 +143,7 @@ const featuredClusters = featuredSeries
     </section>
   )}
 
-  {/* ── Series clusters ── */}
-  <div class="clusters container">
-    {featuredClusters.map(({ series, essays }) => (
-      <SeriesCluster series={series} essays={essays} />
-    ))}
-  </div>
+  <SeriesCarousel clusters={featuredClusters} />
 </BaseLayout>
 
 <script>
@@ -203,11 +199,11 @@ const featuredClusters = featuredSeries
       resize.observe(track);
 
       prev.addEventListener('click', () => {
-        track.scrollBy({ left: -page(), behavior: 'smooth' });
+        track.scrollBy({ left: -page(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }, { signal });
 
       next.addEventListener('click', () => {
-        track.scrollBy({ left: page(), behavior: 'smooth' });
+        track.scrollBy({ left: page(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       }, { signal });
 
       track.addEventListener('scroll', scheduleSync, { passive: true, signal });
@@ -302,6 +298,7 @@ const featuredClusters = featuredSeries
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    flex-wrap: wrap;
     margin-bottom: var(--sp-6);
     padding-bottom: var(--sp-3);
     border-bottom: 2px solid var(--ink-primary);
@@ -394,8 +391,8 @@ const featuredClusters = featuredSeries
   .stacks__arrow {
     display: grid;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--rule-hair);
     color: var(--ink-primary);
     font-family: var(--font-sans);
@@ -461,8 +458,4 @@ const featuredClusters = featuredSeries
     color: var(--ink-primary);
   }
 
-  /* Series cluster container */
-  .clusters {
-    padding-block: 0 var(--sp-12);
-  }
 </style>

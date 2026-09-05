@@ -1,0 +1,331 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import EssayCard from './EssayCard.astro';
+interface Props {
+  clusters: { series: CollectionEntry<'series'>; essays: CollectionEntry<'essays'>[] }[];
+}
+const { clusters } = Astro.props;
+const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 8rem) / 3), 96px';
+---
+
+{clusters.length > 0 && (
+  <section class="series-carousel container" aria-labelledby="home-series-title" aria-roledescription="carousel" data-series-carousel>
+    <div class="series-carousel__header">
+      <h2 id="home-series-title">Series</h2>
+      <a href="/series" class="series-carousel__all">All series →</a>
+    </div>
+    <div class="series-carousel__toolbar">
+      <label class="sr-only" for="series-picker">Chọn series</label>
+      <select id="series-picker" aria-controls="series-track" data-series-picker>
+        {clusters.map(({ series }, i) => <option value={i}>{series.data.nameVi ?? series.data.name}</option>)}
+      </select>
+      <div class="series-carousel__controls">
+        <span class="series-carousel__position" data-series-position aria-hidden="true">1 / {clusters.length}</span>
+        <button type="button" data-series-prev aria-label="Series trước" aria-controls="series-track" disabled><span aria-hidden="true">←</span></button>
+        <button type="button" data-series-next aria-label="Series tiếp theo" aria-controls="series-track" disabled={clusters.length < 2}><span aria-hidden="true">→</span></button>
+      </div>
+    </div>
+    <div class="series-carousel__track" id="series-track" tabindex="0" aria-label="Các series" data-series-track>
+      {clusters.map(({ series, essays }, i) => (
+        <section class="series-carousel__slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${clusters.length}: ${series.data.nameVi ?? series.data.name}`} data-series-slide>
+          <div class="series-carousel__intro">
+            <h3><a href={`/series/${series.data.slug}`}>{series.data.nameVi ?? series.data.name}</a></h3>
+            <a class="series-carousel__browse" href={`/series/${series.data.slug}`}>Xem loạt bài →</a>
+          </div>
+          <ul class="series-carousel__essays">
+            {essays.slice(0, 3).map((essay) => <li><EssayCard essay={essay} imageSizes={imageSizes} /></li>)}
+          </ul>
+        </section>
+      ))}
+    </div>
+    <p class="sr-only" data-series-announcement role="status" aria-live="polite"></p>
+  </section>
+)}
+
+<script>
+  function initSeries() {
+    const root = document.querySelector<HTMLElement>('[data-series-carousel]');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = 'true';
+    const track = root.querySelector<HTMLElement>('[data-series-track]')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-series-slide]')];
+    const picker = root.querySelector<HTMLSelectElement>('select')!;
+    const prev = root.querySelector<HTMLButtonElement>('[data-series-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-series-next]')!;
+    const position = root.querySelector<HTMLElement>('[data-series-position]')!;
+    const announcement = root.querySelector<HTMLElement>('[data-series-announcement]')!;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    let active = 0;
+    let target = 0;
+    let frame = 0;
+    let settle: ReturnType<typeof setTimeout>;
+    const sync = () => {
+      frame = 0;
+      const index = Math.max(
+        0,
+        Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth)),
+      );
+      active = index;
+      picker.value = String(index);
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      position.textContent = `${index + 1} / ${slides.length}`;
+      slides.forEach((slide, i) => {
+        const hidden = i !== index;
+        if (hidden && slide.contains(document.activeElement)) track.focus({ preventScroll: true });
+        slide.inert = hidden;
+        slide.setAttribute('aria-hidden', String(hidden));
+      });
+    };
+    const settleScroll = () => {
+      target = active;
+      announcement.textContent = `${active + 1} / ${slides.length}: ${picker.selectedOptions[0].text}`;
+    };
+    const go = (index: number) => {
+      target = Math.max(0, Math.min(slides.length - 1, index));
+      track.scrollTo({
+        left: target * track.clientWidth,
+        behavior: reduced.matches ? 'instant' : 'smooth',
+      });
+    };
+    picker.addEventListener('change', () => go(Number(picker.value)), { signal });
+    prev.addEventListener('click', () => go(target - 1), { signal });
+    next.addEventListener('click', () => go(target + 1), { signal });
+    track.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        go(
+          event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? slides.length - 1
+              : target + (event.key === 'ArrowRight' ? 1 : -1),
+        );
+      },
+      { signal },
+    );
+    track.addEventListener(
+      'scroll',
+      () => {
+        if (!frame) frame = requestAnimationFrame(sync);
+        clearTimeout(settle);
+        settle = setTimeout(settleScroll, 140);
+      },
+      { passive: true, signal },
+    );
+    track.addEventListener('scrollend', settleScroll, { signal });
+    const resize = new ResizeObserver(() => {
+      track.scrollTo({ left: active * track.clientWidth, behavior: 'instant' });
+      sync();
+      target = active;
+    });
+    resize.observe(track);
+    sync();
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        lifecycle.abort();
+        resize.disconnect();
+        cancelAnimationFrame(frame);
+        clearTimeout(settle);
+      },
+      { once: true, signal },
+    );
+  }
+  document.addEventListener('astro:page-load', initSeries);
+  initSeries();
+</script>
+
+<style>
+  .series-carousel {
+    padding-block: var(--sp-10);
+  }
+  .series-carousel__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-3);
+    border-bottom: 2px solid var(--ink-primary);
+  }
+  .series-carousel__header h2 {
+    font-family: var(--font-sans);
+    font-size: var(--fs-h4);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+  }
+  .series-carousel__all,
+  .series-carousel__browse {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    color: var(--accent-crimson);
+  }
+  .series-carousel__all {
+    letter-spacing: var(--tr-kicker);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .series-carousel__all:hover,
+  .series-carousel__browse:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  .series-carousel__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    padding-block: var(--sp-4);
+  }
+  select {
+    min-height: 44px;
+    min-width: 0;
+    max-width: 100%;
+    padding: var(--sp-2);
+    border: 1px solid var(--rule-hair);
+    color: var(--ink-primary);
+    background: var(--bg-page);
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    border-radius: 0;
+  }
+  .series-carousel__controls {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  .series-carousel__controls button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--rule-hair);
+    color: var(--ink-primary);
+    transition:
+      color var(--t-fast),
+      border-color var(--t-fast);
+  }
+  .series-carousel__controls button:hover:not(:disabled) {
+    color: var(--accent-crimson);
+    border-color: var(--accent-crimson);
+  }
+  .series-carousel__controls button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .series-carousel__position {
+    min-width: 3.5rem;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    font-variant-numeric: tabular-nums;
+  }
+  .series-carousel__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .series-carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+  .series-carousel__slide {
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .series-carousel__intro {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-block: var(--sp-2);
+  }
+  .series-carousel__intro h3 {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: var(--w-semibold);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .series-carousel__intro h3 a {
+    color: var(--ink-primary);
+  }
+  .series-carousel__browse {
+    flex-shrink: 0;
+  }
+  .series-carousel__essays {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-6);
+  }
+  .series-carousel__essays :global(.essay-card__kicker) {
+    display: none;
+  }
+  @media (max-width: 47.999rem) {
+    .series-carousel {
+      padding-block: var(--sp-8);
+    }
+    .series-carousel__position {
+      display: none;
+    }
+    .series-carousel__intro {
+      align-items: start;
+      flex-direction: column;
+      gap: 0;
+    }
+    .series-carousel__intro h3 {
+      font-size: 1.5rem;
+    }
+    .series-carousel__essays {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .series-carousel__essays :global(.essay-card) {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      align-items: center;
+      gap: var(--sp-4);
+      padding-block: var(--sp-4);
+    }
+    .series-carousel__essays :global(.essay-card__cover-link) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .series-carousel__essays :global(.essay-card__body) {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+    }
+    .series-carousel__essays :global(.essay-card__cover) {
+      aspect-ratio: 4 / 3;
+      margin: 0;
+    }
+    .series-carousel__essays :global(.essay-card__title) {
+      font-size: 1.125rem;
+      margin-bottom: 0;
+    }
+    .series-carousel__essays :global(.essay-card__issue) {
+      font-size: 0.6875rem;
+      margin-bottom: var(--sp-2);
+    }
+    .series-carousel__essays :global(.essay-card__subtitle),
+    .series-carousel__essays :global(.essay-card__byline) {
+      display: none;
+    }
+  }
+</style>

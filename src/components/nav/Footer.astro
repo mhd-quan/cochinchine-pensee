@@ -26,8 +26,8 @@ const footerLinks = [
       </nav>
 
       <section class="site-footer__newsletter" aria-labelledby="footer-newsletter-title">
-        <h2 id="footer-newsletter-title" class="site-footer__newsletter-title">
-          Receive the weekly newsletter
+        <h2 id="footer-newsletter-title" class="site-footer__newsletter-title" lang="vi">
+          Nhận thông tin bài viết mới
         </h2>
         <a href={SUBSTACK_SUBSCRIBE_URL} class="site-footer__signup" rel="external">
           Sign up on Substack
@@ -47,7 +47,6 @@ const footerLinks = [
         </p>
       </div>
       <div class="site-footer__identity">
-        <p class="site-footer__edition">A Vietnamese journal of essays &amp; ideas</p>
         <a href="/" class="site-footer__wordmark" aria-label="The Cochinchine Pensées — home">
           The Cochinchine Pensées
         </a>
@@ -59,9 +58,9 @@ const footerLinks = [
 
 <style>
   .site-footer {
-    --footer-link-size: 0.875rem;
+    --footer-link-size: var(--fs-nav);
     --footer-divider-space: clamp(2rem, 5vw, 5rem);
-    margin-top: var(--sp-16);
+    margin-top: var(--sp-10);
     border-top: 4px solid var(--bg-oxblood-well);
     background: var(--bg-ink-well);
     color: var(--ink-on-dark);
@@ -106,7 +105,7 @@ const footerLinks = [
 
   .site-footer__link {
     padding-block: var(--sp-2);
-    text-decoration-thickness: 1px;
+    text-decoration-thickness: 2px;
     text-underline-offset: 0.35em;
   }
 
@@ -125,10 +124,10 @@ const footerLinks = [
   }
 
   .site-footer__newsletter-title {
-    max-width: 18ch;
+    max-width: 25ch;
     margin-bottom: var(--sp-5);
     font-family: var(--font-display);
-    font-size: var(--fs-h1);
+    font-size: clamp(1.25rem, 1.05rem + 0.5vw, 1.5rem);
     font-weight: var(--w-regular);
     line-height: var(--lh-headline);
     text-wrap: balance;
@@ -177,11 +176,11 @@ const footerLinks = [
 
   .site-footer__wordmark {
     display: inline-block;
-    max-width: 20ch;
+    max-width: none;
     margin-top: var(--sp-5);
     padding-block: var(--sp-2);
     font-family: var(--font-display);
-    font-size: var(--fs-h2);
+    font-size: 1.25rem;
     font-weight: var(--w-semibold);
     font-variant-caps: small-caps;
     line-height: var(--lh-headline);

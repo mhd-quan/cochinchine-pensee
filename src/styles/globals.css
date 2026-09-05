@@ -205,3 +205,7 @@ html.has-reader-panel-open {
     animation: none !important;
   }
 }
+
+/* Keep the masthead and its attached navigation aligned while the menu is open. */
+html.has-site-menu { overflow: hidden; }
+.skip-link:focus-visible { position: fixed; z-index: var(--z-toast); top: var(--sp-3); left: var(--sp-3); width: auto; height: auto; padding: var(--sp-3) var(--sp-4); clip: auto; overflow: visible; white-space: normal; background: var(--bg-page); color: var(--ink-primary); }

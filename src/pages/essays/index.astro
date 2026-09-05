@@ -36,9 +36,6 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
       <header class="archive__header">
         <p class="archive__eyebrow">Archive</p>
         <h1 class="archive__title">All Essays</h1>
-        <p class="archive__subtitle">
-          {sortedEssays.length} essays, sorted from most recent.
-        </p>
       </header>
 
       <ul class="archive__list archive__list--rows" data-archive-rows>
@@ -74,7 +71,7 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
 
   .archive__header {
     text-align: center;
-    margin-bottom: var(--sp-12);
+    margin-bottom: var(--sp-8);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
@@ -91,19 +88,12 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
 
   .archive__title {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    font-size: var(--fs-h1);
     line-height: 1.1;
     color: var(--ink-primary);
     margin-bottom: var(--sp-3);
   }
 
-  .archive__subtitle {
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--ink-secondary);
-    font-size: var(--fs-body);
-    margin-bottom: var(--sp-5);
-  }
 
   /* Mobile: row list. Desktop: hidden via media query below. */
   .archive__list--grid {

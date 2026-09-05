@@ -17,7 +17,6 @@ const monthLabel = (month: string) => new Date(`${month}-01T00:00:00Z`)
 ---
 
 <DirectoryLayout title="Archives" description="Tra cứu toàn bộ tiểu luận và pensées của The Cochinchine Pensées theo tháng và năm xuất bản.">
-  <p slot="intro">Essays and pensées, collected by month of publication.</p>
   <nav class="directory-jump" aria-label="Publication months">
     {[...months.keys()].map((month) => <a href={`#month-${month}`}>{monthLabel(month)}</a>)}
   </nav>

@@ -12,24 +12,21 @@ import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
       <header class="subscribe__header">
         <p class="subscribe__eyebrow">Newsletter</p>
         <h1 class="subscribe__title">Subscribe</h1>
-        <p class="subscribe__intro">
-          Weekly long-form Vietnamese essays, delivered directly to your inbox.
+        <p class="subscribe__intro" lang="vi">
+          Nhận thông tin bài viết mới
         </p>
       </header>
 
       <p class="subscribe__action">
         <a href={SUBSTACK_SUBSCRIBE_URL} class="subscribe__link subscribe__cta" rel="external">
-          Open on Substack →
+          Subscribe on Substack →
         </a>
       </p>
 
       <section class="subscribe__feeds" aria-labelledby="subscribe-feeds-title">
         <h2 id="subscribe-feeds-title" class="subscribe__feeds-title">Prefer a feed?</h2>
         <p class="subscribe__feeds-copy">
-          Follow every new essay via{' '}
-          <a href="/rss.xml" class="subscribe__link">RSS</a>,{' '}
-          <a href="/feed.json" class="subscribe__link">JSON Feed</a>, or{' '}
-          <a href="/" class="subscribe__link">return to the latest essay</a>.
+          <a href="/rss.xml" class="subscribe__link">RSS</a> · <a href="/feed.json" class="subscribe__link">JSON Feed</a>
         </p>
       </section>
     </div>
