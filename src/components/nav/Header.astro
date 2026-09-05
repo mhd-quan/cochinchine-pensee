@@ -1,12 +1,6 @@
 ---
-/**
- * Header — CRB-inspired masthead and navigation.
- *
- * Desktop: centered wordmark, spacious primary-navigation tier, and a
- * right-edge menu button. Mobile: compact wordmark, no navigation strip,
- * and a top-right menu button. Both buttons open the same accessible drawer.
- */
 import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
+import SearchResults from '~/components/search/SearchResults.astro';
 
 const navItems = [
   { href: '/', label: 'Latest' },
@@ -15,484 +9,231 @@ const navItems = [
   { href: '/books', label: 'Books' },
   { href: '/about', label: 'About' },
 ];
-
 const currentPath = Astro.url.pathname;
 const Wordmark = currentPath === '/' ? 'h1' : 'span';
-
-function isActive(itemHref: string): boolean {
-  if (itemHref === '/') return currentPath === '/';
-  return currentPath.startsWith(itemHref);
-}
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
-<header class="site-header" data-site-header data-scroll-direction="down">
-  <span class="site-header__safe-area" aria-hidden="true"></span>
-
+<header class="site-header" data-site-header>
   <div class="site-header__flow" data-header-flow data-nosnippet>
     <div class="site-header__masthead">
+      <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-haspopup="dialog" aria-controls="site-search" data-search-open>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
+      </a>
       <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home">
         <Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark>
       </a>
-
-      <button
-        type="button"
-        class="site-header__menu-toggle site-header__menu-toggle--mobile"
-        aria-controls="site-menu"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-        aria-label="Open navigation"
-        data-menu-open
-      >
-        <span class="site-header__menu-icon" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
+      <button type="button" class="header-control" aria-controls="site-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="Open navigation" data-menu-open>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 5h20M2 12h20M2 19h20"/></svg>
       </button>
     </div>
 
-    <a
-      href={SUBSTACK_SUBSCRIBE_URL}
-      class="site-header__newsletter-banner"
-      rel="external"
-      aria-label="Subscribe to The Cochinchine Pensées newsletter on Substack"
-    >
-      <span class="site-header__newsletter-copy" data-nosnippet>Weekly essays, delivered by email.</span>
-      <span class="site-header__newsletter-action" data-nosnippet>
-        Subscribe on Substack <span aria-hidden="true">→</span>
-      </span>
+    <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external">
+      <span class="site-header__newsletter-copy" lang="vi">Nhận thông tin bài viết mới</span>
+      <span class="site-header__newsletter-action">Subscribe on Substack <span aria-hidden="true">→</span></span>
     </a>
 
-    <div class="site-header__nav-tier">
-      <div class="site-header__nav-inner">
-        <nav class="site-header__desktop-nav" aria-label="Primary">
-          <ul class="site-header__nav-list">
-            {navItems.map((item) => (
-              <li>
-                <a
-                  href={item.href}
-                  class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
-                  aria-label={item.label}
-                >
-                  <span class="site-header__nav-label" data-label={item.label}>{item.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <button
-          type="button"
-          class="site-header__menu-toggle site-header__menu-toggle--desktop"
-          aria-controls="site-menu"
-          aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-label="Open navigation"
-          data-menu-open
-        >
-          <span class="site-header__menu-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-      </div>
-    </div>
+    <nav class="site-header__desktop-nav" aria-label="Primary">
+      <ul class="site-header__nav-list">
+        {navItems.map((item) => (
+          <li><a href={item.href} class:list={['site-header__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}>
+            <span class="nav-label">{item.label}</span>
+          </a></li>
+        ))}
+      </ul>
+    </nav>
   </div>
-
   <span class="site-header__sentinel" data-header-sentinel aria-hidden="true"></span>
 
-  <div
-    class="site-header__reading-bar"
-    data-reading-bar
-    data-nosnippet
-    aria-hidden="true"
-    inert
-  >
-    <a
-      href="/"
-      class="site-header__wordmark-link site-header__wordmark-link--reading"
-      aria-label="The Cochinchine Pensées — home"
-    >
-      <span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span>
+  <div class="site-header__reading-bar" data-reading-bar aria-hidden="true" inert data-nosnippet>
+    <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-haspopup="dialog" aria-controls="site-search" data-search-open>
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
     </a>
-
-    <button
-      type="button"
-      class="site-header__menu-toggle site-header__menu-toggle--reading"
-      aria-controls="site-menu"
-      aria-haspopup="dialog"
-      aria-expanded="false"
-      aria-label="Open navigation"
-      data-menu-open
-    >
-      <span class="site-header__menu-icon" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
+    <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home"><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
+    <button type="button" class="header-control" aria-controls="site-menu" aria-haspopup="dialog" aria-expanded="false" aria-label="Open navigation" data-menu-open>
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2 5h20M2 12h20M2 19h20"/></svg>
     </button>
   </div>
 
-  <div
-    id="site-menu"
-    class="site-menu"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="site-menu-title"
-    aria-hidden="true"
-    inert
-    data-site-menu
-    data-nosnippet
-  >
-    <div class="site-menu__scrim" aria-hidden="true"></div>
-    <div class="site-menu__panel" data-menu-panel>
-      <div class="site-menu__header">
-        <h2 id="site-menu-title" class="site-menu__brand">
-          <span class="site-menu__brand-wordmark" aria-hidden="true">The Cochinchine Pensées</span>
-          <span class="sr-only">Navigation</span>
-        </h2>
-        <button
-          type="button"
-          class="site-menu__close"
-          aria-label="Close navigation"
-          data-menu-close
-        >
-          <span class="site-header__menu-icon site-menu__close-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
+  <dialog id="site-menu" class="site-menu" aria-labelledby="site-menu-title" data-site-dialog data-nosnippet>
+    <div class="site-menu__header">
+      <h2 id="site-menu-title">The Cochinchine Pensées</h2>
+      <button type="button" class="dialog-close" aria-label="Close navigation" data-dialog-close>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 5 14 14M5 19 19 5"/></svg>
+      </button>
+    </div>
+    <nav aria-label="Menu" class="site-menu__nav">
+      <ul>
+        {navItems.map((item) => (
+          <li><a href={item.href} class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]} aria-current={isActive(item.href) ? 'page' : undefined}><span class="nav-label">{item.label}</span></a></li>
+        ))}
+      </ul>
+      <a href="/search" class="site-menu__search-link" data-search-open>Tìm kiếm <span aria-hidden="true">→</span></a>
+    </nav>
+  </dialog>
+
+  <dialog id="site-search" class="site-search" aria-labelledby="site-search-title" data-site-dialog data-nosnippet>
+    <div class="site-search__inner">
+      <div class="site-search__header">
+        <h2 id="site-search-title" lang="vi">Tìm kiếm</h2>
+        <button type="button" class="dialog-close" aria-label="Đóng tìm kiếm" data-dialog-close>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 5 14 14M5 19 19 5"/></svg>
         </button>
       </div>
-
-      <nav class="site-menu__nav" aria-label="Menu">
-        <ul class="site-menu__nav-list">
-          {navItems.map((item, index) => (
-            <li class="site-menu__nav-item">
-              <a
-                href={item.href}
-                class:list={['site-menu__nav-link', { 'is-active': isActive(item.href) }]}
-                aria-current={isActive(item.href) ? 'page' : undefined}
-                aria-label={item.label}
-              >
-                <span class="site-menu__nav-label" data-label={item.label}>{item.label}</span>
-                <span class="site-menu__nav-index" aria-hidden="true">0{index + 1}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <SearchResults id="header-search" compact />
     </div>
-  </div>
+  </dialog>
 </header>
 
 <script>
-  import { navigate } from 'astro:transitions/client';
-
   function initHeader() {
     const header = document.querySelector<HTMLElement>('[data-site-header]');
-    if (!header || header.dataset.initialized === 'true') return;
-
-    const flow = header.querySelector<HTMLElement>('[data-header-flow]');
-    const sentinel = header.querySelector<HTMLElement>('[data-header-sentinel]');
-    const readingBar = header.querySelector<HTMLElement>('[data-reading-bar]');
-    const dialog = header.querySelector<HTMLElement>('[data-site-menu]');
-    const scrim = header.querySelector<HTMLElement>('.site-menu__scrim');
-    const panel = header.querySelector<HTMLElement>('[data-menu-panel]');
-    const closeButton = header.querySelector<HTMLButtonElement>('[data-menu-close]');
-    const openButtons = Array.from(
-      header.querySelectorAll<HTMLButtonElement>('[data-menu-open]'),
-    );
-
-    if (
-      !flow ||
-      !sentinel ||
-      !readingBar ||
-      !dialog ||
-      !scrim ||
-      !panel ||
-      !closeButton ||
-      openButtons.length === 0
-    ) return;
-
-    header.dataset.initialized = 'true';
-
+    if (!header || header.dataset.ready) return;
+    header.dataset.ready = 'true';
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let activeOpener: HTMLButtonElement | null = null;
-    let afterClose: (() => void) | null = null;
+    const flow = header.querySelector<HTMLElement>('[data-header-flow]')!;
+    const bar = header.querySelector<HTMLElement>('[data-reading-bar]')!;
+    const sentinel = header.querySelector('[data-header-sentinel]')!;
+    const menu = header.querySelector<HTMLDialogElement>('#site-menu')!;
+    const search = header.querySelector<HTMLDialogElement>('#site-search')!;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let opener: HTMLElement | null = null;
+    let activeDialog: HTMLDialogElement | null = null;
+    let closeTimer: ReturnType<typeof setTimeout>;
     let openFrame = 0;
-    let openTimer: number | undefined;
-    let openTransitionEnd: ((event: TransitionEvent) => void) | null = null;
-    let closeTimer: number | undefined;
-    let isClosing = false;
-    let pointerStartedOnScrim = false;
-    let scrollFrame = 0;
-    let previousScrollY = Math.max(0, window.scrollY);
-    let accumulatedDelta = 0;
-    let currentDirection: 'up' | 'down' = 'down';
 
-    const isMenuOpen = () => dialog.classList.contains('is-open');
+    // The compact bar has a stable size. No per-scroll animation or layout reads.
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      const visible = entry.boundingClientRect.bottom <= 0;
+      bar.classList.toggle('is-visible', visible);
+      bar.inert = !visible;
+      bar.setAttribute('aria-hidden', String(!visible));
+      flow.inert = visible;
+      if (visible) flow.setAttribute('aria-hidden', 'true');
+      else flow.removeAttribute('aria-hidden');
+    });
+    observer.observe(sentinel);
 
-    const setExpanded = (expanded: boolean) => {
-      for (const button of openButtons) {
-        button.setAttribute('aria-expanded', String(expanded));
-        button.setAttribute('aria-label', expanded ? 'Close navigation' : 'Open navigation');
+    const finishClose = (restoreFocus = true) => {
+      clearTimeout(closeTimer);
+      cancelAnimationFrame(openFrame);
+      if (!activeDialog) return;
+      const closedDialog = activeDialog;
+      activeDialog = null;
+      closedDialog.classList.remove('is-visible');
+      closedDialog.close();
+      document.documentElement.classList.remove('has-site-dialog');
+      for (const button of header.querySelectorAll('[data-menu-open]'))
+        button.setAttribute('aria-expanded', 'false');
+      if (restoreFocus && opener?.isConnected) {
+        // Scrolling or a viewport resize can hide the original opener.
+        const visibleOpener = opener.closest('[inert]')
+          ? bar.querySelector<HTMLElement>('[data-menu-open]')
+          : opener;
+        visibleOpener?.focus({ preventScroll: true });
       }
+      opener = null;
     };
-
-    const setReadingBarVisible = (visible: boolean) => {
-      readingBar.classList.toggle('is-visible', visible);
-      readingBar.toggleAttribute('inert', !visible);
-      flow.toggleAttribute('inert', visible);
-
-      if (visible) {
-        readingBar.removeAttribute('aria-hidden');
-        flow.setAttribute('aria-hidden', 'true');
-      } else {
-        readingBar.setAttribute('aria-hidden', 'true');
-        flow.removeAttribute('aria-hidden');
-      }
+    const close = () => {
+      if (!activeDialog) return;
+      activeDialog.classList.remove('is-visible');
+      clearTimeout(closeTimer);
+      if (reducedMotion.matches) finishClose();
+      else closeTimer = setTimeout(finishClose, 180);
     };
-
-    const setScrollDirection = (direction: 'up' | 'down') => {
-      if (currentDirection === direction) return;
-      currentDirection = direction;
-      header.dataset.scrollDirection = direction;
-    };
-
-    const updateScrollDirection = () => {
-      scrollFrame = 0;
-
-      const nextScrollY = Math.max(0, window.scrollY);
-      const delta = nextScrollY - previousScrollY;
-      previousScrollY = nextScrollY;
-
-      if (Math.abs(delta) < 1) return;
-      if (Math.sign(delta) !== Math.sign(accumulatedDelta)) accumulatedDelta = 0;
-      accumulatedDelta += delta;
-
-      if (accumulatedDelta >= 12) {
-        setScrollDirection('down');
-        accumulatedDelta = 0;
-      } else if (accumulatedDelta <= -12) {
-        setScrollDirection('up');
-        accumulatedDelta = 0;
-      }
-    };
-
-    const scheduleScrollUpdate = () => {
-      if (scrollFrame !== 0) return;
-      scrollFrame = window.requestAnimationFrame(updateScrollDirection);
-    };
-
-    const sentinelObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        setReadingBarVisible(!entry.isIntersecting && window.scrollY > 0);
-      },
-      { threshold: 0 },
-    );
-    sentinelObserver.observe(sentinel);
-    window.addEventListener('scroll', scheduleScrollUpdate, { passive: true, signal });
-
-    const clearOpenCompletion = () => {
-      if (openFrame !== 0) {
-        window.cancelAnimationFrame(openFrame);
-        openFrame = 0;
-      }
-      if (openTimer !== undefined) {
-        window.clearTimeout(openTimer);
-        openTimer = undefined;
-      }
-      if (openTransitionEnd) {
-        panel.removeEventListener('transitionend', openTransitionEnd);
-        openTransitionEnd = null;
-      }
-    };
-
-    const finishOpen = () => {
-      clearOpenCompletion();
-      if (!isMenuOpen() || isClosing || !dialog.classList.contains('is-visible')) return;
-      if (dialog.contains(document.activeElement)) return;
-      closeButton.focus({ preventScroll: true });
-    };
-
-    const finishClose = (restoreFocus: boolean) => {
-      clearOpenCompletion();
-      if (closeTimer !== undefined) {
-        window.clearTimeout(closeTimer);
-        closeTimer = undefined;
-      }
-
-      const callback = afterClose;
-      afterClose = null;
-      dialog.classList.remove('is-open', 'is-visible', 'is-closing');
-      dialog.setAttribute('aria-hidden', 'true');
-      dialog.setAttribute('inert', '');
-
-      isClosing = false;
-      setExpanded(false);
-
-      if (restoreFocus && activeOpener?.isConnected) {
-        activeOpener.focus({ preventScroll: true });
-      }
-      activeOpener = null;
-      callback?.();
-    };
-
-    const closeMenu = (restoreFocus = true, onClosed?: () => void) => {
-      if (!isMenuOpen()) {
-        onClosed?.();
-        return;
-      }
-
-      if (isClosing) {
-        if (onClosed) afterClose = onClosed;
-        return;
-      }
-
-      afterClose = onClosed ?? null;
-      isClosing = true;
-      const wasVisible = dialog.classList.contains('is-visible');
-      clearOpenCompletion();
-      dialog.classList.add('is-closing');
-      dialog.classList.remove('is-visible');
-
-      if (reducedMotion.matches || !wasVisible) {
-        finishClose(restoreFocus);
-        return;
-      }
-
-      const onPanelTransitionEnd = (event: TransitionEvent) => {
-        if (event.target !== panel || event.propertyName !== 'transform') return;
-        panel.removeEventListener('transitionend', onPanelTransitionEnd);
-        finishClose(restoreFocus);
-      };
-
-      panel.addEventListener('transitionend', onPanelTransitionEnd);
-      // Safety net only — must outlast --t-panel-exit (240ms) so it never
-      // races the real transitionend and cuts the slide short.
-      closeTimer = window.setTimeout(() => {
-        panel.removeEventListener('transitionend', onPanelTransitionEnd);
-        finishClose(restoreFocus);
-      }, 380);
-    };
-
-    const openMenu = (event: Event) => {
-      const opener = event.currentTarget;
-      if (!(opener instanceof HTMLButtonElement) || isMenuOpen()) return;
-
-      activeOpener = opener;
-      afterClose = null;
-      isClosing = false;
-      dialog.classList.remove('is-closing', 'is-visible');
-      dialog.classList.add('is-open');
-      dialog.removeAttribute('aria-hidden');
-      dialog.removeAttribute('inert');
-      setExpanded(true);
-
-      if (reducedMotion.matches) {
-        dialog.classList.add('is-visible');
-        finishOpen();
-        return;
-      }
-
-      // The panel is permanently laid out off-canvas. One frame with
-      // will-change promotes it before motion starts, avoiding the native
-      // dialog relayout and off-screen focus jump that stutter on iOS Safari.
-      openFrame = window.requestAnimationFrame(() => {
-        openFrame = 0;
-        if (!isMenuOpen() || isClosing) return;
-
-        openTransitionEnd = (transitionEvent: TransitionEvent) => {
-          if (transitionEvent.target !== panel || transitionEvent.propertyName !== 'transform') {
-            return;
-          }
-          finishOpen();
-        };
-        panel.addEventListener('transitionend', openTransitionEnd);
-        dialog.classList.add('is-visible');
-        openTimer = window.setTimeout(finishOpen, 520);
+    const open = (dialog: HTMLDialogElement, trigger: HTMLElement) => {
+      const returnTo = trigger.closest('dialog') ? opener : trigger;
+      finishClose(false);
+      opener = returnTo;
+      activeDialog = dialog;
+      document.documentElement.classList.add('has-site-dialog');
+      dialog.showModal();
+      for (const button of header.querySelectorAll('[data-menu-open]'))
+        button.setAttribute('aria-expanded', String(dialog === menu));
+      const focus = dialog.querySelector<HTMLElement>(
+        dialog === search ? 'input' : '[data-dialog-close]',
+      );
+      focus?.focus({ preventScroll: true });
+      // Commit the resting position before the transition. Transitions remain interruptible.
+      openFrame = requestAnimationFrame(() => {
+        openFrame = requestAnimationFrame(() => {
+          if (activeDialog === dialog) dialog.classList.add('is-visible');
+        });
       });
     };
-
-    for (const button of openButtons) {
-      button.addEventListener('click', openMenu, { signal });
+    for (const trigger of header.querySelectorAll<HTMLElement>(
+      '[data-menu-open], [data-search-open]',
+    )) {
+      trigger.addEventListener(
+        'click',
+        (event) => {
+          if (
+            event instanceof MouseEvent &&
+            (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+          )
+            return;
+          event.preventDefault();
+          open(trigger.hasAttribute('data-search-open') ? search : menu, trigger);
+        },
+        { signal },
+      );
     }
-
-    closeButton.addEventListener('click', () => closeMenu(), { signal });
-    document.addEventListener('keydown', (event) => {
-      if (!isMenuOpen()) return;
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeMenu();
-        return;
-      }
-
-      if (event.key !== 'Tab') return;
-      const focusable = [
-        closeButton,
-        ...dialog.querySelectorAll<HTMLAnchorElement>('a[href]'),
-      ];
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (!first || !last) return;
-
-      const activeElement = document.activeElement;
-      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
-        event.preventDefault();
-        last.focus({ preventScroll: true });
-      } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
-        event.preventDefault();
-        first.focus({ preventScroll: true });
-      }
-    }, { signal });
-
-    scrim.addEventListener('pointerdown', () => {
-      pointerStartedOnScrim = true;
-    }, { signal });
-    scrim.addEventListener('pointercancel', () => {
-      pointerStartedOnScrim = false;
-    }, { signal });
-    scrim.addEventListener('pointerup', () => {
-      if (pointerStartedOnScrim) closeMenu();
-      pointerStartedOnScrim = false;
-    }, { signal });
-
-    for (const link of dialog.querySelectorAll<HTMLAnchorElement>('a[href]')) {
-      link.addEventListener('click', (event) => {
-        if (
-          event.defaultPrevented ||
-          event.button !== 0 ||
-          event.metaKey ||
-          event.ctrlKey ||
-          event.shiftKey ||
-          event.altKey
-        ) return;
-
-        const destination = new URL(link.href);
-        if (destination.origin !== window.location.origin) return;
-
-        event.preventDefault();
-        closeMenu(false, () => {
-          void navigate(`${destination.pathname}${destination.search}${destination.hash}`);
-        });
-      }, { signal });
+    for (const dialog of [menu, search]) {
+      dialog.querySelector('[data-dialog-close]')!.addEventListener('click', close, { signal });
+      dialog.addEventListener(
+        'cancel',
+        (event) => {
+          event.preventDefault();
+          close();
+        },
+        { signal },
+      );
+      let onBackdrop = false;
+      const outside = (event: PointerEvent) => {
+        const rect = dialog.getBoundingClientRect();
+        return (
+          event.clientX < rect.left ||
+          event.clientX > rect.right ||
+          event.clientY < rect.top ||
+          event.clientY > rect.bottom
+        );
+      };
+      dialog.addEventListener(
+        'pointerdown',
+        (event) => {
+          onBackdrop = outside(event);
+        },
+        { signal },
+      );
+      dialog.addEventListener(
+        'pointerup',
+        (event) => {
+          if (onBackdrop && outside(event)) close();
+          onBackdrop = false;
+        },
+        { signal },
+      );
+      dialog.addEventListener(
+        'pointercancel',
+        () => {
+          onBackdrop = false;
+        },
+        { signal },
+      );
     }
-
-    document.addEventListener('astro:before-swap', () => {
-      sentinelObserver.disconnect();
-      if (scrollFrame !== 0) window.cancelAnimationFrame(scrollFrame);
-      lifecycle.abort();
-      if (isMenuOpen()) finishClose(false);
-    }, { once: true });
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        finishClose(false);
+        observer.disconnect();
+        lifecycle.abort();
+      },
+      { once: true, signal },
+    );
   }
-
   document.addEventListener('astro:page-load', initHeader);
   initHeader();
 </script>
@@ -502,634 +243,299 @@ function isActive(itemHref: string): boolean {
     position: relative;
     background: var(--bg-page);
   }
-
-  /* This cap only masks content that Safari lets drift behind its status bar.
-   * Its colour is the same page token used by html, body and browser chrome;
-   * it does not introduce another visual surface. */
-  .site-header__safe-area {
-    position: fixed;
-    z-index: var(--z-header);
-    inset: calc(-1 * var(--sp-16)) 0 auto;
-    height: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    background-color: var(--bg-page);
-    pointer-events: none;
-    transition: background-color var(--t-base);
-  }
-
-  .site-header__flow {
+  .site-header__masthead,
+  .site-header__reading-bar {
+    display: grid;
+    grid-template-columns: var(--header-edge) minmax(0, 1fr) var(--header-edge);
+    align-items: center;
     background: var(--bg-page);
+    padding-top: env(safe-area-inset-top, 0px);
   }
-
   .site-header__masthead {
-    position: relative;
+    --header-edge: 3rem;
+    min-height: 4rem;
+  }
+  .header-control {
     display: grid;
     place-items: center;
-    min-height: 4.5rem;
-    padding: var(--sp-3) var(--gutter-mobile);
-    /* viewport-fit=cover lets the page run under the iOS status bar; the
-     * masthead must own that strip or raw page bleeds out above it. */
-    padding-top: calc(var(--sp-3) + env(safe-area-inset-top, 0px));
-    border-bottom: 1px solid var(--rule-hair);
-    text-align: center;
+    width: 100%;
+    min-height: 3rem;
+    color: var(--ink-primary);
+    transition: color var(--t-fast);
   }
-
-  .site-header__newsletter-banner {
+  .header-control:hover,
+  .dialog-close:hover {
+    color: var(--accent-crimson);
+  }
+  .site-header__wordmark-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--sp-3);
-    min-height: 2.75rem;
+    min-width: 0;
+    min-height: 44px;
+    color: var(--ink-primary);
+  }
+  .site-header__wordmark {
+    font-family: var(--font-display);
+    font-size: clamp(0.78rem, 3.4vw, 1.2rem);
+    font-weight: var(--w-semibold);
+    line-height: 1.2;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .site-header__newsletter-banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: var(--sp-3);
+    row-gap: var(--sp-1);
+    min-height: 44px;
     padding: var(--sp-2) var(--gutter-mobile);
-    background-color: var(--bg-oxblood-well);
     color: var(--ink-on-dark);
+    background: var(--bg-oxblood-well);
     text-align: center;
-    user-select: none;
-    transition:
-      background-color var(--t-fast),
-      color var(--t-fast);
+    transition: background-color var(--t-fast);
   }
-
   .site-header__newsletter-banner:hover {
-    background-color: var(--accent-crimson);
-    color: var(--ink-inverse);
+    background: var(--accent-crimson);
   }
-
   .site-header__newsletter-banner:focus-visible {
     outline: 2px solid var(--ink-on-dark);
-    outline-offset: -3px;
+    outline-offset: -4px;
   }
-
   .site-header__newsletter-copy {
-    display: none;
     font-family: var(--font-serif);
     font-size: var(--fs-meta);
-    font-style: italic;
-    line-height: var(--lh-meta);
+    line-height: 1.4;
   }
-
   .site-header__newsletter-action {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
-    line-height: 1.3;
-    letter-spacing: 0.14em;
+    line-height: 1.4;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     white-space: nowrap;
   }
-
+  .site-header__desktop-nav {
+    display: none;
+    border-bottom: 1px solid var(--rule-hair);
+  }
+  .site-header__nav-list {
+    display: flex;
+    justify-content: space-between;
+    max-width: 70rem;
+    margin-inline: auto;
+    padding-inline: var(--gutter-tablet);
+  }
+  .site-header__nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 3.25rem;
+    color: var(--ink-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--fs-nav);
+    font-weight: var(--w-semibold);
+    line-height: 1.4;
+    letter-spacing: var(--tr-nav);
+    text-transform: uppercase;
+    transition: color var(--t-fast);
+  }
+  .nav-label {
+    position: relative;
+    display: inline-block;
+  }
+  .nav-label::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 calc(-1 * var(--nav-rule-offset));
+    height: var(--nav-rule-width);
+    background: var(--accent-crimson);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--t-nav);
+  }
+  .is-active {
+    color: var(--ink-primary);
+  }
+  .is-active > .nav-label::after,
+  a:hover > .nav-label::after,
+  a:focus-visible > .nav-label::after {
+    transform: scaleX(1);
+  }
+  .site-header__nav-link:hover,
+  .site-menu__nav-link:hover {
+    color: var(--accent-crimson);
+  }
+  .site-header__sentinel {
+    display: block;
+    height: 1px;
+    margin-top: -1px;
+    pointer-events: none;
+  }
+  .site-header__reading-bar {
+    --header-edge: 3rem;
+    position: fixed;
+    z-index: var(--z-header);
+    inset: 0 0 auto;
+    min-height: 3.5rem;
+    border-bottom: 1px solid var(--rule-hair);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+    transition:
+      transform 200ms var(--ease-panel),
+      opacity 160ms var(--ease-panel);
+  }
+  .site-header__reading-bar.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .site-header__wordmark--reading {
+    font-size: clamp(0.78rem, 3.3vw, 1rem);
+  }
+  dialog {
+    position: fixed;
+    border: 0;
+    color: var(--ink-primary);
+    background: var(--bg-page);
+    max-width: none;
+    max-height: none;
+    overscroll-behavior: contain;
+  }
+  dialog::backdrop {
+    background: rgb(15 15 15 / 12%);
+  }
+  .dialog-close {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--ink-primary);
+    transition: color var(--t-fast);
+  }
+  .site-menu {
+    inset: 0 0 0 auto;
+    margin: 0;
+    width: min(88vw, 22rem);
+    height: 100dvh;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    border-inline-start: 1px solid var(--rule-hair);
+    transform: translateX(100%);
+    transition: transform 180ms var(--ease-panel);
+  }
+  .site-menu.is-visible {
+    transform: translateX(0);
+    transition-duration: 240ms;
+  }
+  .site-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    min-height: 4rem;
+    padding-inline: var(--sp-5) var(--sp-2);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+  .site-menu__header h2 {
+    font-family: var(--font-display);
+    font-weight: var(--w-semibold);
+    font-size: 0.875rem;
+    line-height: 1.3;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+  .site-menu__nav {
+    padding: var(--sp-5);
+  }
+  .site-menu__nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 3.25rem;
+    font-family: var(--font-sans);
+    font-size: var(--fs-nav);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-nav);
+    color: var(--ink-secondary);
+    text-transform: uppercase;
+    transition: color var(--t-fast);
+  }
+  .site-menu__nav-link.is-active {
+    color: var(--ink-primary);
+  }
+  .site-menu__search-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    margin-top: var(--sp-5);
+    border-top: 1px solid var(--rule-hair);
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    color: var(--accent-crimson);
+  }
+  .site-search {
+    inset: 0 0 auto;
+    margin: 0;
+    width: 100%;
+    max-height: 90dvh;
+    padding: calc(var(--sp-3) + env(safe-area-inset-top, 0px)) var(--gutter-mobile) var(--sp-6);
+    overflow-y: auto;
+    border-bottom: 1px solid var(--rule-hair);
+    opacity: 0;
+    transition: opacity 160ms var(--ease-panel);
+  }
+  .site-search.is-visible {
+    opacity: 1;
+  }
+  .site-search__inner {
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+  .site-search__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .site-search__header h2 {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: var(--w-semibold);
+  }
   @media (min-width: 32rem) {
-    .site-header__newsletter-copy {
-      display: inline;
-    }
-
     .site-header__newsletter-action {
       padding-inline-start: var(--sp-3);
       border-inline-start: 1px solid var(--rule-on-dark);
     }
   }
-
-  .site-header__wordmark-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: calc(100% - 7rem);
-    transform-origin: center;
-    transition:
-      opacity var(--t-base),
-      transform var(--t-slow),
-      filter var(--t-base);
-  }
-
-  .site-header__wordmark-link:hover {
-    opacity: 0.82;
-  }
-
-  .site-header__wordmark {
-    margin: 0;
-    color: var(--ink-primary);
-    font-family: var(--font-display);
-    /* Sized so the nowrap masthead clears the menu button down to ~320px */
-    font-size: clamp(0.8125rem, 4.2vw, 1.25rem);
-    font-weight: var(--w-semibold);
-    line-height: 1.05;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .site-header__sentinel {
-    display: block;
-    width: 100%;
-    height: 1px;
-    margin-top: -1px;
-    pointer-events: none;
-  }
-
-  .site-header__reading-bar {
-    position: fixed;
-    z-index: var(--z-header);
-    inset: 0 0 auto;
-    display: grid;
-    grid-template-columns: 3.75rem minmax(0, 1fr) 3.75rem;
-    align-items: center;
-    min-height: 3.75rem;
-    /* Seal the bar to the physical top of the screen — without this the
-     * page shows through the status-bar strip above the bar on iOS. */
-    padding-top: env(safe-area-inset-top, 0px);
-    border-bottom: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-    background: var(--bg-page);
-    box-shadow: 0 0.35rem 1.2rem rgb(15 15 15 / 4%);
-    opacity: 0;
-    pointer-events: none;
-    transform: translate3d(0, -110%, 0);
-    transition:
-      transform 320ms cubic-bezier(0.2, 0, 0, 1),
-      opacity 180ms cubic-bezier(0.2, 0, 0, 1),
-      background-color var(--t-base),
-      border-color var(--t-base);
-    contain: layout paint;
-  }
-
-  .site-header__reading-bar.is-visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translate3d(0, 0, 0);
-    will-change: transform, opacity;
-  }
-
-  .site-header__wordmark-link--reading {
-    grid-column: 2;
-    max-width: 100%;
-    transform: scale(0.76);
-  }
-
-  .site-header[data-scroll-direction='up'] .site-header__wordmark-link--reading {
-    transform: scale(0.88);
-  }
-
-  .site-header__wordmark--reading {
-    font-size: clamp(0.875rem, 3.5vw, 1.05rem);
-  }
-
-  .site-header__nav-tier {
-    display: none;
-  }
-
-  .site-header__nav-inner {
-    display: grid;
-    grid-template-columns: 4.5rem minmax(0, 1fr) 4.5rem;
-    min-height: 4.5rem;
-  }
-
-  .site-header__nav-inner::before {
-    content: '';
-  }
-
-  .site-header__desktop-nav {
-    display: grid;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .site-header__nav-list {
-    display: grid;
-    grid-template-columns: repeat(5, max-content);
-    justify-content: space-between;
-    justify-self: center;
-    width: min(100%, 72rem);
-    padding-inline: clamp(var(--sp-6), 6vw, var(--sp-16));
-  }
-
-  /* Nav links — colour shift plus a hairline that grows from the centre.
-   * Compositor-friendly on purpose: no blur, no text-shadow, no repaints. */
-  .site-header__nav-link {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    padding-block: var(--sp-2);
-    color: var(--ink-muted);
-    font-family: var(--font-sans);
-    font-size: var(--fs-meta);
-    font-weight: var(--w-semibold);
-    line-height: 1;
-    letter-spacing: var(--tr-nav);
-    text-transform: uppercase;
-    user-select: none;
-    transition: color var(--t-fast);
-  }
-
-  .site-header__nav-label {
-    position: relative;
-    display: inline-block;
-    padding-bottom: 0.45em;
-    background-image: linear-gradient(currentColor, currentColor);
-    background-position: 50% 100%;
-    background-repeat: no-repeat;
-    background-size: 0 1px;
-    transition: background-size var(--t-base);
-  }
-
-  .site-header__nav-link:hover {
-    color: var(--accent-crimson);
-  }
-
-  .site-header__nav-link:hover .site-header__nav-label {
-    background-size: 100% 1px;
-  }
-
-  .site-header__nav-link.is-active {
-    color: var(--ink-primary);
-  }
-
-  .site-header__nav-link.is-active .site-header__nav-label {
-    background-image: linear-gradient(var(--accent-crimson), var(--accent-crimson));
-    background-size: 100% 1px;
-  }
-
-  .site-header__menu-toggle {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--ink-primary);
-    user-select: none;
-    transition:
-      color var(--t-base),
-      transform var(--t-fast);
-  }
-
-  .site-header__menu-toggle:hover {
-    color: var(--accent-crimson);
-  }
-
-  .site-header__menu-toggle:active,
-  .site-menu__close:active {
-    transform: scale(0.96);
-  }
-
-  .site-header__menu-toggle--mobile {
-    position: absolute;
-    top: 50%;
-    right: var(--gutter-mobile);
-    translate: 0 -50%;
-  }
-
-  .site-header__menu-toggle--desktop {
-    display: none;
-  }
-
-  .site-header__menu-toggle--reading {
-    grid-column: 3;
-    justify-self: stretch;
-    width: 3.75rem;
-    height: 3.75rem;
-    border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-  }
-
-  .site-header__menu-icon {
-    position: relative;
-    display: block;
-    width: 1.5rem;
-    height: 1rem;
-  }
-
-  /* Hamburger morph — three bars fold into an ✕ on the same curve as the
-   * panel. Transform and opacity only, and no overshoot: the bars must not
-   * spring past the ✕ and rock back. */
-  .site-header__menu-icon span {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: currentColor;
-    transform-origin: center;
-    transition:
-      transform var(--t-icon),
-      opacity 160ms var(--ease-panel);
-  }
-
-  .site-header__menu-icon span:nth-child(1) {
-    transform: translateY(-0.375rem);
-  }
-
-  .site-header__menu-icon span:nth-child(2) {
-    transform: scaleX(0.72);
-  }
-
-  .site-header__menu-icon span:nth-child(3) {
-    transform: translateY(0.375rem);
-  }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(1),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(1) {
-    transform: rotate(45deg) scaleX(0.82);
-  }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(2),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(2) {
-    opacity: 0;
-    transform: scaleX(0.1);
-  }
-
-  .site-header__menu-toggle[aria-expanded='true'] .site-header__menu-icon span:nth-child(3),
-  .site-menu.is-visible .site-menu__close .site-header__menu-icon span:nth-child(3) {
-    transform: rotate(-45deg) scaleX(0.82);
-  }
-
-  .site-menu {
-    position: fixed;
-    z-index: var(--z-modal);
-    inset: 0;
-    width: 100%;
-    max-width: none;
-    height: 100vh;
-    height: 100dvh;
-    max-height: none;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    background: transparent;
-    color: var(--ink-primary);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .site-menu.is-open {
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  /* The scrim is invisible — the panel is part of the page, not an overlay.
-   * Kept in the DOM as a click-capture target only. */
-  .site-menu__scrim {
-    position: fixed;
-    inset: 0;
-    background: transparent;
-    cursor: default;
-  }
-
-  /* Panel slides in smoothly and lives as part of the page.
-   * Same paper background as the page; no shadow, no texture, no overshoot. */
-  .site-menu__panel {
-    position: fixed;
-    z-index: 1;
-    inset: calc(-1 * var(--sp-16)) 0 calc(-1 * var(--sp-16)) auto;
-    width: min(88vw, 28rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    border-left: 1px solid color-mix(in srgb, var(--ink-primary) 10%, transparent);
-    background-color: var(--bg-page);
-    /* The surface bleeds behind Safari's translucent top and bottom chrome;
-     * only the content is returned to the usable viewport. */
-    padding-top: calc(var(--sp-16) + env(safe-area-inset-top, 0px));
-    transform: translate3d(calc(100% + 1px), 0, 0);
-    transition: transform var(--t-panel);
-    backface-visibility: hidden;
-    contain: paint;
-  }
-
-  .site-menu.is-open .site-menu__panel {
-    will-change: transform;
-  }
-
-  .site-menu.is-visible .site-menu__panel {
-    transform: translate3d(0, 0, 0);
-  }
-
-  .site-menu.is-closing .site-menu__panel {
-    transition: transform var(--t-panel-exit);
-  }
-
-  .site-menu__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 4.5rem;
-    padding-inline: var(--sp-5) var(--sp-3);
-    border-bottom: 1px solid var(--rule-hair);
-  }
-
-  .site-menu__brand {
-    min-width: 0;
-    color: var(--ink-primary);
-    font-family: var(--font-display);
-    font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1.05rem);
-    font-weight: var(--w-semibold);
-    line-height: 1.05;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
-  }
-
-  .site-menu__brand-wordmark {
-    white-space: nowrap;
-  }
-
-  .site-menu__close {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    color: var(--ink-primary);
-    transition:
-      color var(--t-base),
-      transform var(--t-fast);
-  }
-
-  .site-menu__close:hover {
-    color: var(--accent-crimson);
-  }
-
-  .site-menu__nav {
-    padding: var(--sp-5) var(--sp-5) var(--sp-10);
-  }
-
-  .site-menu__nav-list {
-    display: grid;
-    gap: var(--sp-1);
-  }
-
-  /* Items are always visible — no stagger, no transform.
-   * Emphasis comes from font-weight + background fade on hover/focus. */
-  .site-menu__nav-item {
-    opacity: 1;
-    transform: none;
-  }
-
-  .site-menu__nav-link {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--sp-4);
-    min-height: 3.25rem;
-    padding: var(--sp-2) var(--sp-4);
-    color: var(--ink-secondary);
-    font-family: var(--font-sans);
-    font-size: clamp(1rem, 3vw, 1.125rem);
-    font-weight: var(--w-medium);
-    line-height: 1.4;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    background-color: transparent;
-    /* Weight is not transitioned: Be Vietnam Pro ships as static faces, so an
-     * interpolated font-weight snaps to the next face mid-transition. Switching
-     * it on pointer-down instead reads as crisp while the colour carries the
-     * fade. The label grows rightward inside a space-between row, so the index
-     * on the right edge does not move. */
-    transition: color var(--t-base);
-  }
-
-  /* Hover is carried entirely by the type: the label gains weight and the
-   * ink fades to the house oxblood. No panel, no plate, no box behind it. */
-  .site-menu__nav-link:hover,
-  .site-menu__nav-link:focus-visible {
-    color: var(--accent-crimson);
-    font-weight: var(--w-bold);
-    background-color: transparent;
-    outline: none;
-  }
-
-  .site-menu__nav-link.is-active {
-    color: var(--ink-primary);
-    font-weight: var(--w-bold);
-  }
-
-  /* No label transform — items stay put. */
-  .site-menu__nav-label {
-    position: relative;
-    display: inline-block;
-  }
-
-  .site-menu__nav-link.is-active .site-menu__nav-label::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -1rem;
-    width: 0.45rem;
-    height: 1.5px;
-    background: var(--accent-crimson);
-  }
-
-  .site-menu__nav-index {
-    font-family: var(--font-sans);
-    font-size: 0.625rem;
-    font-weight: var(--w-medium);
-    letter-spacing: 0.12em;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink-muted);
-    opacity: 0.5;
-    transition:
-      color var(--t-base),
-      opacity var(--t-base);
-  }
-
-  .site-menu__nav-link:hover .site-menu__nav-index,
-  .site-menu__nav-link.is-active .site-menu__nav-index {
-    color: var(--accent-crimson);
-    opacity: 0.85;
-  }
-
-  /* No body scroll lock — the panel sits as part of the page, not as
-   * a modal overlay. */
-
-  @media (max-width: 22rem) {
-    .site-header__wordmark {
-      font-size: 0.72rem;
-      letter-spacing: 0.035em;
-    }
-
-    .site-menu__brand {
-      font-size: 0.75rem;
-      letter-spacing: 0.035em;
-    }
-  }
-
   @media (min-width: 48rem) {
     .site-header__masthead {
-      min-height: 7.5rem;
-      padding: var(--sp-5) var(--gutter-tablet);
-      padding-top: calc(var(--sp-5) + env(safe-area-inset-top, 0px));
-      border-bottom: 0;
+      --header-edge: 4.5rem;
+      min-height: 5.5rem;
     }
-
-    .site-header__wordmark-link {
-      max-width: none;
+    .header-control {
+      min-height: 4rem;
     }
-
     .site-header__wordmark {
-      font-size: clamp(1.5rem, 1.15rem + 1vw, 2rem);
-      letter-spacing: 0.06em;
+      font-size: clamp(1.35rem, 1rem + 0.8vw, 1.7rem);
+      letter-spacing: 0.065em;
     }
-
-    .site-header__newsletter-banner {
-      padding-inline: var(--gutter-tablet);
-    }
-
-    .site-header__reading-bar {
-      grid-template-columns: 4.25rem minmax(0, 1fr) 4.25rem;
-      min-height: 4.25rem;
-    }
-
-    .site-header__wordmark--reading {
-      font-size: clamp(1rem, 0.8rem + 0.65vw, 1.35rem);
-      letter-spacing: 0.055em;
-    }
-
-    .site-header__nav-tier {
+    .site-header__desktop-nav {
       display: block;
-      border-top: 1px solid var(--rule-hair);
-      border-bottom: 1px solid var(--rule-hair);
     }
-
-    .site-header__menu-toggle--mobile {
-      display: none;
+    .site-header__reading-bar {
+      --header-edge: 3.75rem;
+      min-height: 3.75rem;
     }
-
-    .site-header__menu-toggle--desktop {
-      display: grid;
-      width: 4.5rem;
-      height: 4.5rem;
-      border-left: 1px solid var(--rule-hair);
+    .site-header__reading-bar .header-control {
+      min-height: 3.75rem;
     }
-
-    .site-header__menu-toggle--reading {
-      width: 4.25rem;
-      height: 4.25rem;
-    }
-  }
-
-  /* Desktop (≥1024px): the menu docks as a fixed right-column sidebar.
-   * It still slides in, but is permanently in the layout — body does not
-   * dim, body does not lock scroll. */
-  @media (min-width: 64rem) {
-    .site-menu__panel {
-      width: min(22rem, 26vw);
-    }
-
-    .site-menu__nav {
-      padding: var(--sp-8) var(--sp-4) var(--sp-10);
-    }
-
-    .site-menu__nav-link {
-      min-height: 2.75rem;
-      padding: var(--sp-2) var(--sp-3);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .site-header__reading-bar,
-    .site-header__wordmark-link,
-    .site-header__menu-icon span,
-    .site-header__nav-label,
-    .site-menu__scrim,
-    .site-menu__panel,
-    .site-menu__nav-item,
-    .site-menu__nav-label {
-      transition-duration: 0.01ms;
-      transition-delay: 0ms;
+    .site-header__wordmark--reading {
+      font-size: 1.1rem;
     }
   }
 </style>

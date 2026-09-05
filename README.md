@@ -11,7 +11,7 @@ npm run dev          # http://localhost:4321
 npm run build        # static output to ./dist
 npm run preview      # preview built site
 npm run check        # astro check (type-check)
-npm test             # image delivery, reader lifecycle and SEO (run build first)
+npm test             # image delivery, reader lifecycle, SEO and search (run build first)
 npm run lint         # biome check .
 npm run format       # biome format --write .
 ```
@@ -103,7 +103,8 @@ and a size inventory live in `.astro/`; no system Python installation is needed.
 Restart development after adding content with new characters; every production
 build collects the current content again.
 
-Small route styles are inlined while the shared stylesheet and fonts stay
+Styles are inlined with each page to remove the cold-load blocking stylesheet
+request; compressed shared styles add about 7 KB to a page. Font files remain
 external and cacheable. Hashed `/_astro/` assets have a one-year immutable cache
 policy; HTML continues to revalidate. Links prefetch on hover/focus/touch rather
 than simply entering the viewport. The home book shelf measures its controls
@@ -156,6 +157,29 @@ columns stack on mobile; no Substack iframe or social widget is loaded.
 `/masthead` holds the confirmed editorial roles. About has a short introduction
 and reader note; its existing noindex setting remains until the full profile
 is ready. The existing `/essays` catalogue and all article URLs are retained.
+
+## Site search and series
+
+Search opens from the left side of the masthead or compact reading bar, with a
+standalone `/search?q=...` page for shareable queries and progressively loaded
+results. The build indexes only published essay bodies with Pagefind; navigation
+and reader controls are excluded. The index, worker and WASM load only after a
+nonempty query. Use `npm run build` followed by `npm run preview` to exercise the
+search index locally; `npm run dev` alone does not generate it.
+
+Search supports Vietnamese with and without accents, including đ/d, and English.
+Titles receive additional ranking weight. Unquoted queries require each complete
+word; quotation marks preserve exact phrase search. Results are rendered with
+text nodes and a restricted highlight element. New builds regenerate the index;
+its entry points revalidate on deploy. No service, API key or client framework is
+required.
+
+The homepage presents all featured series in one native scroll-snap track.
+Readers can swipe, use previous/next buttons, select a series or use arrow/Home/End
+keys when the track is focused. The selected panel remains aligned on resize;
+non-visible panels leave keyboard navigation. Reduced-motion settings disable
+smooth scrolling. Without JavaScript, the horizontal content and links remain
+available.
 
 ## Reader preferences and search identity
 

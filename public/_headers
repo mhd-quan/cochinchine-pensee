@@ -5,3 +5,7 @@
 # Vite hashes these filenames when their contents change.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Search entry points must revalidate when a new edition is deployed.
+/pagefind/*
+  Cache-Control: public, max-age=0, must-revalidate

@@ -8,6 +8,5 @@ const pensees = (await getCollection('essays', ({ data }) => !data.draft && data
 ---
 
 <DirectoryLayout title="Pensées" description="Những pensées trên The Cochinchine Pensées: ghi chép, suy tưởng và các bài viết mang hình thức tự do.">
-  <p slot="intro">Notes, reflections, and thoughts in a more open form.</p>
   <ArticleList entries={pensees} />
 </DirectoryLayout>

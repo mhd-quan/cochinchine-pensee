@@ -1,0 +1,14 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import SearchResults from '~/components/search/SearchResults.astro';
+---
+<BaseLayout title="Tìm kiếm" description="Tìm bài viết trên The Cochinchine Pensées." noindex>
+  <section class="search-page container" lang="vi">
+    <h1>Tìm kiếm</h1>
+    <SearchResults id="page-search" />
+  </section>
+</BaseLayout>
+<style>
+  .search-page { max-width: 52rem; min-height: 45vh; padding-block: var(--sp-8) var(--sp-10); }
+  h1 { margin-bottom: var(--sp-6); font-family: var(--font-display); font-size: var(--fs-h1); line-height: var(--lh-headline); }
+</style>

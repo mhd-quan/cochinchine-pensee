@@ -1,0 +1,115 @@
+---
+interface Props {
+  id: string;
+  compact?: boolean;
+}
+const { id, compact = false } = Astro.props;
+---
+
+<publication-search data-compact={compact ? 'true' : undefined} lang="vi">
+  <form action="/search" role="search" class="search-form">
+    <label for={id} class="sr-only">Tìm bài viết</label>
+    <input id={id} name="q" type="search" placeholder="Tìm bài viết…" autocomplete="off" maxlength="200" />
+    <button type="submit">Tìm kiếm</button>
+  </form>
+  <p class="search-status" role="status" aria-live="polite"></p>
+  <ol class="search-results"></ol>
+  <button type="button" class="search-more" hidden>Xem thêm kết quả</button>
+  <a class="search-all" href="/search" hidden>Xem tất cả kết quả →</a>
+  <noscript><p>Bật JavaScript để tìm kiếm, hoặc <a href="/archives">xem kho bài viết</a>.</p></noscript>
+</publication-search>
+
+<script>
+  import './search';
+</script>
+
+<style>
+  publication-search {
+    display: block;
+    min-width: 0;
+  }
+  .search-form {
+    display: flex;
+    border-bottom: 2px solid var(--ink-primary);
+    gap: var(--sp-3);
+  }
+  input {
+    width: 100%;
+    min-width: 0;
+    min-height: 3.5rem;
+    padding: var(--sp-3) 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink-primary);
+    font-family: var(--font-serif);
+    font-size: 1rem;
+  }
+  input::placeholder {
+    color: var(--ink-secondary);
+    opacity: 1;
+  }
+  .search-form button {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding-inline: var(--sp-2);
+    color: var(--accent-crimson);
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    font-weight: var(--w-semibold);
+  }
+  .search-status {
+    margin-block: var(--sp-4);
+    color: var(--ink-secondary);
+    font-size: var(--fs-meta);
+  }
+  .search-status:empty {
+    margin: 0;
+  }
+  .search-results {
+    list-style: none;
+  }
+  .search-results :global(li) {
+    border-bottom: 1px solid var(--rule-hair);
+  }
+  .search-results :global(a) {
+    display: block;
+    padding-block: var(--sp-4);
+    color: var(--ink-primary);
+  }
+  .search-results :global(h3) {
+    font-family: var(--font-display);
+    font-weight: var(--w-semibold);
+    font-size: var(--fs-h3);
+    line-height: 1.25;
+    text-wrap: pretty;
+  }
+  .search-results :global(a:hover h3) {
+    color: var(--accent-crimson);
+  }
+  .search-results :global(p) {
+    margin-top: var(--sp-2);
+    color: var(--ink-secondary);
+    font-size: var(--fs-meta);
+    line-height: 1.6;
+  }
+  .search-results :global(mark) {
+    background: var(--selection-bg);
+    color: inherit;
+  }
+  .search-more,
+  .search-all {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: var(--sp-4);
+    color: var(--accent-crimson);
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+  [hidden] {
+    display: none;
+  }
+</style>

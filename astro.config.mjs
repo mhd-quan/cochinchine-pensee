@@ -6,6 +6,7 @@ import { defineConfig } from 'astro/config';
 import fetchCovers from './scripts/fetch-covers.mjs';
 import responsiveImages from './scripts/responsive-images.mjs';
 import publicationFonts from './scripts/subset-fonts.mjs';
+import searchIndex from './scripts/search-index.mjs';
 
 // The Cochinchine Pensées — Astro 7 config
 // Output: pure static. Deploy target: Cloudflare Workers (Static Assets).
@@ -24,26 +25,28 @@ export default defineConfig({
     fetchCovers(), // TEMP: one-shot cover download — remove once covers are committed
     responsiveImages(),
     publicationFonts(),
+    searchIndex(),
     mdx(),
     sitemap({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '');
         return (
-          !path.startsWith('/draft/') && !['/draft', '/about', '/404', '/404.html'].includes(path)
+          !path.startsWith('/draft/') && !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
         );
       },
     }),
   ],
   build: {
     format: 'directory',
-    inlineStylesheets: 'auto',
+    // Avoid a blocking stylesheet round trip on a cold mobile visit.
+    // The shared styles compress to ~7 KB; fonts remain independently cacheable.
+    inlineStylesheets: 'always',
   },
   vite: {
     build: {
       cssMinify: 'lightningcss',
-      // Inline small route CSS; keep larger shared CSS and all fonts cacheable.
-      assetsInlineLimit: (filePath, content) => {
-        if (filePath.endsWith('.css')) return content.length < 14000;
+      // Fonts stay external even though critical styles ship with the HTML.
+      assetsInlineLimit: (filePath) => {
         if (/\.woff2?$/.test(filePath)) return false;
         // Preserve Vite/Astro's default behavior for small scripts and icons.
         return undefined;

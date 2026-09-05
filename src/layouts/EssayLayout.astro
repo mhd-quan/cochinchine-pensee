@@ -5,10 +5,12 @@ import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
 import { titleCaps } from '~/lib/titleCaps';
+import { foldSearchText } from '~/lib/searchText';
 import { HERO_IMAGE_SIZES, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
   title: string;
+  searchAliases?: string;
   subtitle?: string;
   dek?: string;
   date: Date;
@@ -30,6 +32,7 @@ interface Props {
 
 const {
   title,
+  searchAliases = "",
   subtitle,
   dek,
   date,
@@ -69,7 +72,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   reader={true}
   ogType="article"
 >
-  <article class="essay">
+  <article class="essay" data-pagefind-body data-pagefind-meta="title[data-search-title], title_alias[data-search-title-alias], description[data-search-description], aliases[data-search-aliases]" data-search-title={title} data-search-title-alias={foldSearchText(title)} data-search-description={excerpt ?? subtitle ?? ""} data-search-aliases={searchAliases}>
     <header class="essay__hero">
       <div class:list={['essay__hero-inner', { 'essay__hero-inner--text-only': !coverImage }]}>
         <div class="essay__header-copy">
@@ -79,7 +82,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
             </p>
           )}
 
-          <h1 class="essay__title">
+          <h1 class="essay__title" data-pagefind-weight="10">
             {titleCaps(title).map((segment) => (
               segment.small
                 ? <span class="title-caps__small">{segment.text}</span>
@@ -91,13 +94,13 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
           {dek && <p class="essay__dek">{dek}</p>}
 
           <div class="essay__byline">
-            <span class="essay__byline-by">by</span>
+            <span class="essay__byline-by" data-pagefind-ignore>by</span>
             <span class="essay__byline-author">{author}</span>
-            <span class="essay__byline-sep" aria-hidden="true">·</span>
-            <time datetime={isoDate}>{formattedDate}</time>
+            <span data-pagefind-ignore class="essay__byline-sep" aria-hidden="true">·</span>
+            <time data-pagefind-ignore datetime={isoDate}>{formattedDate}</time>
           </div>
 
-          <div class="essay__topics" aria-label={`${topicLead} ${topics.join(', ')}`}>
+          <div data-pagefind-ignore class="essay__topics" aria-label={`${topicLead} ${topics.join(', ')}`}>
             <span class="essay__topics-label">{topicLead}</span>
             <ul class="essay__topics-list" aria-label="Chủ đề">
               {topics.map((topic) => <li class="essay__topic">{topic}</li>)}
@@ -130,7 +133,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
       <ViewCustomizer />
     </div>
 
-    <footer class="essay__footer">
+    <footer class="essay__footer" data-pagefind-ignore>
       {publicationHistory && (
         <details class="essay__history">
           <summary>Publication history</summary>
