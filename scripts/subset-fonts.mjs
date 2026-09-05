@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import subsetFont from 'subset-font';
+import { fontCodePoints, unicodeRange } from './font-coverage.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.join(root, '.astro/fonts');
@@ -40,22 +41,35 @@ export async function generateFonts(logger = console) {
   const points = [...text].map((letter) => letter.codePointAt(0));
   const css = [];
   const inventory = [];
+  const preloads = [];
   for (const family of families) {
     const directory = path.join(root, 'node_modules/@fontsource', family);
     for (const style of styles[family]) {
       const original = await fs.readFile(path.join(directory, `${style}.css`), 'utf8');
-      for (const [face] of original.matchAll(/@font-face\s*\{[^}]+\}/g)) {
+      // Fontsource's Latin-ext ranges overlap Vietnamese (Đ, ư, ỵ, …).
+      // Give complete Vietnamese coverage to its small subset first, so an
+      // ordinary Vietnamese headline does not also request Latin-ext.
+      const priority = ['latin', 'vietnamese', 'latin-ext', 'greek', 'greek-ext', 'cyrillic', 'cyrillic-ext'];
+      const faces = [...original.matchAll(/@font-face\s*\{[^}]+\}/g)].map(([face]) => {
+        const source = face.match(/url\(([^)]+\.woff2)\)/)[1];
+        const script = source.replace(`./files/${family}-`, '').replace(/-\d+-(normal|italic)\.woff2$/, '');
+        return { face, source, script };
+      }).sort((a, b) => priority.indexOf(a.script) - priority.indexOf(b.script));
+      const assigned = new Set();
+      for (const { face, source, script } of faces) {
         const range = face.match(/unicode-range:\s*([^;]+);/)[1];
         const spans = range.split(',').map((item) => {
           const [start, end = start] = item.trim().replace('U+', '').split('-');
           return [Number.parseInt(start, 16), Number.parseInt(end, 16)];
         });
+        const buffer = await fs.readFile(path.join(directory, source));
+        const supported = await fontCodePoints(buffer);
         const selected = points.filter((point) =>
+          !assigned.has(point) && supported.has(point) &&
           spans.some(([start, end]) => point >= start && point <= end),
         );
         if (!selected.length) continue;
-        const source = face.match(/url\(([^)]+\.woff2)\)/)[1];
-        const buffer = await fs.readFile(path.join(directory, source));
+        selected.forEach((point) => assigned.add(point));
         const characters = String.fromCodePoint(...selected);
         const key = createHash('sha256')
           .update(buffer)
@@ -74,10 +88,22 @@ export async function generateFonts(logger = console) {
           await fs.writeFile(temporary, subset);
           await fs.rename(temporary, destination);
         }
-        css.push(face.replace(/src:[^;]+;/, `src: url('./fonts/${filename}') format('woff2');`));
+        const coverage = unicodeRange(selected);
+        css.push(face
+          .replace(/src:[^;]+;/, `src: url('./fonts/${filename}') format('woff2');`)
+          .replace(/unicode-range:[^;]+;/, `unicode-range: ${coverage};`));
+        if (family === 'eb-garamond' &&
+            ((style === '600' && script === 'latin') ||
+             (style === '700' && ['latin', 'vietnamese'].includes(script)))) {
+          preloads.push({ filename, script, role: style === '600' ? 'wordmark' : 'heading' });
+        }
         inventory.push({
           source: `${family}/${source}`,
           output: filename,
+          family,
+          style,
+          script,
+          coverage,
           before: buffer.length,
           after: (await fs.stat(destination)).size,
         });
@@ -85,6 +111,9 @@ export async function generateFonts(logger = console) {
     }
   }
   await fs.writeFile(path.join(root, '.astro/fonts.css'), `${css.join('\n')}\n`);
+  await fs.writeFile(path.join(root, '.astro/font-preloads.mjs'),
+    preloads.map(({ filename }, index) => `import font${index} from './fonts/${filename}?url';`).join('\n') +
+    `\nexport default [${preloads.map(({ script, role }, index) => `{ href: font${index}, script: '${script}', role: '${role}' }`).join(',')}];\n`);
   await fs.writeFile(
     path.join(root, '.astro/font-inventory.json'),
     `${JSON.stringify(inventory, null, 2)}\n`,

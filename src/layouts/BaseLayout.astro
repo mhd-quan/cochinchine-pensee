@@ -6,6 +6,7 @@
  * Vietnamese. The language policy is split by region, not by page.
  */
 import '~/styles/globals.css';
+import fontPreloads from '../../.astro/font-preloads.mjs';
 import { ClientRouter } from 'astro:transitions';
 import GoogleAnalytics from '~/components/analytics/GoogleAnalytics.astro';
 import ReaderPreferences from '~/components/essay/ReaderPreferences.astro';
@@ -39,18 +40,25 @@ const fullTitle =
   title === 'The Cochinchine Pensées'
     ? 'The Cochinchine Pensées'
     : `${title} — The Cochinchine Pensées`;
+const hasVietnameseHeading = lang === 'vi' || Astro.url.pathname === '/' || /[ĂăĐđĨĩŨũƠơƯư\u1EA0-\u1EF9]/u.test(title);
+const criticalFonts = fontPreloads.filter((font) => font.role === 'wordmark' ||
+  (Astro.url.pathname !== '/search' && (font.script === 'latin' || hasVietnameseHeading)));
 ---
 
 <!doctype html>
 <html lang={lang} data-reader={reader ? 'true' : undefined} data-theme="paper">
   <head>
-    <GoogleAnalytics />
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#EEEEEB" />
     <meta name="color-scheme" content={reader ? 'light dark' : 'light'} />
     <meta name="generator" content={Astro.generator} />
+
+    {criticalFonts.map((font) => (
+      <link rel="preload" href={font.href} as="font" type="font/woff2" crossorigin />
+    ))}
+
+    <GoogleAnalytics />
 
     <ReaderPreferences />
 
@@ -66,9 +74,6 @@ const fullTitle =
       ogType={ogType}
     />
     <slot name="head" />
-
-    {/* DNS prefetch for any external resources we may add later */}
-    <link rel="dns-prefetch" href="//cochinchinepensees.studio" />
 
     {/* View Transitions — Astro 7 native */}
     <ClientRouter />

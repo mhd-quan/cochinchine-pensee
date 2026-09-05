@@ -103,6 +103,14 @@ and a size inventory live in `.astro/`; no system Python installation is needed.
 Restart development after adding content with new characters; every production
 build collects the current content again.
 
+The font build reads each font's actual character map and emits disjoint Unicode
+ranges, assigning Vietnamese before Latin Extended. A Vietnamese title therefore
+does not request a large Latin Extended file for characters such as Đ, ư and ỵ.
+Critical wordmark and heading fonts are preloaded using the same hashed URLs as
+the CSS; Vietnamese heading preloads are limited to relevant pages. Font parsing
+libraries run only at build time. Tests verify preserved character coverage,
+non-overlapping ranges, and preload/CSS URL agreement.
+
 Styles are inlined with each page to remove the cold-load blocking stylesheet
 request; compressed shared styles add about 7 KB to a page. Font files remain
 external and cacheable. Hashed `/_astro/` assets have a one-year immutable cache
