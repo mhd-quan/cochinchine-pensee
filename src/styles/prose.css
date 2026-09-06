@@ -205,6 +205,7 @@
 
 .prose .footnotes li {
   margin-bottom: var(--sp-3);
+  overflow-wrap: anywhere;
 }
 
 /* ──────────────────────────────────────────────────────────────────

@@ -198,6 +198,11 @@ pages. Other routes always render in Paper without overwriting the saved reader
 preferences. The early initializer also applies the destination's preferences
 before Astro swaps the document and when the browser restores a page.
 
+Reader options include Source Serif, Garamond, New York and **San Serif**
+(the operating system's sans-serif font; no Apple font files are distributed),
+with Paper, Sepia, Sage and Night surfaces. On phones below 768px, Text width
+is hidden and prose uses the available width with the usual page gutters.
+
 The homepage wordmark is its H1. Homepage JSON-LD identifies the publication,
 website and canonical homepage, with the Substack publication as a related
 identity. Navigation pages use website Open Graph metadata; essays use article
