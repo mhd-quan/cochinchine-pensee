@@ -65,9 +65,7 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
     const lifecycle = new AbortController();
     const { signal } = lifecycle;
     const flow = header.querySelector<HTMLElement>('[data-header-flow]')!;
-    const stage = header.querySelector<HTMLElement>('[data-header-stage]')!;
     const masthead = header.querySelector<HTMLElement>('[data-masthead]')!;
-    const banner = header.querySelector<HTMLElement>('[data-newsletter-banner]')!;
     const bar = header.querySelector<HTMLElement>('[data-reading-bar]')!;
     const menu = header.querySelector<HTMLElement>('[data-site-menu]')!;
     const desktop = matchMedia('(min-width: 48rem)');
@@ -319,6 +317,7 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
   }
   .site-header__newsletter-banner {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
@@ -499,6 +498,9 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
     color: var(--ink-primary);
   }
   @media (min-width: 32rem) {
+    .site-header__newsletter-banner {
+      flex-direction: row;
+    }
     .site-header__newsletter-action {
       padding-inline-start: var(--sp-3);
       border-inline-start: 1px solid var(--rule-on-dark);
@@ -514,6 +516,13 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
     }
     .site-header__masthead {
       min-height: 5.5rem;
+    }
+    .is-search-open .site-header__masthead .header-control--menu {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+      width: var(--header-edge);
+      height: calc(100% + 2.75rem);
     }
     .header-control {
       min-height: 4rem;

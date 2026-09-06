@@ -8,7 +8,7 @@
  * Preferences: typeface · type size · text width · theme.
  * Typefaces are the publication's own registers — Source Serif (house),
  * EB Garamond (the display face, offered for body), and New York via
- * ui-serif for readers on Apple devices (Georgia elsewhere).
+ * ui-serif for readers on Apple devices (Georgia elsewhere), plus system sans-serif.
  */
 ---
 
@@ -65,6 +65,10 @@
           <span class="reader-tools__font-sample reader-tools__font-sample--newyork" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--newyork">New York</span>
         </button>
+        <button type="button" data-pref="font" data-value="sans" aria-label="San Serif typeface">
+          <span class="reader-tools__font-sample reader-tools__font-sample--sans" aria-hidden="true">Aa</span>
+          <span class="reader-tools__option-name reader-tools__option-name--sans">San Serif</span>
+        </button>
       </div>
     </fieldset>
 
@@ -83,7 +87,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="reader-tools__group">
+    <fieldset class="reader-tools__group reader-tools__group--measure">
       <legend>Text width</legend>
       <div class="reader-tools__options reader-tools__options--measure">
         <button type="button" data-pref="measure" data-value="standard" aria-label="Standard text width">
@@ -108,6 +112,10 @@
           <span class="reader-tools__swatch reader-tools__swatch--sepia" aria-hidden="true">A</span>
           <span class="reader-tools__option-name">Sepia</span>
         </button>
+        <button type="button" data-pref="theme" data-value="sage" aria-label="Sage theme">
+          <span class="reader-tools__swatch reader-tools__swatch--sage" aria-hidden="true">A</span>
+          <span class="reader-tools__option-name">Sage</span>
+        </button>
         <button type="button" data-pref="theme" data-value="night" aria-label="Night theme">
           <span class="reader-tools__swatch reader-tools__swatch--night" aria-hidden="true">A</span>
           <span class="reader-tools__option-name">Night</span>
@@ -121,8 +129,8 @@
   type ReaderPrefs = {
     fontSize: 'md' | 'lg' | 'xl';
     measure: 'standard' | 'wide';
-    theme: 'paper' | 'sepia' | 'night';
-    font: 'serif' | 'garamond' | 'newyork';
+    theme: 'paper' | 'sepia' | 'sage' | 'night';
+    font: 'serif' | 'garamond' | 'newyork' | 'sans';
   };
 
   type PrefName = keyof ReaderPrefs;
@@ -138,8 +146,8 @@
   const VALID_VALUES: { [Key in PrefName]: readonly ReaderPrefs[Key][] } = {
     fontSize: ['md', 'lg', 'xl'],
     measure: ['standard', 'wide'],
-    theme: ['paper', 'sepia', 'night'],
-    font: ['serif', 'garamond', 'newyork'],
+    theme: ['paper', 'sepia', 'sage', 'night'],
+    font: ['serif', 'garamond', 'newyork', 'sans'],
   };
   let activePreferenceAnimation: Animation | null = null;
   let preferenceCommitTimer: number | undefined;
@@ -199,11 +207,12 @@
     root.dataset.measure = prefs.measure;
     root.dataset.theme = prefs.theme;
     root.dataset.font = prefs.font;
-    const themeColor = prefs.theme === 'night'
-      ? '#1D1A18'
-      : prefs.theme === 'sepia'
-        ? '#ECE6D8'
-        : '#EEEEEB';
+    const themeColor = {
+      paper: '#EEEEEB',
+      sepia: '#ECE6D8',
+      sage: '#E4EBE1',
+      night: '#1D1A18',
+    }[prefs.theme];
     document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
       ?.setAttribute('content', themeColor);
 
@@ -553,10 +562,16 @@
 
   .reader-tools__option-name--serif,
   .reader-tools__option-name--garamond,
-  .reader-tools__option-name--newyork {
+  .reader-tools__option-name--newyork,
+  .reader-tools__option-name--sans {
     text-transform: none;
     font-size: 0.8125rem;
     letter-spacing: 0.01em;
+  }
+
+  .reader-tools__font-sample--sans,
+  .reader-tools__option-name--sans {
+    font-family: var(--font-system-sans);
   }
 
   .reader-tools__options--size button {
@@ -636,6 +651,11 @@
   .reader-tools__swatch--sepia {
     background: #ECE6D8;
     color: #4A3F2A;
+  }
+
+  .reader-tools__swatch--sage {
+    background: #E4EBE1;
+    color: #0F0F0F;
   }
 
   .reader-tools__swatch--night {
@@ -835,7 +855,7 @@
 
     .reader-tools__options--font,
     .reader-tools__options--theme {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .reader-tools__options--measure {
@@ -867,7 +887,8 @@
 
     .reader-tools__option-name--serif,
     .reader-tools__option-name--garamond,
-    .reader-tools__option-name--newyork {
+    .reader-tools__option-name--newyork,
+    .reader-tools__option-name--sans {
       font-size: 0.875rem;
     }
 
@@ -875,6 +896,12 @@
       width: 1.75rem;
       height: 1.75rem;
       font-size: 0.875rem;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .reader-tools__group--measure {
+      display: none;
     }
   }
 

@@ -103,6 +103,14 @@ and a size inventory live in `.astro/`; no system Python installation is needed.
 Restart development after adding content with new characters; every production
 build collects the current content again.
 
+The font build reads each font's actual character map and emits disjoint Unicode
+ranges, assigning Vietnamese before Latin Extended. A Vietnamese title therefore
+does not request a large Latin Extended file for characters such as Đ, ư and ỵ.
+Critical wordmark and heading fonts are preloaded using the same hashed URLs as
+the CSS; Vietnamese heading preloads are limited to relevant pages. Font parsing
+libraries run only at build time. Tests verify preserved character coverage,
+non-overlapping ranges, and preload/CSS URL agreement.
+
 Styles are inlined with each page to remove the cold-load blocking stylesheet
 request; compressed shared styles add about 7 KB to a page. Font files remain
 external and cacheable. Hashed `/_astro/` assets have a one-year immutable cache
@@ -189,6 +197,11 @@ Reader theme, typeface, size and measure are restored only on `EssayLayout`
 pages. Other routes always render in Paper without overwriting the saved reader
 preferences. The early initializer also applies the destination's preferences
 before Astro swaps the document and when the browser restores a page.
+
+Reader options include Source Serif, Garamond, New York and **San Serif**
+(the operating system's sans-serif font; no Apple font files are distributed),
+with Paper, Sepia, Sage and Night surfaces. On phones below 768px, Text width
+is hidden and prose uses the available width with the usual page gutters.
 
 The homepage wordmark is its H1. Homepage JSON-LD identifies the publication,
 website and canonical homepage, with the Substack publication as a related

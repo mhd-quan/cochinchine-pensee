@@ -151,3 +151,23 @@ test('rerunning the inline script does not register duplicate lifecycle listener
   vm.runInContext(script, context);
   assert.equal(extraListeners, 0);
 });
+
+test('Sage and system sans restore across article reloads and navigation without theming browse pages', () => {
+  const saved = JSON.stringify({ theme: 'sage', font: 'sans', measure: 'wide' });
+  const { document, window, storage } = harness(true, saved);
+  const assertReader = () => {
+    assert.equal(document.documentElement.dataset.theme, 'sage');
+    assert.equal(document.documentElement.dataset.font, 'sans');
+    assert.equal(document.documentElement.dataset.measure, 'wide');
+    assert.equal(document.meta.content, '#E4EBE1');
+  };
+  assertReader();
+  swap(document, new Page());
+  assert.deepEqual(document.documentElement.dataset, { theme: 'paper' });
+  assert.equal(document.meta.content, '#EEEEEB');
+  assert.equal(storage.value, saved);
+  swap(document, new Page(true));
+  assertReader();
+  window.dispatchEvent(new Event('pageshow'));
+  assertReader();
+});

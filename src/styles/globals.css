@@ -74,6 +74,13 @@ html[data-reader='true'][data-theme='sepia'] {
   --rule-hair: #D8CFBE;
 }
 
+html[data-reader='true'][data-theme='sage'] {
+  --bg-page: #E4EBE1;
+  --bg-page-deep: #DAE3D6;
+  --bg-tinted: #D3DECF;
+  --rule-hair: #C6D1C1;
+}
+
 html[data-reader='true'][data-theme='night'] {
   --bg-page: #1D1A18;
   --bg-page-deep: #14110F;
@@ -111,6 +118,10 @@ html[data-reader='true'][data-font='garamond'] .prose {
 
 html[data-reader='true'][data-font='newyork'] .prose {
   font-family: ui-serif, 'New York', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+}
+
+html[data-reader='true'][data-font='sans'] .prose {
+  font-family: var(--font-system-sans);
 }
 
 /* Astro keeps the root element across navigations: browse pages must switch

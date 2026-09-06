@@ -8,8 +8,8 @@
       const allowed = {
         fontSize: ['md', 'lg', 'xl'],
         measure: ['standard', 'wide'],
-        font: ['serif', 'garamond', 'newyork'],
-        theme: ['paper', 'sepia', 'night'],
+        font: ['serif', 'garamond', 'newyork', 'sans'],
+        theme: ['paper', 'sepia', 'sage', 'night'],
       };
 
       if (reading) {
@@ -32,7 +32,7 @@
       }
       if (!reading) root.classList.remove('has-reader-panel-open');
 
-      const colors = { paper: '#EEEEEB', sepia: '#ECE6D8', night: '#1D1A18' };
+      const colors = { paper: '#EEEEEB', sepia: '#ECE6D8', sage: '#E4EBE1', night: '#1D1A18' };
       doc.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors[prefs.theme]);
     }
 
