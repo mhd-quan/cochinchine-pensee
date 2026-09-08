@@ -209,10 +209,6 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     padding-block: var(--sp-6) var(--sp-10);
   }
 
-  .discovery__spread {
-    border-block: 2px solid var(--ink-primary);
-  }
-
   .quote-feature,
   .author-folio {
     min-width: 0;
@@ -222,11 +218,13 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
   .discovery__heading {
     display: flex;
     align-items: center;
-    min-height: 44px;
-    margin-bottom: var(--sp-4);
+    min-height: calc(44px + var(--sp-3) + 2px);
+    margin-bottom: var(--sp-6);
+    padding-bottom: var(--sp-3);
+    border-bottom: 2px solid var(--ink-primary);
     font-family: var(--font-sans);
-    font-size: var(--fs-kicker);
-    font-weight: var(--w-semibold);
+    font-size: var(--fs-h4);
+    font-weight: var(--w-bold);
     letter-spacing: var(--tr-kicker);
     line-height: var(--lh-meta);
     text-transform: uppercase;
@@ -240,7 +238,7 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     min-height: 22rem;
     padding: var(--sp-5);
     overflow: hidden;
-    border-left: 3px solid var(--accent-crimson);
+    border-radius: 12px;
     color: var(--ink-primary);
   }
 
@@ -262,6 +260,9 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
 
   .quote-feature__title {
     align-self: end;
+    justify-self: end;
+    max-width: 75%;
+    text-align: right;
     margin-top: var(--sp-6);
     font-family: var(--font-essay-title, var(--font-display));
     font-size: var(--fs-h4);
@@ -280,28 +281,25 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     z-index: -1;
     margin: 0;
     overflow: hidden;
-    background: var(--bg-page-deep);
+    background: transparent;
   }
 
   .quote-feature__image::after {
     position: absolute;
     inset: 0;
     content: '';
-    background: rgb(238 238 235 / 74%);
+    background: linear-gradient(90deg, var(--bg-page) 0%, transparent 90%),
+      radial-gradient(ellipse at bottom left, var(--bg-page) 12%, transparent 78%),
+      linear-gradient(180deg, var(--bg-page), transparent 14%),
+      linear-gradient(0deg, var(--bg-page), transparent 40%);
   }
 
   .quote-feature__image :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: blur(2px) saturate(0.55) contrast(0.9);
-    opacity: 0.62;
-    transform: scale(1.025);
-    transition: opacity var(--t-base);
-  }
-
-  .quote-feature__tile:hover .quote-feature__image :global(img) {
-    opacity: 0.74;
+    object-position: 65% center;
+    mask-image: radial-gradient(ellipse 80% 85% at 60% 45%, #000 35%, transparent 100%);
   }
 
   .quote-feature__tile:hover .quote-feature__title {
@@ -309,10 +307,6 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
-  }
-
-  .author-folio {
-    border-top: 1px solid var(--rule-hair);
   }
 
   .author-folio__name-row {
@@ -332,10 +326,6 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     color: var(--accent-crimson);
     text-decoration: underline;
     text-underline-offset: 0.2em;
-  }
-
-  .author-folio__list {
-    border-top: 1px solid var(--rule-hair);
   }
 
   .author-folio__entry {
@@ -408,6 +398,15 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     text-underline-offset: 0.18em;
   }
 
+  @media (max-width: 55.999rem) {
+    .quote-feature__image::after {
+      background: linear-gradient(180deg, var(--bg-page) 0%,
+          color-mix(in srgb, var(--bg-page) 88%, transparent) 42%,
+          transparent 72%, var(--bg-page) 100%),
+        radial-gradient(ellipse at bottom left, var(--bg-page) 10%, transparent 85%);
+    }
+  }
+
   @media (min-width: 56rem) {
     .discovery {
       padding-top: var(--sp-8);
@@ -423,60 +422,21 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
     }
 
     .quote-feature__tile {
-      grid-template-columns: minmax(0, 1fr) minmax(12rem, 31%);
-      grid-template-rows: 1fr auto;
-      grid-template-areas:
-        'quote image'
-        'title image';
-      column-gap: var(--sp-6);
-      min-height: 18rem;
-      padding: var(--sp-5) 0 var(--sp-4) var(--sp-5);
-      border-block: 1px solid var(--rule-hair);
+      min-height: 20rem;
+      padding: var(--sp-5) var(--sp-3) var(--sp-4) 0;
+      border-radius: 0;
     }
 
     .quote-feature__quote {
-      grid-area: quote;
-    }
-
-    .quote-feature__title {
-      grid-area: title;
+      max-width: 68%;
     }
 
     .quote-feature__image {
-      position: relative;
-      inset: auto;
-      z-index: auto;
-      grid-area: image;
-      align-self: center;
-      background: transparent;
-    }
-
-    .quote-feature__image::after {
-      content: none;
-    }
-
-    .quote-feature__image :global(img) {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 17rem;
-      margin-inline: auto;
-      object-fit: contain;
-      filter: none;
-      opacity: 1;
-      transform: none;
+      inset: 0 0 0 43%;
     }
 
     .quote-feature__image[data-cover-treatment='paper'] :global(img) {
       filter: url('#paper-to-alpha');
-    }
-
-    .quote-feature__image[data-cover-treatment='plate'] :global(img) {
-      mask-image: radial-gradient(ellipse 82% 80% at center, #000 58%, transparent 100%);
-    }
-
-    .quote-feature__tile:hover .quote-feature__image :global(img) {
-      opacity: 0.82;
     }
 
     .author-folio {
