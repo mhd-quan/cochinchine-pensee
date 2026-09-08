@@ -6,9 +6,9 @@
  * card-based in the manner of a native reader's display settings.
  *
  * Preferences: typeface · type size · text width · theme.
- * Typefaces are the publication's own registers — Source Serif (house),
- * EB Garamond (the display face, offered for body), and New York via
- * ui-serif for readers on Apple devices (Georgia elsewhere), plus system sans-serif.
+ * Typefaces: EB Garamond, New York via ui-serif (Georgia elsewhere), and
+ * Bricolage Grotesque. The sans preview stays on the system face until chosen,
+ * so opening the reader does not download Bricolage prematurely.
  */
 ---
 
@@ -53,10 +53,6 @@
     <fieldset class="reader-tools__group">
       <legend>Typeface</legend>
       <div class="reader-tools__options reader-tools__options--font">
-        <button type="button" data-pref="font" data-value="serif" aria-label="Source Serif typeface">
-          <span class="reader-tools__font-sample reader-tools__font-sample--serif" aria-hidden="true">Aa</span>
-          <span class="reader-tools__option-name reader-tools__option-name--serif">Source Serif</span>
-        </button>
         <button type="button" data-pref="font" data-value="garamond" aria-label="Garamond typeface">
           <span class="reader-tools__font-sample reader-tools__font-sample--garamond" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--garamond">Garamond</span>
@@ -65,7 +61,7 @@
           <span class="reader-tools__font-sample reader-tools__font-sample--newyork" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--newyork">New York</span>
         </button>
-        <button type="button" data-pref="font" data-value="sans" aria-label="San Serif typeface">
+        <button type="button" data-pref="font" data-value="sans" aria-label="Bricolage Grotesque sans serif typeface">
           <span class="reader-tools__font-sample reader-tools__font-sample--sans" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--sans">San Serif</span>
         </button>
@@ -130,7 +126,7 @@
     fontSize: 'md' | 'lg' | 'xl';
     measure: 'standard' | 'wide';
     theme: 'paper' | 'sepia' | 'sage' | 'night';
-    font: 'serif' | 'garamond' | 'newyork' | 'sans';
+    font: 'garamond' | 'newyork' | 'sans';
   };
 
   type PrefName = keyof ReaderPrefs;
@@ -140,14 +136,14 @@
     fontSize: 'md',
     measure: 'standard',
     theme: 'paper',
-    font: 'serif',
+    font: 'garamond',
   };
 
   const VALID_VALUES: { [Key in PrefName]: readonly ReaderPrefs[Key][] } = {
     fontSize: ['md', 'lg', 'xl'],
     measure: ['standard', 'wide'],
     theme: ['paper', 'sepia', 'sage', 'night'],
-    font: ['serif', 'garamond', 'newyork', 'sans'],
+    font: ['garamond', 'newyork', 'sans'],
   };
   let activePreferenceAnimation: Animation | null = null;
   let preferenceCommitTimer: number | undefined;
@@ -176,15 +172,18 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return { ...DEFAULTS };
 
-      const stored = JSON.parse(raw) as Partial<Record<PrefName, unknown>>;
+      const stored = JSON.parse(raw) as Partial<Record<PrefName, unknown>> & { font?: unknown };
       const prefs = { ...DEFAULTS };
+      const migratedFont = stored.font === 'serif' ? 'garamond' : stored.font;
 
       for (const pref of Object.keys(DEFAULTS) as PrefName[]) {
-        const value = stored[pref];
+        const value = pref === 'font' ? migratedFont : stored[pref];
         if (typeof value === 'string' && isValidValue(pref, value)) {
           setPreference(prefs, pref, value);
         }
       }
+
+      if (migratedFont !== stored.font) savePrefs(prefs);
 
       return prefs;
     } catch {
@@ -545,11 +544,6 @@
     color: var(--ink-primary);
   }
 
-  .reader-tools__font-sample--serif,
-  .reader-tools__option-name--serif {
-    font-family: var(--font-serif);
-  }
-
   .reader-tools__font-sample--garamond,
   .reader-tools__option-name--garamond {
     font-family: 'EB Garamond', Garamond, Georgia, serif;
@@ -560,7 +554,6 @@
     font-family: ui-serif, 'New York', 'Iowan Old Style', Georgia, serif;
   }
 
-  .reader-tools__option-name--serif,
   .reader-tools__option-name--garamond,
   .reader-tools__option-name--newyork,
   .reader-tools__option-name--sans {
@@ -572,6 +565,11 @@
   .reader-tools__font-sample--sans,
   .reader-tools__option-name--sans {
     font-family: var(--font-system-sans);
+  }
+
+  :global(html[data-reader='true'][data-font='sans']) .reader-tools__font-sample--sans,
+  :global(html[data-reader='true'][data-font='sans']) .reader-tools__option-name--sans {
+    font-family: var(--font-reader-sans);
   }
 
   .reader-tools__options--size button {
@@ -853,9 +851,13 @@
       gap: var(--sp-2);
     }
 
-    .reader-tools__options--font,
     .reader-tools__options--theme {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .reader-tools__options--font,
+    .reader-tools__options--size {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .reader-tools__options--measure {
@@ -885,7 +887,6 @@
       font-size: 1.5rem;
     }
 
-    .reader-tools__option-name--serif,
     .reader-tools__option-name--garamond,
     .reader-tools__option-name--newyork,
     .reader-tools__option-name--sans {

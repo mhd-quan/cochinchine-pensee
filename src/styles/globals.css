@@ -121,7 +121,10 @@ html[data-reader='true'][data-font='newyork'] .prose {
 }
 
 html[data-reader='true'][data-font='sans'] .prose {
-  font-family: var(--font-system-sans);
+  font-family: var(--font-reader-sans);
+  /* Bricolage ships real 400/600 upright faces but no italic. Permit only
+   * style synthesis here so emphasis stays visible without faking weights. */
+  font-synthesis: style;
 }
 
 /* Astro keeps the root element across navigations: browse pages must switch
@@ -167,8 +170,8 @@ html.has-reader-panel-open {
   margin-block: var(--sp-6);
 }
 
-/* Caps-and-small-caps headlines, built from spans because the display face
- * ships no `smcp` feature. See src/lib/titleCaps.ts. */
+/* Legacy caps-and-small-caps utility for EB Garamond surfaces. Article titles
+ * use the native Playfair Display SC face and do not need scaled spans. */
 .title-caps__small {
   font-size: 0.78em;
   letter-spacing: 0.01em;

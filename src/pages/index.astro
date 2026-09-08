@@ -3,8 +3,9 @@
  * Homepage — single-column CRB style, refined per user feedback (Aug 2026):
  *   1. Hero essay (latest, with cover image)
  *   2. "Recent Essays" grid
- *   3. "From the Stacks" book reviews grid
- *   4. One browsable series carousel
+ *   3. Daily quotation + author discovery spread
+ *   4. "From the Stacks" book reviews grid
+ *   5. One browsable series carousel
  *
  * No right rail, no utility nav, no floating issue line in header.
  */
@@ -12,16 +13,17 @@ import { getCollection } from 'astro:content';
 import BookCard from '~/components/essay/BookCard.astro';
 import EssayCard from '~/components/essay/EssayCard.astro';
 import SeriesCarousel from '~/components/essay/SeriesCarousel.astro';
-import BaseLayout from '~/layouts/BaseLayout.astro';
+import HomeDiscovery from '~/components/home/HomeDiscovery.astro';
 import SiteIdentity from '~/components/seo/SiteIdentity.astro';
-import { titleCaps } from '~/lib/titleCaps';
+import BaseLayout from '~/layouts/BaseLayout.astro';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
 const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const essaysById = new Map(sortedEssays.map((e) => [e.id, e]));
 
 const heroEssay = sortedEssays[0];
-const siteDescription = 'The Cochinchine Pensées — tiểu luận tiếng Việt về chính trị, văn hóa và văn chương. Đọc bài viết mới, điểm sách và các loạt bài trên website của ấn phẩm.';
+const siteDescription =
+  'The Cochinchine Pensées — tiểu luận tiếng Việt về chính trị, văn hóa và văn chương. Đọc bài viết mới, điểm sách và các loạt bài trên website của ấn phẩm.';
 // Max three rows on the widest grid (3 columns); CSS trims to 3 rows at
 // narrower breakpoints too. Everything else lives at /essays.
 const recentEssays = sortedEssays.slice(1, 10);
@@ -45,7 +47,11 @@ const featuredClusters = featuredSeries
       .filter((essay) => essay !== undefined),
   }))
   .filter(({ essays }) => essays.length > 0)
-  .sort((a, b) => Math.max(...b.essays.map((essay) => +essay.data.date)) - Math.max(...a.essays.map((essay) => +essay.data.date)));
+  .sort(
+    (a, b) =>
+      Math.max(...b.essays.map((essay) => +essay.data.date)) -
+      Math.max(...a.essays.map((essay) => +essay.data.date)),
+  );
 ---
 
 <BaseLayout
@@ -60,13 +66,7 @@ const featuredClusters = featuredSeries
       <div class="container">
         <p class="hero__eyebrow">Latest Essay</p>
         <h2 class="hero__title">
-          <a href={`/essays/${heroEssay.id}`}>
-            {titleCaps(heroEssay.data.title).map((segment) => (
-              segment.small
-                ? <span class="title-caps__small">{segment.text}</span>
-                : <span>{segment.text}</span>
-            ))}
-          </a>
+          <a href={`/essays/${heroEssay.id}`} lang={heroEssay.data.lang}>{heroEssay.data.title}</a>
         </h2>
         {heroEssay.data.subtitle && (
           <p class="hero__subtitle">{heroEssay.data.subtitle}</p>
@@ -101,6 +101,8 @@ const featuredClusters = featuredSeries
       ))}
     </ul>
   </section>
+
+  <HomeDiscovery essays={sortedEssays} />
 
   {/* ── From the Stacks — book reviews, newest first, horizontally scrollable ── */}
   {stackBooks.length > 0 && (
@@ -242,8 +244,9 @@ const featuredClusters = featuredSeries
   }
 
   .hero__title {
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title, var(--font-display));
     font-size: clamp(2rem, 1.4rem + 2.5vw, 3.75rem);
+    font-weight: var(--w-bold);
     line-height: 1.05;
     letter-spacing: 0.015em;
     color: var(--ink-primary);

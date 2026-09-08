@@ -47,6 +47,9 @@ function harness(reader, saved = savedReader) {
         if (storage.value instanceof Error) throw storage.value;
         return storage.value;
       },
+      setItem(_key, value) {
+        storage.value = value;
+      },
     },
   });
   vm.runInContext(script, context);
@@ -134,7 +137,7 @@ test('malformed, null, unsupported and blocked storage safely use reader default
     assert.deepEqual(document.documentElement.dataset, {
       reader: 'true',
       theme: 'paper',
-      font: 'serif',
+      font: 'garamond',
       fontSize: 'md',
       measure: 'standard',
     });
@@ -152,7 +155,7 @@ test('rerunning the inline script does not register duplicate lifecycle listener
   assert.equal(extraListeners, 0);
 });
 
-test('Sage and system sans restore across article reloads and navigation without theming browse pages', () => {
+test('Sage and Bricolage sans restore across article reloads and navigation without theming browse pages', () => {
   const saved = JSON.stringify({ theme: 'sage', font: 'sans', measure: 'wide' });
   const { document, window, storage } = harness(true, saved);
   const assertReader = () => {
@@ -170,4 +173,34 @@ test('Sage and system sans restore across article reloads and navigation without
   assertReader();
   window.dispatchEvent(new Event('pageshow'));
   assertReader();
+});
+
+test('legacy Source Serif preferences migrate once to Garamond without losing other choices', () => {
+  const saved = JSON.stringify({ theme: 'night', font: 'serif', fontSize: 'lg', measure: 'wide' });
+  const { document, storage } = harness(true, saved);
+  assert.deepEqual(document.documentElement.dataset, {
+    reader: 'true',
+    theme: 'night',
+    font: 'garamond',
+    fontSize: 'lg',
+    measure: 'wide',
+  });
+  assert.deepEqual(JSON.parse(storage.value), {
+    theme: 'night',
+    font: 'garamond',
+    fontSize: 'lg',
+    measure: 'wide',
+  });
+});
+
+test('the customizer exposes exactly the three supported reader typefaces', () => {
+  const customizer = readFileSync(
+    new URL('../src/components/essay/ViewCustomizer.astro', import.meta.url),
+    'utf8',
+  );
+  const values = [...customizer.matchAll(/data-pref="font" data-value="([^"]+)"/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(values, ['garamond', 'newyork', 'sans']);
+  assert.doesNotMatch(customizer, />Source Serif</);
 });

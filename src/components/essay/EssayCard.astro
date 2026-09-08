@@ -16,8 +16,12 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
-import { titleCaps } from '~/lib/titleCaps';
-import { CARD_IMAGE_SIZES, containedImageSizes, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
+import {
+  CARD_IMAGE_SIZES,
+  containedImageSizes,
+  responsiveImage,
+  responsiveSource,
+} from '~/lib/responsiveImage';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
@@ -28,7 +32,10 @@ interface Props {
 }
 
 const {
-  essay, showExcerpt = false, variant = 'default', priority = false,
+  essay,
+  showExcerpt = false,
+  variant = 'default',
+  priority = false,
   imageSizes = CARD_IMAGE_SIZES,
 } = Astro.props;
 const formattedDate = essay.data.date.toLocaleDateString('en-US', {
@@ -79,13 +86,7 @@ const coverTreatment = getCoverTreatment(essay.id);
     )}
 
     <h4 class="essay-card__title">
-      <a href={`/essays/${essay.id}`}>
-        {titleCaps(essay.data.title).map((segment) => (
-          segment.small
-            ? <span class="title-caps__small">{segment.text}</span>
-            : <span>{segment.text}</span>
-        ))}
-      </a>
+      <a href={`/essays/${essay.id}`}>{essay.data.title}</a>
     </h4>
 
     {essay.data.subtitle && (
@@ -192,11 +193,11 @@ const coverTreatment = getCoverTreatment(essay.id);
     margin-bottom: var(--sp-1);
   }
 
-  /* Title — CRB caps-and-small-caps: the words' true capitals stand
-   * full-height while every other letter renders as a smaller capital.
-   * No text-transform: the natural casing decides which letters lead. */
+  /* The dedicated title face contains real small-cap glyphs, so the source
+   * title stays intact and needs no simulated per-letter scaling. */
   .essay-card__title {
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-regular);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
     letter-spacing: 0.02em;

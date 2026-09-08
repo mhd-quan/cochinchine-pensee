@@ -94,8 +94,8 @@ processing or additional JavaScript is required.
 
 ### Font and loading preparation
 
-The build subsets the existing Source Serif 4, EB Garamond and Be Vietnam Pro
-files with HarfBuzz through `subset-font`. It retains OpenType shaping features,
+The build subsets Source Serif 4, EB Garamond, Be Vietnam Pro, Playfair Display SC
+and Bricolage Grotesque files with HarfBuzz through `subset-font`. It retains OpenType shaping features,
 the characters found throughout `src/`, common Latin, Vietnamese, combining
 marks and punctuation. NFC/NFD and case variants are included. Font family,
 weights, styles and `font-display: swap` remain the same. Generated WOFF2/CSS
@@ -162,7 +162,8 @@ columns stack on mobile; no Substack iframe or social widget is loaded.
 
 `/archives` indexes published writing by month, `/pensees` follows the existing
 `form: pensee` metadata, and `/authors` groups published work by its byline.
-`/masthead` holds the confirmed editorial roles. About has a short introduction
+`/authors/m-q-doan` and `/authors/adler` are permanent, server-rendered author
+archives; `/masthead` holds the confirmed editorial roles. About has a short introduction
 and reader note; its existing noindex setting remains until the full profile
 is ready. The existing `/essays` catalogue and all article URLs are retained.
 
@@ -191,6 +192,20 @@ non-visible panels leave keyboard navigation. Reduced-motion settings disable
 smooth scrolling. Without JavaScript, the horizontal content and links remain
 available.
 
+Between recent essays and the book shelf, the homepage presents one full quotation
+from the published archive alongside its matching responsive cover, title and
+reader link. Two source-verified excerpts are curated for each of 57 eligible essays;
+the earliest Minh Tuệ essay remains published in the archives but is intentionally
+excluded from this quotation rotation.
+Every visitor sees the same selection for each calendar day in Vietnam. The next
+eligible article appears on the next day, and its second excerpt appears on the next
+pass through the archive. Reloads, tabs and browser history keep the day's selection;
+an open page checks for a changed date when it regains focus or visibility, without
+timed cycling. The adjacent author folio links to each static author archive and
+their latest essay. The selected image alone enters the live DOM. Because the site
+is statically generated, visitors without JavaScript see the selection for the build
+date until the next deployment.
+
 ## Reader preferences and search identity
 
 Reader theme, typeface, size and measure are restored only on `EssayLayout`
@@ -198,9 +213,10 @@ pages. Other routes always render in Paper without overwriting the saved reader
 preferences. The early initializer also applies the destination's preferences
 before Astro swaps the document and when the browser restores a page.
 
-Reader options include Source Serif, Garamond, New York and **San Serif**
-(the operating system's sans-serif font; no Apple font files are distributed),
-with Paper, Sepia, Sage and Night surfaces. On phones below 768px, Text width
+Reader options include Garamond, New York and **San Serif** (Bricolage Grotesque),
+with Paper, Sepia, Sage and Night surfaces. Existing saved Source Serif selections
+migrate to Garamond. Bricolage loads only after a reader chooses it, and no Apple
+font files are distributed. On phones below 768px, Text width
 is hidden and prose uses the available width with the usual page gutters.
 
 The homepage wordmark is its H1. Homepage JSON-LD identifies the publication,

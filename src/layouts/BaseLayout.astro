@@ -6,13 +6,13 @@
  * Vietnamese. The language policy is split by region, not by page.
  */
 import '~/styles/globals.css';
-import fontPreloads from '../../.astro/font-preloads.mjs';
 import { ClientRouter } from 'astro:transitions';
 import GoogleAnalytics from '~/components/analytics/GoogleAnalytics.astro';
 import ReaderPreferences from '~/components/essay/ReaderPreferences.astro';
 import Footer from '~/components/nav/Footer.astro';
 import Header from '~/components/nav/Header.astro';
 import MetaTags from '~/components/seo/MetaTags.astro';
+import fontPreloads from '../../.astro/font-preloads.mjs';
 
 interface Props {
   title: string;
@@ -40,9 +40,26 @@ const fullTitle =
   title === 'The Cochinchine Pensées'
     ? 'The Cochinchine Pensées'
     : `${title} — The Cochinchine Pensées`;
-const hasVietnameseHeading = lang === 'vi' || Astro.url.pathname === '/' || /[ĂăĐđĨĩŨũƠơƯư\u1EA0-\u1EF9]/u.test(title);
-const criticalFonts = fontPreloads.filter((font) => font.role === 'wordmark' ||
-  (Astro.url.pathname !== '/search' && (font.script === 'latin' || hasVietnameseHeading)));
+const pathname = Astro.url.pathname;
+const hasVietnameseHeading =
+  lang === 'vi' || Astro.url.pathname === '/' || /[ĂăĐđĨĩŨũƠơƯư\u1EA0-\u1EF9]/u.test(title);
+const hasEssayHero = reader || pathname === '/';
+const hasEssayList =
+  pathname === '/' ||
+  ['/essays', '/authors', '/series', '/archives', '/pensees'].some(
+    (section) => pathname === section || pathname.startsWith(`${section}/`),
+  );
+const hasGenericHeading = !hasEssayHero && pathname !== '/search';
+const criticalFonts = fontPreloads.filter((font) => {
+  if (font.role === 'wordmark') return true;
+  if (font.role === 'essay-title-hero') return hasEssayHero;
+  if (font.role === 'essay-title-list') return hasEssayList && !reader;
+  return (
+    font.role === 'heading' &&
+    hasGenericHeading &&
+    (font.script === 'latin' || hasVietnameseHeading)
+  );
+});
 ---
 
 <!doctype html>

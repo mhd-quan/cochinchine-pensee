@@ -1,22 +1,29 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import fontverter from 'fontverter';
 import { fontCodePoints } from '../scripts/font-coverage.mjs';
-import { publicationCharacters } from '../scripts/subset-fonts.mjs';
+import { publicationCharacters, publicationTitleCharacters } from '../scripts/subset-fonts.mjs';
 
 const root = new URL('../', import.meta.url);
 const inventory = JSON.parse(await readFile(new URL('.astro/font-inventory.json', root), 'utf8'));
-const pointsIn = (range) => range.split(',').flatMap((span) => {
-  const [start, end = start] = span.replace('U+', '').split('-').map((hex) => parseInt(hex, 16));
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-});
+const pointsIn = (range) =>
+  range.split(',').flatMap((span) => {
+    const [start, end = start] = span
+      .replace('U+', '')
+      .split('-')
+      .map((hex) => parseInt(hex, 16));
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  });
 
 test('font subsets claim only supported characters and never overlap within a style', async () => {
   const groups = new Map();
   for (const font of inventory) {
     const key = `${font.family}/${font.style}`;
     const assigned = groups.get(key) ?? new Set();
-    const supported = await fontCodePoints(await readFile(new URL(`.astro/fonts/${font.output}`, root)));
+    const supported = await fontCodePoints(
+      await readFile(new URL(`.astro/fonts/${font.output}`, root)),
+    );
     for (const point of pointsIn(font.coverage)) {
       assert.ok(supported.has(point), `${font.output}: missing ${point.toString(16)}`);
       assert.ok(!assigned.has(point), `${key}: overlapping ${point.toString(16)}`);
@@ -27,34 +34,106 @@ test('font subsets claim only supported characters and never overlap within a st
 });
 
 test('font repartition preserves the original publication character coverage', async () => {
-  const requested = new Set([...(await publicationCharacters())].map((char) => char.codePointAt(0)));
-  for (const key of new Set(inventory.map((font) => `${font.family}/${font.style}`))) {
+  const requested = new Set(
+    [...(await publicationCharacters())].map((char) => char.codePointAt(0)),
+  );
+  const fontsourceInventory = inventory.filter((font) => font.sourceType === 'fontsource');
+  for (const key of new Set(fontsourceInventory.map((font) => `${font.family}/${font.style}`))) {
     const [family, style] = key.split('/');
-    const originalCSS = await readFile(new URL(`node_modules/@fontsource/${family}/${style}.css`, root), 'utf8');
+    const originalCSS = await readFile(
+      new URL(`node_modules/@fontsource/${family}/${style}.css`, root),
+      'utf8',
+    );
     const expected = new Set();
     for (const [face] of originalCSS.matchAll(/@font-face\s*\{[^}]+\}/g)) {
       const source = face.match(/url\(([^)]+\.woff2)\)/)[1];
-      const supported = await fontCodePoints(await readFile(new URL(`node_modules/@fontsource/${family}/${source}`, root)));
+      const supported = await fontCodePoints(
+        await readFile(new URL(`node_modules/@fontsource/${family}/${source}`, root)),
+      );
       for (const point of pointsIn(face.match(/unicode-range:\s*([^;]+);/)[1])) {
         if (supported.has(point) && requested.has(point)) expected.add(point);
       }
     }
-    const actual = new Set(inventory.filter((font) => `${font.family}/${font.style}` === key)
-      .flatMap((font) => pointsIn(font.coverage)));
+    const actual = new Set(
+      fontsourceInventory
+        .filter((font) => `${font.family}/${font.style}` === key)
+        .flatMap((font) => pointsIn(font.coverage)),
+    );
     assert.deepEqual(actual, expected, key);
-    const vietnamese = inventory.find((font) => `${font.family}/${font.style}` === key && font.script === 'vietnamese');
+    const vietnamese = inventory.find(
+      (font) => `${font.family}/${font.style}` === key && font.script === 'vietnamese',
+    );
     for (const character of 'ĐđĂăƯưƠơỲỳỴỵ') {
-      assert.ok(pointsIn(vietnamese.coverage).includes(character.codePointAt(0)), `${key}: ${character}`);
+      assert.ok(
+        pointsIn(vietnamese.coverage).includes(character.codePointAt(0)),
+        `${key}: ${character}`,
+      );
     }
   }
 });
 
-test('critical font preloads reuse the exact cacheable CSS assets', async () => {
-  for (const page of ['index.html', 'books/index.html', 'search/index.html', 'essays/2026-09-02-hongkong-va-hoang-chi-phong/index.html']) {
+test('local title and reader subsets preserve their requested Vietnamese coverage', async () => {
+  const publication = await publicationCharacters();
+  const titles = await publicationTitleCharacters();
+  const localInventory = inventory.filter((font) => font.sourceType === 'local');
+  for (const font of localInventory) {
+    const requested = font.family === 'playfair-display-sc' ? titles : publication;
+    const original = await fontCodePoints(await readFile(new URL(font.source, root)));
+    const expected = new Set(
+      [...requested].map((char) => char.codePointAt(0)).filter((point) => original.has(point)),
+    );
+    const actual = new Set(pointsIn(font.coverage));
+    assert.deepEqual(actual, expected, `${font.family}/${font.style}`);
+    for (const character of 'ĐđĂăƯưƠơỲỳỴỵ') {
+      assert.ok(actual.has(character.codePointAt(0)), `${font.family}/${font.style}: ${character}`);
+    }
+  }
+});
+
+test('Playfair subsets retain native small-cap features and homepage titles use their default glyphs', async () => {
+  for (const font of inventory.filter((font) => font.family === 'playfair-display-sc')) {
+    const subset = await readFile(new URL(`.astro/fonts/${font.output}`, root));
+    const truetype = Buffer.from(await fontverter.convert(subset, 'truetype'));
+    assert.ok(truetype.includes(Buffer.from('smcp')), `${font.style}: smcp`);
+    assert.ok(truetype.includes(Buffer.from('c2sc')), `${font.style}: c2sc`);
+  }
+
+  const homepage = await readFile(new URL('src/components/home/HomeDiscovery.astro', root), 'utf8');
+  assert.doesNotMatch(homepage, /font-variant-caps:\s*all-small-caps/);
+  for (const selector of ['quote-feature__title', 'author-folio__latest-title']) {
+    const rules = [...homepage.matchAll(new RegExp(`\\.${selector}\\s*\\{([^}]+)\\}`, 'g'))];
+    const rule =
+      rules.map((match) => match[1]).find((styles) => styles.includes('font-variant-caps')) ?? '';
+    assert.match(rule, /font-variant-caps:\s*normal/);
+    assert.match(rule, /text-transform:\s*lowercase/);
+  }
+});
+
+test('critical font preloads are page-specific and never fetch Bricolage eagerly', async () => {
+  const pages = [
+    {
+      page: 'index.html',
+      count: 3,
+      include: ['playfair-display-sc-400', 'playfair-display-sc-700'],
+    },
+    { page: 'books/index.html', count: 2, include: [] },
+    { page: 'search/index.html', count: 1, include: [] },
+    { page: 'essays/index.html', count: 3, include: ['playfair-display-sc-400'] },
+    {
+      page: 'essays/2026-09-02-hongkong-va-hoang-chi-phong/index.html',
+      count: 2,
+      include: ['playfair-display-sc-700'],
+    },
+  ];
+  for (const { page, count, include } of pages) {
     const html = await readFile(new URL(`dist/${page}`, root), 'utf8');
     const preloads = [...html.matchAll(/<link\b[^>]*rel="preload"[^>]*>/g)]
-      .map(([tag]) => tag).filter((tag) => tag.includes('as="font"'));
-    assert.equal(preloads.length, page.startsWith('search/') ? 1 : page.startsWith('books/') ? 2 : 3);
+      .map(([tag]) => tag)
+      .filter((tag) => tag.includes('as="font"'));
+    assert.equal(preloads.length, count, page);
+    const preloadMarkup = preloads.join('\n');
+    for (const familyStyle of include) assert.match(preloadMarkup, new RegExp(familyStyle), page);
+    assert.doesNotMatch(preloadMarkup, /bricolage-grotesque/, page);
     for (const tag of preloads) {
       assert.match(tag, /crossorigin/);
       const href = tag.match(/href="([^"]+)"/)[1];

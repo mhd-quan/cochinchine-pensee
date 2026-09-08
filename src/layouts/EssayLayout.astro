@@ -4,9 +4,8 @@ import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
 import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
-import { titleCaps } from '~/lib/titleCaps';
-import { foldSearchText } from '~/lib/searchText';
 import { HERO_IMAGE_SIZES, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
+import { foldSearchText } from '~/lib/searchText';
 
 interface Props {
   title: string;
@@ -32,7 +31,7 @@ interface Props {
 
 const {
   title,
-  searchAliases = "",
+  searchAliases = '',
   subtitle,
   dek,
   date,
@@ -60,7 +59,10 @@ const formattedDate = date.toLocaleDateString('en-US', {
 
 const isoDate = date.toISOString();
 const summaryLead = `${title}${subtitle ? ` — ${subtitle}` : ''}`.trim().replace(/[.!?…]+$/, '');
-const description = excerpt?.trim() || dek?.trim() || `${summaryLead}. ${form === 'pensee' ? 'Pensée' : 'Tiểu luận'} của ${author} trên The Cochinchine Pensées.`;
+const description =
+  excerpt?.trim() ||
+  dek?.trim() ||
+  `${summaryLead}. ${form === 'pensee' ? 'Pensée' : 'Tiểu luận'} của ${author} trên The Cochinchine Pensées.`;
 const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 ---
 
@@ -82,13 +84,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
             </p>
           )}
 
-          <h1 class="essay__title" data-pagefind-weight="10">
-            {titleCaps(title).map((segment) => (
-              segment.small
-                ? <span class="title-caps__small">{segment.text}</span>
-                : <span>{segment.text}</span>
-            ))}
-          </h1>
+          <h1 class="essay__title" data-pagefind-weight="10">{title}</h1>
 
           {subtitle && <p class="essay__subtitle">{subtitle}</p>}
           {dek && <p class="essay__dek">{dek}</p>}
@@ -212,7 +208,8 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 
   .essay__title {
     margin-bottom: var(--sp-4);
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-bold);
     font-size: var(--fs-h1);
     line-height: var(--lh-headline);
     letter-spacing: 0.015em;
@@ -389,7 +386,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   }
 
   .essay__prev-next-link {
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
     color: var(--ink-primary);
     transition: color var(--t-base);
   }
@@ -420,7 +417,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   .essay__prev-next-title {
     display: block;
     font-size: var(--fs-h4);
-    font-weight: var(--w-semibold);
+    font-weight: var(--w-regular);
     line-height: var(--lh-headline);
   }
 
