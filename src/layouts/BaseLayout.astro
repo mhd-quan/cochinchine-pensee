@@ -43,17 +43,16 @@ const fullTitle =
 const pathname = Astro.url.pathname;
 const hasVietnameseHeading =
   lang === 'vi' || Astro.url.pathname === '/' || /[ĂăĐđĨĩŨũƠơƯư\u1EA0-\u1EF9]/u.test(title);
-const hasEssayHero = reader || pathname === '/';
 const hasEssayList =
   pathname === '/' ||
   ['/essays', '/authors', '/series', '/archives', '/pensees'].some(
     (section) => pathname === section || pathname.startsWith(`${section}/`),
   );
-const hasGenericHeading = !hasEssayHero && pathname !== '/search';
+const hasEssayTitle = reader || hasEssayList;
+const hasGenericHeading = !reader && pathname !== '/' && pathname !== '/search';
 const criticalFonts = fontPreloads.filter((font) => {
   if (font.role === 'wordmark') return true;
-  if (font.role === 'essay-title-hero') return hasEssayHero;
-  if (font.role === 'essay-title-list') return hasEssayList && !reader;
+  if (font.role === 'essay-title') return hasEssayTitle;
   return (
     font.role === 'heading' &&
     hasGenericHeading &&

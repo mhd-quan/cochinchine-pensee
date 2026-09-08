@@ -178,7 +178,9 @@ function fakeContainer(payload) {
 
 const image = (name) => ({
   alt: `${name} cover`,
+  mobileAvif: { type: 'image/avif', srcset: `${name}-mobile.avif 160w`, sizes: '160px' },
   avif: { type: 'image/avif', srcset: `${name}.avif 160w`, sizes: '160px' },
+  mobileWebp: { type: 'image/webp', srcset: `${name}-mobile.webp 160w`, sizes: '160px' },
   fallback: {
     src: `${name}.webp`,
     srcset: `${name}.webp 160w`,
@@ -233,7 +235,11 @@ function assertSelection(container, expected, quoteKey) {
   );
   const picture = get('[data-home-discovery-image]').children[0];
   assert.equal(picture.tagName, 'picture');
-  assert.equal(picture.children[1].src, `${expected}.webp`);
+  assert.equal(picture.children[0].media, '(max-width: 55.999rem)');
+  assert.equal(picture.children[0].srcset, `${expected}-mobile.avif 160w`);
+  assert.equal(picture.children[2].type, 'image/webp');
+  assert.equal(picture.children[2].srcset, `${expected}-mobile.webp 160w`);
+  assert.equal(picture.children[3].src, `${expected}.webp`);
 }
 
 test('direct, reload, Astro Back and BFCache keep the shared quote until Vietnam midnight', () => {
@@ -315,4 +321,13 @@ test('built homepage keeps the payload out of the rendered quote DOM and offers 
     module.match(/data-home-discovery-payload[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '',
     /[<&]/,
   );
+
+  const payloadText =
+    module.match(/data-home-discovery-payload[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '';
+  const payload = JSON.parse(payloadText);
+  const article = Object.values(payload.articles)[0];
+  const widths = (srcset) => [...srcset.matchAll(/\s(\d+)w(?:,|$)/g)].map((match) => +match[1]);
+  assert.ok(Math.max(...widths(article.image.mobileAvif.srcset)) <= 672);
+  assert.ok(Math.max(...widths(article.image.mobileWebp.srcset)) <= 672);
+  assert.ok(Math.max(...widths(article.image.avif.srcset)) > 672);
 });

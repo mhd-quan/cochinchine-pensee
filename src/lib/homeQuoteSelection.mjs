@@ -62,10 +62,22 @@ export function selectDailyHomeQuote(choices, date = new Date()) {
 
 function makePicture(document, image) {
   const picture = document.createElement('picture');
+  const mobileAvif = document.createElement('source');
+  mobileAvif.media = '(max-width: 55.999rem)';
+  mobileAvif.type = image.mobileAvif.type;
+  mobileAvif.srcset = image.mobileAvif.srcset;
+  mobileAvif.sizes = image.mobileAvif.sizes;
+
   const source = document.createElement('source');
   source.type = image.avif.type;
   source.srcset = image.avif.srcset;
   source.sizes = image.avif.sizes;
+
+  const mobileWebp = document.createElement('source');
+  mobileWebp.media = '(max-width: 55.999rem)';
+  mobileWebp.type = image.mobileWebp.type;
+  mobileWebp.srcset = image.mobileWebp.srcset;
+  mobileWebp.sizes = image.mobileWebp.sizes;
 
   const img = document.createElement('img');
   img.src = image.fallback.src;
@@ -77,7 +89,7 @@ function makePicture(document, image) {
   img.loading = 'lazy';
   img.decoding = 'async';
 
-  picture.append(source, img);
+  picture.append(mobileAvif, source, mobileWebp, img);
   return picture;
 }
 

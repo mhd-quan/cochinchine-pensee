@@ -6,8 +6,10 @@ import { getCoverTreatment } from '~/lib/coverTreatment';
 import { getVietnamDateKey, selectDailyHomeQuote } from '~/lib/homeQuoteSelection.mjs';
 import {
   HOME_DISCOVERY_IMAGE_SIZES,
+  HOME_DISCOVERY_MOBILE_MAX_WIDTH,
   responsiveImage,
   responsiveSource,
+  responsiveWebpSource,
 } from '~/lib/responsiveImage';
 
 interface Props {
@@ -37,7 +39,17 @@ const articlePayload = Object.fromEntries(
         coverTreatment: getCoverTreatment(essay.id),
         image: {
           alt: essay.data.coverImageAlt ?? `Minh hoạ cho ${essay.data.title}`,
+          mobileAvif: responsiveSource(
+            essay.data.coverImage,
+            sizes,
+            HOME_DISCOVERY_MOBILE_MAX_WIDTH,
+          ),
           avif: responsiveSource(essay.data.coverImage, sizes),
+          mobileWebp: responsiveWebpSource(
+            essay.data.coverImage,
+            sizes,
+            HOME_DISCOVERY_MOBILE_MAX_WIDTH,
+          ),
           fallback: responsiveImage(essay.data.coverImage, sizes, 480),
         },
       },
@@ -100,7 +112,23 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
           >
             <noscript>
               <picture>
+                <source
+                  media="(max-width: 55.999rem)"
+                  {...responsiveSource(
+                    fallbackCover,
+                    fallbackSizes,
+                    HOME_DISCOVERY_MOBILE_MAX_WIDTH,
+                  )}
+                />
                 <source {...responsiveSource(fallbackCover, fallbackSizes)} />
+                <source
+                  media="(max-width: 55.999rem)"
+                  {...responsiveWebpSource(
+                    fallbackCover,
+                    fallbackSizes,
+                    HOME_DISCOVERY_MOBILE_MAX_WIDTH,
+                  )}
+                />
                 <img
                   {...responsiveImage(fallbackCover, fallbackSizes, 480)}
                   alt={fallbackEssay.data.coverImageAlt ?? `Minh hoạ cho ${fallbackEssay.data.title}`}
@@ -141,11 +169,11 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
           <li class="author-folio__entry">
             <div class="author-folio__name-row">
               <h4><a href={`/authors/${slug}`}>{name}</a></h4>
-              <span
-                class="author-folio__count"
-                aria-label={`${entries.length} ${entries.length === 1 ? 'essay' : 'essays'}`}
-              >
+              <span class="author-folio__count">
                 <span aria-hidden="true">{entries.length}</span>
+                <span class="sr-only">
+                  {entries.length} {entries.length === 1 ? 'essay' : 'essays'}
+                </span>
               </span>
             </div>
             <a class="author-folio__latest" href={`/essays/${latest.id}`} lang={latest.data.lang}>

@@ -32,12 +32,43 @@ export function bookImageSizes(source: string) {
   return `(min-width: 640px) ${jacket}, min(calc((100vw - 3.75rem) / 2), ${jacket})`;
 }
 
-export function responsiveSource(source: string, sizes: string) {
+function limitedVariants(
+  variants: ResponsiveImage['variants'],
+  maximumWidth = Number.POSITIVE_INFINITY,
+) {
+  const limited = variants.filter(({ width }) => width <= maximumWidth);
+  return limited.length > 0 ? limited : variants.slice(0, 1);
+}
+
+function responsiveSrcset(
+  variants: ResponsiveImage['variants'],
+  maximumWidth = Number.POSITIVE_INFINITY,
+) {
+  return limitedVariants(variants, maximumWidth)
+    .map((variant) => `${variant.src} ${variant.width}w`)
+    .join(', ');
+}
+
+export function responsiveSource(
+  source: string,
+  sizes: string,
+  maximumWidth = Number.POSITIVE_INFINITY,
+) {
   return {
     type: 'image/avif',
-    srcset: images[source].avifVariants
-      .map((variant) => `${variant.src} ${variant.width}w`)
-      .join(', '),
+    srcset: responsiveSrcset(images[source].avifVariants, maximumWidth),
+    sizes,
+  };
+}
+
+export function responsiveWebpSource(
+  source: string,
+  sizes: string,
+  maximumWidth = Number.POSITIVE_INFINITY,
+) {
+  return {
+    type: 'image/webp',
+    srcset: responsiveSrcset(images[source].variants, maximumWidth),
     sizes,
   };
 }
@@ -63,6 +94,8 @@ export const HERO_IMAGE_SIZES =
 export const HOME_DISCOVERY_IMAGE_SIZES =
   '(min-width: 1280px) 240px, (min-width: 896px) calc((100vw - 8rem) * 0.2), ' +
   'calc(100vw - 2.5rem)';
+
+export const HOME_DISCOVERY_MOBILE_MAX_WIDTH = 672;
 
 export function responsiveImage(source: string, sizes: string, fallbackWidth = 800) {
   const image = images[source];
