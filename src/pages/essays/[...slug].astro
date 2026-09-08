@@ -22,6 +22,14 @@ export const getStaticPaths = (async () => {
       params: { slug: essay.id },
       props: {
         essay,
+        moreByAuthor: sorted
+          .filter((candidate) => candidate.id !== essay.id && candidate.data.author === essay.data.author)
+          .slice(0, 3)
+          .map((candidate) => ({
+            url: `/essays/${candidate.id}`,
+            title: candidate.data.title,
+            date: candidate.data.date,
+          })),
         prevEssay: prevEssay
           ? { url: `/essays/${prevEssay.id}`, title: prevEssay.data.title }
           : null,
@@ -33,7 +41,7 @@ export const getStaticPaths = (async () => {
   });
 }) satisfies GetStaticPaths;
 
-const { essay, prevEssay, nextEssay } = Astro.props;
+const { essay, prevEssay, nextEssay, moreByAuthor } = Astro.props;
 const { Content } = await render(essay);
 ---
 
@@ -57,6 +65,7 @@ const { Content } = await render(essay);
   coverTreatment={getCoverTreatment(essay.id)}
   prevEssay={prevEssay}
   nextEssay={nextEssay}
+  moreByAuthor={moreByAuthor}
 >
   <Content components={{ img: ArticleImage }} />
 </EssayLayout>
