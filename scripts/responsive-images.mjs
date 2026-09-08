@@ -11,7 +11,7 @@ const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const OUTPUT = path.join(ROOT, 'public/images/responsive');
 const CACHE = path.join(ROOT, '.cache/image-sources');
 const MANIFEST = path.join(ROOT, '.astro/responsive-images.json');
-const WIDTHS = [160, 240, 320, 400, 480, 640, 800, 1200, 1600];
+const WIDTHS = [160, 240, 320, 400, 480, 640, 672, 800, 1200, 1600];
 const QUALITY = 78;
 const AVIF_QUALITY = 55;
 const hash = (value) => createHash('sha256').update(value).digest('hex').slice(0, 20);

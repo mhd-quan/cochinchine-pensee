@@ -109,16 +109,49 @@ test('Playfair subsets retain native small-cap features and homepage titles use 
   }
 });
 
+test('published article titles use the real Playfair bold face while muted previews stay regular', async () => {
+  const publishedTitles = [
+    ['src/components/essay/EssayCard.astro', 'essay-card__title'],
+    ['src/components/essay/EssayRow.astro', 'essay-row__title'],
+    ['src/components/directory/ArticleList.astro', 'article-list__title'],
+    ['src/components/search/SearchResults.astro', 'search-results :global\\(h3\\)'],
+    ['src/layouts/EssayLayout.astro', 'essay__prev-next-title'],
+  ];
+  for (const [filename, selector] of publishedTitles) {
+    const source = await readFile(new URL(filename, root), 'utf8');
+    const rule = source.match(new RegExp(`\\.${selector}\\s*\\{([^}]+)\\}`))?.[1] ?? '';
+    assert.match(rule, /font-weight:\s*var\(--w-bold\)/, filename);
+  }
+
+  const comingSoon = await readFile(
+    new URL('src/components/essay/ComingSoonCard.astro', root),
+    'utf8',
+  );
+  assert.match(
+    comingSoon.match(/\.coming-card__title\s*\{([^}]+)\}/)?.[1] ?? '',
+    /font-weight:\s*var\(--w-regular\)/,
+  );
+
+  const homepage = await readFile(new URL('src/components/home/HomeDiscovery.astro', root), 'utf8');
+  for (const selector of ['quote-feature__title', 'author-folio__latest-title']) {
+    const rule =
+      [...homepage.matchAll(new RegExp(`\\.${selector}\\s*\\{([^}]+)\\}`, 'g'))]
+        .map((match) => match[1])
+        .find((styles) => styles.includes('font-weight')) ?? '';
+    assert.match(rule, /font-weight:\s*var\(--w-regular\)/, selector);
+  }
+});
+
 test('critical font preloads are page-specific and never fetch Bricolage eagerly', async () => {
   const pages = [
     {
       page: 'index.html',
-      count: 3,
-      include: ['playfair-display-sc-400', 'playfair-display-sc-700'],
+      count: 2,
+      include: ['playfair-display-sc-700'],
     },
     { page: 'books/index.html', count: 2, include: [] },
     { page: 'search/index.html', count: 1, include: [] },
-    { page: 'essays/index.html', count: 3, include: ['playfair-display-sc-400'] },
+    { page: 'essays/index.html', count: 3, include: ['playfair-display-sc-700'] },
     {
       page: 'essays/2026-09-02-hongkong-va-hoang-chi-phong/index.html',
       count: 2,
@@ -133,6 +166,7 @@ test('critical font preloads are page-specific and never fetch Bricolage eagerly
     assert.equal(preloads.length, count, page);
     const preloadMarkup = preloads.join('\n');
     for (const familyStyle of include) assert.match(preloadMarkup, new RegExp(familyStyle), page);
+    assert.doesNotMatch(preloadMarkup, /playfair-display-sc-400/, page);
     assert.doesNotMatch(preloadMarkup, /bricolage-grotesque/, page);
     for (const tag of preloads) {
       assert.match(tag, /crossorigin/);

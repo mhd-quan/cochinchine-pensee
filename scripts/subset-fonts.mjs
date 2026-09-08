@@ -22,7 +22,6 @@ const localFaces = [
     fontStyle: 'normal',
     fontWeight: '400',
     characters: 'titles',
-    preloadRole: 'essay-title-list',
   },
   {
     family: 'playfair-display-sc',
@@ -32,7 +31,7 @@ const localFaces = [
     fontStyle: 'normal',
     fontWeight: '700',
     characters: 'titles',
-    preloadRole: 'essay-title-hero',
+    preloadRole: 'essay-title',
   },
   {
     family: 'bricolage-grotesque',

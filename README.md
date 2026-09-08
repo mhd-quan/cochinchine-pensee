@@ -63,7 +63,7 @@ npm run format       # biome format --write .
 `npm run build` and `npm run dev` prepare responsive covers automatically. The
 pipeline reads published essay cover fields (`coverImage` or `cover_image`),
 Markdown body images (including reference-style images), and book records. It
-creates AVIF and WebP variants at 160, 240, 320, 400, 480, 640, 800, 1200 and 1600px,
+creates AVIF and WebP variants at 160, 240, 320, 400, 480, 640, 672, 800, 1200 and 1600px,
 without enlarging smaller originals or changing their aspect ratio. Images use
 `picture`, `srcset`, layout-specific `sizes`, and intrinsic dimensions. AVIF is
 preferred where supported, with WebP fallback. Contained portraits advertise
