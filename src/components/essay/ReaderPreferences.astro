@@ -4,11 +4,11 @@
     function applyReaderPreferences(doc) {
       const root = doc.documentElement;
       const reading = root.dataset.reader === 'true';
-      const prefs = { fontSize: 'md', measure: 'standard', font: 'serif', theme: 'paper' };
+      const prefs = { fontSize: 'md', measure: 'standard', font: 'garamond', theme: 'paper' };
       const allowed = {
         fontSize: ['md', 'lg', 'xl'],
         measure: ['standard', 'wide'],
-        font: ['serif', 'garamond', 'newyork', 'sans'],
+        font: ['garamond', 'newyork', 'sans'],
         theme: ['paper', 'sepia', 'sage', 'night'],
       };
 
@@ -16,8 +16,13 @@
         try {
           const saved = JSON.parse(localStorage.getItem('tcp-reader-prefs') || '{}');
           if (saved && typeof saved === 'object') {
+            const migratedFont = saved.font === 'serif' ? 'garamond' : saved.font;
             for (const key of Object.keys(prefs)) {
-              if (allowed[key].includes(saved[key])) prefs[key] = saved[key];
+              const value = key === 'font' ? migratedFont : saved[key];
+              if (allowed[key].includes(value)) prefs[key] = value;
+            }
+            if (migratedFont !== saved.font) {
+              localStorage.setItem('tcp-reader-prefs', JSON.stringify({ ...saved, font: migratedFont }));
             }
           }
         } catch {

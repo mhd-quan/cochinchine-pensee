@@ -60,6 +60,10 @@ export const HERO_IMAGE_SIZES =
   '(min-width: 1216px) 624px, (min-width: 900px) calc((100vw - 8rem) * 0.57), ' +
   'calc(100vw - 2.5rem)';
 
+export const HOME_DISCOVERY_IMAGE_SIZES =
+  '(min-width: 1280px) 240px, (min-width: 896px) calc((100vw - 8rem) * 0.2), ' +
+  'calc(100vw - 2.5rem)';
+
 export function responsiveImage(source: string, sizes: string, fallbackWidth = 800) {
   const image = images[source];
   if (!image) throw new Error(`Image missing from responsive pipeline: ${source}`);

@@ -1,6 +1,9 @@
 ---
 import SearchForm from './SearchForm.astro';
-interface Props { id: string }
+
+interface Props {
+  id: string;
+}
 const { id } = Astro.props;
 ---
 
@@ -41,8 +44,8 @@ const { id } = Astro.props;
     color: var(--ink-primary);
   }
   .search-results :global(h3) {
-    font-family: var(--font-display);
-    font-weight: var(--w-semibold);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-regular);
     font-size: var(--fs-h3);
     line-height: 1.25;
     text-wrap: pretty;

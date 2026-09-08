@@ -1,0 +1,461 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import quoteRecords from '~/data/home-quotes.json';
+import { authorSlug } from '~/lib/authorArchive.mjs';
+import { getCoverTreatment } from '~/lib/coverTreatment';
+import { getVietnamDateKey, selectDailyHomeQuote } from '~/lib/homeQuoteSelection.mjs';
+import {
+  HOME_DISCOVERY_IMAGE_SIZES,
+  responsiveImage,
+  responsiveSource,
+} from '~/lib/responsiveImage';
+
+interface Props {
+  essays: CollectionEntry<'essays'>[];
+}
+
+const { essays } = Astro.props;
+const published = essays.filter(({ data }) => !data.draft && !data.comingSoon);
+const essaysById = new Map(published.map((essay) => [essay.id, essay]));
+const eligibleRecords = quoteRecords.filter(({ essayId }) => essaysById.has(essayId));
+if (eligibleRecords.length === 0)
+  throw new Error('Home discovery needs at least one published quote');
+
+const articlePayload = Object.fromEntries(
+  eligibleRecords.map(({ essayId }) => {
+    const essay = essaysById.get(essayId);
+    if (!essay?.data.coverImage) throw new Error(`Home discovery essay has no cover: ${essayId}`);
+    const sizes = HOME_DISCOVERY_IMAGE_SIZES;
+    return [
+      essayId,
+      {
+        essayId,
+        href: `/essays/${essayId}`,
+        title: essay.data.title,
+        author: essay.data.author,
+        lang: essay.data.lang,
+        coverTreatment: getCoverTreatment(essay.id),
+        image: {
+          alt: essay.data.coverImageAlt ?? `Minh hoạ cho ${essay.data.title}`,
+          avif: responsiveSource(essay.data.coverImage, sizes),
+          fallback: responsiveImage(essay.data.coverImage, sizes, 480),
+        },
+      },
+    ];
+  }),
+);
+const choices = eligibleRecords.flatMap(({ essayId, quotes }) =>
+  quotes.map((quote, index) => ({
+    quoteKey: `${essayId}:${index}`,
+    essayId,
+    quote,
+  })),
+);
+const payload = JSON.stringify({ articles: articlePayload, choices })
+  .replaceAll('&', '\\u0026')
+  .replaceAll('<', '\\u003c')
+  .replaceAll('>', '\\u003e')
+  .replaceAll('\u2028', '\\u2028')
+  .replaceAll('\u2029', '\\u2029');
+
+const buildInstant = new Date();
+const buildDateKey = getVietnamDateKey(buildInstant);
+const fallbackSelection = selectDailyHomeQuote(choices, buildInstant);
+if (!fallbackSelection) throw new Error('Home discovery needs a server fallback');
+const fallbackEssay = essaysById.get(fallbackSelection.essayId);
+if (!fallbackEssay?.data.coverImage) throw new Error('Home discovery fallback has no cover');
+const fallbackCover = fallbackEssay.data.coverImage;
+const fallbackSizes = HOME_DISCOVERY_IMAGE_SIZES;
+const authors = [...new Set(published.map(({ data }) => data.author))]
+  .map((name) => {
+    const entries = published.filter(({ data }) => data.author === name);
+    return { name, slug: authorSlug(name), entries, latest: entries[0] };
+  })
+  .sort((a, b) => b.entries.length - a.entries.length || a.name.localeCompare(b.name, 'vi'));
+---
+
+<section
+  class="discovery container"
+  data-home-discovery
+  data-discovery-day={buildDateKey}
+  data-essay-id={fallbackSelection.essayId}
+  data-quote-key={fallbackSelection.quoteKey}
+  aria-labelledby="discovery-title"
+>
+  <div class="discovery__spread">
+    <article class="quote-feature">
+      <h3 id="discovery-title" class="discovery__heading">From the Essays</h3>
+
+      <div data-home-discovery-active>
+        <a
+          class="quote-feature__tile"
+          data-home-discovery-link
+          href={`/essays/${fallbackEssay.id}`}
+          aria-label={`Read ${fallbackEssay.data.title}`}
+        >
+          <figure
+            class="quote-feature__image"
+            data-home-discovery-image
+            data-cover-treatment={getCoverTreatment(fallbackEssay.id)}
+          >
+            <noscript>
+              <picture>
+                <source {...responsiveSource(fallbackCover, fallbackSizes)} />
+                <img
+                  {...responsiveImage(fallbackCover, fallbackSizes, 480)}
+                  alt={fallbackEssay.data.coverImageAlt ?? `Minh hoạ cho ${fallbackEssay.data.title}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+            </noscript>
+          </figure>
+          <blockquote
+            class="quote-feature__quote"
+            cite={`/essays/${fallbackEssay.id}`}
+            data-home-discovery-blockquote
+          >
+            <p data-home-discovery-quote lang={fallbackEssay.data.lang}>{fallbackSelection.quote}</p>
+          </blockquote>
+          <p class="quote-feature__title" data-home-discovery-title lang={fallbackEssay.data.lang}>
+            {fallbackEssay.data.title}
+          </p>
+          <span class="sr-only">by <span data-home-discovery-author>{fallbackEssay.data.author}</span></span>
+        </a>
+      </div>
+
+      <script
+        is:inline
+        type="application/json"
+        data-home-discovery-payload
+        set:html={payload}
+      ></script>
+    </article>
+
+    <aside class="author-folio" aria-labelledby="authors-title">
+      <h3 id="authors-title" class="discovery__heading author-folio__heading">
+        <a href="/authors">Authors</a>
+      </h3>
+      <ul class="author-folio__list">
+        {authors.map(({ name, slug, entries, latest }) => (
+          <li class="author-folio__entry">
+            <div class="author-folio__name-row">
+              <h4><a href={`/authors/${slug}`}>{name}</a></h4>
+              <span
+                class="author-folio__count"
+                aria-label={`${entries.length} ${entries.length === 1 ? 'essay' : 'essays'}`}
+              >
+                <span aria-hidden="true">{entries.length}</span>
+              </span>
+            </div>
+            <a class="author-folio__latest" href={`/essays/${latest.id}`} lang={latest.data.lang}>
+              <span class="author-folio__latest-label">Latest</span>
+              <span class="author-folio__latest-title">{latest.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import { createHomeDiscoveryLifecycle } from '~/lib/homeQuoteSelection.mjs';
+
+  type HomeDiscoveryWindow = Window & {
+    __tcpHomeDiscoveryLifecycle?: ReturnType<typeof createHomeDiscoveryLifecycle>;
+  };
+  const lifecycleWindow = window as HomeDiscoveryWindow;
+  if (!lifecycleWindow.__tcpHomeDiscoveryLifecycle) {
+    lifecycleWindow.__tcpHomeDiscoveryLifecycle = createHomeDiscoveryLifecycle({
+      document,
+      window,
+    });
+  } else {
+    lifecycleWindow.__tcpHomeDiscoveryLifecycle.show();
+  }
+</script>
+
+<style>
+  .discovery {
+    padding-block: var(--sp-6) var(--sp-10);
+  }
+
+  .discovery__spread {
+    border-block: 2px solid var(--ink-primary);
+  }
+
+  .quote-feature,
+  .author-folio {
+    min-width: 0;
+    padding-block: var(--sp-5) var(--sp-6);
+  }
+
+  .discovery__heading {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--tr-kicker);
+    line-height: var(--lh-meta);
+    text-transform: uppercase;
+  }
+
+  .quote-feature__tile {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 22rem;
+    padding: var(--sp-5);
+    overflow: hidden;
+    border-left: 3px solid var(--accent-crimson);
+    color: var(--ink-primary);
+  }
+
+  .quote-feature__quote,
+  .quote-feature__title {
+    position: relative;
+    z-index: var(--z-base);
+  }
+
+  .quote-feature__quote {
+    align-self: start;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.65rem);
+    font-style: italic;
+    line-height: 1.34;
+    letter-spacing: -0.005em;
+  }
+
+  .quote-feature__title {
+    align-self: end;
+    margin-top: var(--sp-6);
+    font-family: var(--font-essay-title, var(--font-display));
+    font-size: var(--fs-h4);
+    /* This SC-specific face draws lowercase as native small capitals. Its
+     * `all-small-caps` lookup reverses them to ordinary lowercase outlines. */
+    font-variant-caps: normal;
+    font-weight: var(--w-regular);
+    line-height: var(--lh-headline);
+    text-transform: lowercase;
+    text-wrap: balance;
+  }
+
+  .quote-feature__image {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg-page-deep);
+  }
+
+  .quote-feature__image::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: rgb(238 238 235 / 74%);
+  }
+
+  .quote-feature__image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(2px) saturate(0.55) contrast(0.9);
+    opacity: 0.62;
+    transform: scale(1.025);
+    transition: opacity var(--t-base);
+  }
+
+  .quote-feature__tile:hover .quote-feature__image :global(img) {
+    opacity: 0.74;
+  }
+
+  .quote-feature__tile:hover .quote-feature__title {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .author-folio {
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .author-folio__name-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+
+  .author-folio__heading a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .author-folio__heading a:hover {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .author-folio__list {
+    border-top: 1px solid var(--rule-hair);
+  }
+
+  .author-folio__entry {
+    padding-block: var(--sp-4);
+    border-bottom: 1px solid var(--rule-hair);
+  }
+
+  .author-folio__name-row h4 {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.1rem + 0.45vw, 1.5rem);
+    font-style: italic;
+    font-weight: var(--w-regular);
+    line-height: var(--lh-headline);
+  }
+
+  .author-folio__name-row h4 a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .author-folio__name-row h4 a:hover {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  .author-folio__count {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-style: italic;
+    line-height: 1;
+    color: var(--ink-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .author-folio__latest {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 44px;
+    color: var(--ink-secondary);
+  }
+
+  .author-folio__latest-label {
+    display: block;
+    margin-bottom: var(--sp-1);
+    color: var(--accent-crimson);
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .author-folio__latest-title {
+    font-family: var(--font-essay-title, var(--font-display));
+    font-size: var(--fs-meta);
+    font-variant-caps: normal;
+    font-weight: var(--w-regular);
+    line-height: var(--lh-headline);
+    text-transform: lowercase;
+  }
+
+  .author-folio__latest:hover {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+  }
+
+  @media (min-width: 56rem) {
+    .discovery {
+      padding-top: var(--sp-8);
+    }
+
+    .discovery__spread {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+    }
+
+    .quote-feature {
+      padding-right: var(--sp-8);
+    }
+
+    .quote-feature__tile {
+      grid-template-columns: minmax(0, 1fr) minmax(12rem, 31%);
+      grid-template-rows: 1fr auto;
+      grid-template-areas:
+        'quote image'
+        'title image';
+      column-gap: var(--sp-6);
+      min-height: 18rem;
+      padding: var(--sp-5) 0 var(--sp-4) var(--sp-5);
+      border-block: 1px solid var(--rule-hair);
+    }
+
+    .quote-feature__quote {
+      grid-area: quote;
+    }
+
+    .quote-feature__title {
+      grid-area: title;
+    }
+
+    .quote-feature__image {
+      position: relative;
+      inset: auto;
+      z-index: auto;
+      grid-area: image;
+      align-self: center;
+      background: transparent;
+    }
+
+    .quote-feature__image::after {
+      content: none;
+    }
+
+    .quote-feature__image :global(img) {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 17rem;
+      margin-inline: auto;
+      object-fit: contain;
+      filter: none;
+      opacity: 1;
+      transform: none;
+    }
+
+    .quote-feature__image[data-cover-treatment='paper'] :global(img) {
+      filter: url('#paper-to-alpha');
+    }
+
+    .quote-feature__image[data-cover-treatment='plate'] :global(img) {
+      mask-image: radial-gradient(ellipse 82% 80% at center, #000 58%, transparent 100%);
+    }
+
+    .quote-feature__tile:hover .quote-feature__image :global(img) {
+      opacity: 0.82;
+    }
+
+    .author-folio {
+      padding-left: var(--sp-6);
+      border-top: 0;
+      border-left: 1px solid var(--rule-hair);
+    }
+
+  }
+</style>

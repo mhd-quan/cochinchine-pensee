@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+
 interface Props {
   entries: CollectionEntry<'essays'>[];
 }
@@ -48,7 +49,8 @@ const { entries } = Astro.props;
   .article-list__title {
     display: inline-block;
     padding-block: var(--sp-2);
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-regular);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
     color: var(--ink-primary);
