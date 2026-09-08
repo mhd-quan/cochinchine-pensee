@@ -1,6 +1,7 @@
 ---
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
+import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
 import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
@@ -27,6 +28,7 @@ interface Props {
   coverTreatment?: CoverTreatment;
   prevEssay?: { url: string; title: string } | null;
   nextEssay?: { url: string; title: string } | null;
+  moreByAuthor?: { url: string; title: string; date: Date }[];
 }
 
 const {
@@ -49,6 +51,7 @@ const {
   coverTreatment = 'paper',
   prevEssay,
   nextEssay,
+  moreByAuthor = [],
 } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
@@ -126,7 +129,10 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         <slot />
       </div>
 
-      <ViewCustomizer />
+      <div class="essay__sidebar">
+        <ViewCustomizer />
+        <ReaderCompanion author={author} essays={moreByAuthor} title={title} />
+      </div>
     </div>
 
     <footer class="essay__footer" data-pagefind-ignore>
@@ -424,9 +430,9 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   @media (min-width: 1100px) {
     .essay__reading-shell {
       display: grid;
-      grid-template-columns: 10rem minmax(0, var(--reader-measure)) 10rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, var(--reader-measure)) 14rem;
       align-items: start;
-      gap: var(--sp-8);
+      gap: var(--sp-6);
       width: min(100%, calc(var(--measure-long) + 30rem));
       padding-inline: var(--gutter-tablet);
     }
@@ -435,8 +441,13 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
       grid-column: 2;
     }
 
-    .essay__reading-shell :global(.reader-tools) {
+    .essay__sidebar {
       grid-column: 3;
+      min-width: 0;
+    }
+
+    .essay__sidebar :global(.reader-tools) {
+      position: static;
     }
 
     .essay__footer {
