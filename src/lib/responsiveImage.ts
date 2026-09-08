@@ -92,7 +92,7 @@ export const HERO_IMAGE_SIZES =
   'calc(100vw - 2.5rem)';
 
 export const HOME_DISCOVERY_IMAGE_SIZES =
-  '(min-width: 1280px) 240px, (min-width: 896px) calc((100vw - 8rem) * 0.2), ' +
+  '(min-width: 1280px) 440px, (min-width: 896px) calc((100vw - 8rem) * 0.38), ' +
   'calc(100vw - 2.5rem)';
 
 export const HOME_DISCOVERY_MOBILE_MAX_WIDTH = 672;
