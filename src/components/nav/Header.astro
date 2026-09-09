@@ -25,7 +25,7 @@ const isActive = (href: string) =>
         <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="masthead-search" aria-expanded="false" data-search-open><SearchIcon /></a>
         <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark></a>
         <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
-          <span class="menu-icons"><Icon name="menu" class="menu-icons__open" /><Icon name="close" class="menu-icons__close" /></span>
+          <Icon name="menu" class="menu-toggle-icon" />
         </button>
       </div>
       <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external" data-newsletter-banner>
@@ -46,7 +46,7 @@ const isActive = (href: string) =>
     <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="reading-search" aria-expanded="false" data-search-open><SearchIcon /></a>
     <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
     <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
-      <span class="menu-icons"><Icon name="menu" class="menu-icons__open" /><Icon name="close" class="menu-icons__close" /></span>
+      <Icon name="menu" class="menu-toggle-icon" />
     </button>
     <HeaderSearch id="reading-search" compact />
   </div>
@@ -259,6 +259,7 @@ const isActive = (href: string) =>
 
 <style>
   .site-header {
+    --menu-duration: 180ms;
     position: relative;
     background: var(--bg-page);
   }
@@ -386,28 +387,7 @@ const isActive = (href: string) =>
     text-transform: uppercase;
     transition: color var(--t-nav);
   }
-  .nav-label {
-    position: relative;
-    display: inline-block;
-  }
-  .nav-label::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 calc(-1 * var(--nav-rule-offset));
-    height: var(--nav-rule-width);
-    background: var(--accent-crimson);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--t-nav);
-  }
-  .is-active {
-    color: var(--ink-primary);
-  }
-  .is-active > .nav-label::after,
-  a:hover > .nav-label::after,
-  a:focus-visible > .nav-label::after {
-    transform: scaleX(1);
-  }
+  .is-active { color: var(--ink-primary); }
   .site-header__nav-link:hover,
   .site-menu__nav-link:hover {
     color: var(--accent-crimson);
@@ -440,16 +420,27 @@ const isActive = (href: string) =>
   .site-header__wordmark--reading {
     font-size: clamp(0.78rem, 3.3vw, 1rem);
   }
-  .menu-icons { display: grid; width: 20px; height: 20px; }
-  .menu-icons :global(.icon) {
-    grid-area: 1 / 1;
-    transition: opacity 160ms var(--ease-panel);
+  /* The icon and panel share the duration and easing in both directions.
+   * CSS transitions reverse from their current pose on a rapid toggle. */
+  .is-menu-open { --menu-duration: 240ms; }
+  .header-control :global(.menu-toggle-icon path) {
+    transform-box: view-box;
+    transform-origin: 10px 10px;
+    transition: transform var(--menu-duration) var(--ease-panel),
+      opacity var(--menu-duration) var(--ease-panel);
   }
-  .menu-icons :global(.menu-icons__close) { opacity: 0; }
-  .is-menu-open .menu-icons :global(.menu-icons__open) { opacity: 0; }
-  .is-menu-open .menu-icons :global(.menu-icons__close) { opacity: 1; }
+  .is-menu-open :global(.menu-toggle-icon path:first-child) {
+    transform: rotate(45deg) translateY(6px) scaleX(1.2);
+  }
+  .is-menu-open :global(.menu-toggle-icon path:nth-child(2)) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  .is-menu-open :global(.menu-toggle-icon path:last-child) {
+    transform: rotate(-45deg) translateY(-6px) scaleX(1.2);
+  }
   @media (prefers-reduced-motion: reduce) {
-    .menu-icons :global(.icon) { transition: none; }
+    .site-header { --menu-duration: 0ms; }
   }
   .site-menu {
     position: fixed;
@@ -468,13 +459,12 @@ const isActive = (href: string) =>
     visibility: hidden;
     transform: translateX(100%);
     transition:
-      transform 180ms var(--ease-panel),
-      visibility 0s 180ms;
+      transform var(--menu-duration) var(--ease-panel),
+      visibility 0s var(--menu-duration);
   }
   .is-menu-open .site-menu {
     visibility: visible;
     transform: translateX(0);
-    transition-duration: 240ms, 0s;
     transition-delay: 0s;
   }
   .site-menu ul {
