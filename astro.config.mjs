@@ -7,6 +7,8 @@ import fetchCovers from './scripts/fetch-covers.mjs';
 import responsiveImages from './scripts/responsive-images.mjs';
 import publicationFonts from './scripts/subset-fonts.mjs';
 import searchIndex from './scripts/search-index.mjs';
+import publicationIntegrity from './scripts/publication-integrity.mjs';
+import { sitemapEntry } from './src/lib/seo/publication.mjs';
 
 // The Cochinchine Pensées — Astro 7 config
 // Output: pure static. Deploy target: Cloudflare Workers (Static Assets).
@@ -28,6 +30,7 @@ export default defineConfig({
     searchIndex(),
     mdx(),
     sitemap({
+      serialize: sitemapEntry,
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '');
         return (
@@ -35,6 +38,7 @@ export default defineConfig({
         );
       },
     }),
+    publicationIntegrity(),
   ],
   build: {
     format: 'directory',

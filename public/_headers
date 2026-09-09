@@ -9,3 +9,9 @@
 # Search entry points must revalidate when a new edition is deployed.
 /pagefind/*
   Cache-Control: public, max-age=0, must-revalidate
+
+# Reader downloads are image-only copies, not additional search landing pages.
+/downloads/essays/*
+  X-Robots-Tag: noindex, noarchive
+  Content-Disposition: attachment
+  Cache-Control: public, max-age=0, must-revalidate

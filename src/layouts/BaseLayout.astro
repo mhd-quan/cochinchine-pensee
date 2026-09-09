@@ -20,6 +20,7 @@ interface Props {
   lang?: 'en' | 'vi';
   canonicalUrl?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   noindex?: boolean;
   reader?: boolean;
   ogType?: 'website' | 'article';
@@ -31,6 +32,7 @@ const {
   lang = 'en',
   canonicalUrl,
   ogImage,
+  ogImageAlt,
   noindex = false,
   reader = false,
   ogType = 'website',
@@ -86,6 +88,8 @@ const criticalFonts = fontPreloads.filter((font) => {
       description={description}
       canonicalUrl={canonicalUrl}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      lang={lang}
       noindex={noindex}
       ogType={ogType}
     />
