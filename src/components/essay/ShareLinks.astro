@@ -14,10 +14,9 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
   <ul class="share-links__list" role="list">
     <li>
       <a href={targets.facebook} class="share-links__btn" aria-label="Chia sẻ trên Facebook" title="Chia sẻ trên Facebook" target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">
-        <!-- Current complete Facebook mark, from Meta's Brand Resource Center. -->
-        <svg class="share-links__facebook" width="20" height="20" viewBox="0 0 500 500" aria-hidden="true">
-          <path fill="#0866FF" d="m500,250C500,111.93,388.07,0,250,0S0,111.93,0,250c0,117.24,80.72,215.62,189.61,242.64v-166.24h-51.55v-76.4h51.55v-32.92c0-85.09,38.51-124.53,122.05-124.53,15.84,0,43.17,3.11,54.35,6.21v69.25c-5.9-.62-16.15-.93-28.88-.93-40.99,0-56.83,15.53-56.83,55.9v27.02h81.66l-14.03,76.4h-67.63v171.77c123.77-14.95,219.7-120.35,219.7-248.17Z" />
-          <path fill="#fff" d="m347.92,326.4l14.03-76.4h-81.66v-27.02c0-40.37,15.84-55.9,56.83-55.9,12.73,0,22.98.31,28.88.93v-69.25c-11.18-3.11-38.51-6.21-54.35-6.21-83.54,0-122.05,39.44-122.05,124.53v32.92h-51.55v76.4h51.55v166.24c19.34,4.8,39.57,7.36,60.39,7.36,10.25,0,20.36-.63,30.29-1.83v-171.77h67.64Z" />
+        <!-- Official Secondary Logo: vector from the editor-supplied Facebook asset pack. -->
+        <svg class="share-links__facebook" width="20" height="20" viewBox="100 100 500 500" aria-hidden="true">
+          <path fill="currentColor" d="M600 350c0-138.07-111.93-250-250-250S100 211.93 100 350c0 117.246 80.715 215.621 189.605 242.637V426.395h-51.55V350h51.55v-32.918c0-85.094 38.508-124.531 122.047-124.531 15.84 0 43.168 3.101 54.348 6.21v69.255c-5.898-.621-16.148-.934-28.883-.934-40.992 0-56.832 15.527-56.832 55.898V350h81.66l-14.027 76.395h-67.633v171.773C504.075 583.218 600 477.816 600 350" />
         </svg>
       </a>
     </li>
@@ -122,8 +121,9 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
   .share-links__btn:hover { color: var(--share-interaction); border-color: var(--share-interaction); }
   .share-links__btn:focus-visible { outline: 2px solid var(--share-interaction); outline-offset: var(--focus-offset); }
   .share-links__btn:disabled { opacity: 0.4; cursor: default; }
-  .share-links__x { color: #000; }
+  .share-links__facebook, .share-links__x { color: #000; }
   :global(html[data-theme='night']) .share-links { --share-interaction: var(--accent-on-dark); }
+  :global(html[data-theme='night']) .share-links__facebook,
   :global(html[data-theme='night']) .share-links__x { color: #fff; }
   .share-links__check, .is-copied .share-links__copy { display: none; }
   .is-copied .share-links__check { display: block; }
