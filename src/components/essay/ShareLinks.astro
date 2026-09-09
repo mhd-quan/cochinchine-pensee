@@ -9,58 +9,68 @@ const targets = shareTargets(title, canonical);
 const slug = new URL(canonical).pathname.split('/').at(-1);
 ---
 
-<div class="share-links" aria-label="Chia sẻ bài viết" data-nosnippet data-pagefind-ignore>
-  <span class="share-links__label">Chia sẻ</span>
-  <ul class="share-links__list" role="list">
+<div class="reader-actions" aria-label="Chia sẻ bài viết" data-nosnippet data-pagefind-ignore>
+  <span class="reader-actions__label">Chia sẻ</span>
+  <ul class="reader-actions__list" role="list">
     <li>
-      <a href={targets.facebook} class="share-links__btn" aria-label="Chia sẻ trên Facebook" title="Chia sẻ trên Facebook" target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">
-        <!-- Current complete Facebook mark, from Meta's Brand Resource Center. -->
-        <svg class="share-links__facebook" width="20" height="20" viewBox="0 0 500 500" aria-hidden="true">
-          <path fill="#0866FF" d="m500,250C500,111.93,388.07,0,250,0S0,111.93,0,250c0,117.24,80.72,215.62,189.61,242.64v-166.24h-51.55v-76.4h51.55v-32.92c0-85.09,38.51-124.53,122.05-124.53,15.84,0,43.17,3.11,54.35,6.21v69.25c-5.9-.62-16.15-.93-28.88-.93-40.99,0-56.83,15.53-56.83,55.9v27.02h81.66l-14.03,76.4h-67.63v171.77c123.77-14.95,219.7-120.35,219.7-248.17Z" />
-          <path fill="#fff" d="m347.92,326.4l14.03-76.4h-81.66v-27.02c0-40.37,15.84-55.9,56.83-55.9,12.73,0,22.98.31,28.88.93v-69.25c-11.18-3.11-38.51-6.21-54.35-6.21-83.54,0-122.05,39.44-122.05,124.53v32.92h-51.55v76.4h51.55v166.24c19.34,4.8,39.57,7.36,60.39,7.36,10.25,0,20.36-.63,30.29-1.83v-171.77h67.64Z" />
+      <button type="button" data-reader-share={targets.facebook} disabled class="reader-actions__btn" aria-label="Chia sẻ trên Facebook" title="Chia sẻ trên Facebook">
+        <!-- Official Secondary Logo: vector from the editor-supplied Facebook asset pack. -->
+        <svg class="reader-actions__facebook" width="20" height="20" viewBox="100 100 500 500" aria-hidden="true">
+          <path fill="currentColor" d="M600 350c0-138.07-111.93-250-250-250S100 211.93 100 350c0 117.246 80.715 215.621 189.605 242.637V426.395h-51.55V350h51.55v-32.918c0-85.094 38.508-124.531 122.047-124.531 15.84 0 43.168 3.101 54.348 6.21v69.255c-5.898-.621-16.148-.934-28.883-.934-40.992 0-56.832 15.527-56.832 55.898V350h81.66l-14.027 76.395h-67.633v171.773C504.075 583.218 600 477.816 600 350" />
         </svg>
-      </a>
-    </li>
-    <li>
-      <a href={targets.x} class="share-links__btn" aria-label="Chia sẻ trên X" title="Chia sẻ trên X" target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">
-        <!-- Unmodified path from the official X logo pack. -->
-        <svg class="share-links__x" width="18" height="19" viewBox="0 0 1200 1227" aria-hidden="true">
-          <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
-        </svg>
-      </a>
-    </li>
-    <li>
-      <button type="button" class="share-links__btn" aria-label="Chép đường dẫn" title="Chép đường dẫn" data-copy-url={canonical} disabled>
-        <svg class="share-links__copy" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-          <path d="M8 8h12v13H8zM4 16H3V3h12v1" />
-        </svg>
-        <svg class="share-links__check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7" /></svg>
       </button>
     </li>
     <li>
-      <a href={targets.email} class="share-links__btn" aria-label="Gởi bài qua email" title="Gởi bài qua email" data-astro-prefetch="false">
+      <button type="button" data-reader-share={targets.x} disabled class="reader-actions__btn" aria-label="Chia sẻ trên X" title="Chia sẻ trên X">
+        <!-- Unmodified path from the official X logo pack. -->
+        <svg class="reader-actions__x" width="18" height="19" viewBox="0 0 1200 1227" aria-hidden="true">
+          <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
+        </svg>
+      </button>
+    </li>
+    <li>
+      <button type="button" class="reader-actions__btn" aria-label="Chép đường dẫn" title="Chép đường dẫn" data-copy-url={canonical} disabled>
+        <svg class="reader-actions__copy" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+          <path d="M8 8h12v13H8zM4 16H3V3h12v1" />
+        </svg>
+        <svg class="reader-actions__check" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7" /></svg>
+      </button>
+    </li>
+    <li>
+      <a href={targets.email} class="reader-actions__btn" aria-label="Gởi bài qua email" title="Gởi bài qua email" data-astro-prefetch="false">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 8 9-8M3 19l6-6m6 0 6 6" /></svg>
       </a>
     </li>
     <li>
-      <a href={`/downloads/essays/${slug}.pdf`} download={`${slug}.pdf`} class="share-links__btn" aria-label="Tải bản PDF để đọc hoặc in" title="Tải bản PDF để đọc hoặc in" rel="nofollow" data-astro-prefetch="false">
+      <a href={`/downloads/essays/${slug}.pdf`} download={`${slug}.pdf`} class="reader-actions__btn" aria-label="Tải bản PDF để đọc hoặc in" title="Tải bản PDF để đọc hoặc in" rel="nofollow" data-astro-prefetch="false">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3H5v18h14V8l-5-5Zm0 0v5h5M12 11v7m-3-3 3 3 3-3" /></svg>
       </a>
     </li>
   </ul>
-  <span class="share-links__status sr-only" role="status" aria-live="polite"></span>
-  <input class="share-links__fallback" aria-label="Đường dẫn bài viết để chép" type="url" value={canonical} readonly hidden />
+  <noscript>
+    <p><a href={targets.facebook} target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">Facebook</a> · <a href={targets.x} target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">X</a></p>
+  </noscript>
+  <span class="reader-actions__status sr-only" role="status" aria-live="polite"></span>
+  <input class="reader-actions__fallback" aria-label="Đường dẫn bài viết để chép" type="url" value={canonical} readonly hidden />
 </div>
 
 <script>
   function initializeShareLinks() {
+    document.querySelectorAll<HTMLButtonElement>('[data-reader-share]').forEach((button) => {
+      if (button.dataset.initialized) return;
+      button.dataset.initialized = 'true';
+      button.disabled = false;
+      button.addEventListener('click', () => {
+        window.open(button.dataset.readerShare!, '_blank', 'noopener,noreferrer');
+      });
+    });
     document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach((button) => {
       if (button.dataset.initialized) return;
       button.dataset.initialized = 'true';
       button.disabled = false;
       let timer: ReturnType<typeof setTimeout>;
       button.addEventListener('click', async () => {
-        const root = button.closest('.share-links');
+        const root = button.closest('.reader-actions');
         const status = root?.querySelector<HTMLElement>('[role="status"]');
         const fallback = root?.querySelector<HTMLInputElement>('input');
         try {
@@ -90,7 +100,7 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
 </script>
 
 <style>
-  .share-links {
+  .reader-actions {
     --share-interaction: var(--accent-crimson);
     display: flex;
     flex-wrap: wrap;
@@ -100,14 +110,14 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
     margin-block: var(--sp-5);
     border-block: 1px solid var(--rule-hair);
   }
-  .share-links__label {
+  .reader-actions__label {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
     font-weight: var(--w-semibold);
     color: var(--ink-secondary);
   }
-  .share-links__list { display: flex; gap: var(--sp-1); list-style: none; padding: 0; margin: 0; }
-  .share-links__btn {
+  .reader-actions__list { display: flex; flex-wrap: wrap; gap: var(--sp-1); list-style: none; padding: 0; margin: 0; }
+  .reader-actions__btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -119,16 +129,17 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
     cursor: pointer;
     transition: color var(--t-fast), border-color var(--t-fast);
   }
-  .share-links__btn:hover { color: var(--share-interaction); border-color: var(--share-interaction); }
-  .share-links__btn:focus-visible { outline: 2px solid var(--share-interaction); outline-offset: var(--focus-offset); }
-  .share-links__btn:disabled { opacity: 0.4; cursor: default; }
-  .share-links__x { color: #000; }
-  :global(html[data-theme='night']) .share-links { --share-interaction: var(--accent-on-dark); }
-  :global(html[data-theme='night']) .share-links__x { color: #fff; }
-  .share-links__check, .is-copied .share-links__copy { display: none; }
-  .is-copied .share-links__check { display: block; }
+  .reader-actions__btn:hover { color: var(--share-interaction); border-color: var(--share-interaction); }
+  .reader-actions__btn:focus-visible { outline: 2px solid var(--share-interaction); outline-offset: var(--focus-offset); }
+  .reader-actions__btn:disabled { opacity: 0.4; cursor: default; }
+  .reader-actions__facebook, .reader-actions__x { color: #000; }
+  :global(html[data-theme='night']) .reader-actions { --share-interaction: var(--accent-on-dark); }
+  :global(html[data-theme='night']) .reader-actions__facebook,
+  :global(html[data-theme='night']) .reader-actions__x { color: #fff; }
+  .reader-actions__check, .is-copied .reader-actions__copy { display: none; }
+  .is-copied .reader-actions__check { display: block; }
   .is-copied { color: var(--share-interaction); }
-  .share-links__fallback { width: 100%; min-width: 0; padding: var(--sp-3); font-size: 1rem; background: var(--bg-page); color: var(--ink-primary); border: 1px solid var(--rule-strong); }
-  .share-links__fallback[hidden] { display: none; }
-  .share-links__status:not(.sr-only) { width: 100%; font-family: var(--font-serif); font-size: var(--fs-meta); }
+  .reader-actions__fallback { width: 100%; min-width: 0; padding: var(--sp-3); font-size: 1rem; background: var(--bg-page); color: var(--ink-primary); border: 1px solid var(--rule-strong); }
+  .reader-actions__fallback[hidden] { display: none; }
+  .reader-actions__status:not(.sr-only) { width: 100%; font-family: var(--font-serif); font-size: var(--fs-meta); }
 </style>

@@ -1,6 +1,7 @@
 ---
 import { articleGraph, serializeJsonLd } from '~/lib/seo/publication.mjs';
 import { metadataImage } from '~/lib/responsiveImage';
+import ReaderNavigation from '~/components/essay/ReaderNavigation.astro';
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
 import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
@@ -98,7 +99,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
             </p>
           )}
 
-          <h1 class="essay__title" data-pagefind-weight="10">{title}</h1>
+          <h1 id="essay-title" tabindex="-1" class="essay__title" data-pagefind-weight="10">{title}</h1>
 
           {subtitle && <p class="essay__subtitle">{subtitle}</p>}
           {dek && <p class="essay__dek">{dek}</p>}
@@ -136,8 +137,12 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
     </header>
 
     <div class="essay__reading-shell">
-      <div class:list={['prose', { 'has-dropcap': dropcap }]}>
-        <slot />
+      <div class="essay__reading-column">
+        <div class:list={['prose', { 'has-dropcap': dropcap }]}>
+          <slot />
+        </div>
+        <div data-article-end aria-hidden="true"></div>
+        <ShareLinks title={title} excerpt={excerpt} />
       </div>
 
       <div class="essay__sidebar" data-nosnippet>
@@ -159,8 +164,6 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         </details>
       )}
 
-      <ShareLinks title={title} excerpt={excerpt} />
-
       {(prevEssay || nextEssay) && (
         <nav class="essay__prev-next" aria-label="Article navigation">
           {prevEssay ? (
@@ -179,6 +182,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
       )}
     </footer>
   </article>
+  <ReaderNavigation />
 </BaseLayout>
 
 <style>
@@ -448,17 +452,24 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
       padding-inline: var(--gutter-tablet);
     }
 
-    .essay__reading-shell :global(.prose) {
+    .essay__reading-column {
       grid-column: 2;
+      min-width: 0;
     }
 
     .essay__sidebar {
       grid-column: 3;
       min-width: 0;
+      align-self: stretch;
     }
 
     .essay__sidebar :global(.reader-tools) {
       position: static;
+    }
+
+    .essay__sidebar :global(.reader-companion) {
+      position: sticky;
+      top: min(calc(4.25rem + var(--sp-5)), calc(100dvh - var(--companion-height, 0px) - var(--sp-6)));
     }
 
     .essay__footer {
