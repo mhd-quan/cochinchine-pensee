@@ -15,6 +15,7 @@
  * the title and author rather than leaving a broken <img>.
  */
 import type { CollectionEntry } from 'astro:content';
+import Icon from '~/components/ui/Icon.astro';
 import { bookImageSizes, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
@@ -58,7 +59,7 @@ const sizes = cover ? bookImageSizes(cover) : '';
     <h4 class="book-card__title">{book.data.title}</h4>
     <p class="book-card__author">{book.data.author}</p>
     {book.data.blurb && <p class="book-card__blurb">{book.data.blurb}</p>}
-    <span class="book-card__cta">Read review →</span>
+    <span class="book-card__cta">Read review <Icon name="arrow-right" size={16} /></span>
   </div>
 </a>
 

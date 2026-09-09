@@ -226,22 +226,26 @@
 /* ──────────────────────────────────────────────────────────────────
  * Asterism — section break
  *
- * Use <hr class="asterism"> or <p class="asterism">✦ ✦ ✦</p>
+ * Use <hr class="asterism"> for a semantic, font-independent section break.
  * ────────────────────────────────────────────────────────────────── */
 .prose hr.asterism,
 .prose .asterism {
   border: 0;
   text-align: center;
   margin-block: var(--sp-8);
-  font-family: var(--font-glyph);
-  font-size: 0.875rem;
-  letter-spacing: 1em;
   color: var(--ink-primary);
-  padding-left: 1em; /* compensate for letter-spacing right-edge cutoff */
 }
 
 .prose hr.asterism::before {
-  content: '✦ ✦ ✦';
+  content: '';
+  display: block;
+  width: 5rem;
+  height: 1rem;
+  margin-inline: auto;
+  background: currentColor;
+  mask: url('../assets/icons/fleuron.svg') left / 1rem 1rem no-repeat,
+    url('../assets/icons/fleuron.svg') center / 1rem 1rem no-repeat,
+    url('../assets/icons/fleuron.svg') right / 1rem 1rem no-repeat;
 }
 
 /* ──────────────────────────────────────────────────────────────────

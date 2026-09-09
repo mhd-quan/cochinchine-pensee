@@ -1,0 +1,50 @@
+---
+/** Local, trusted SVG sources are inlined at build time; no icon runtime or requests. */
+interface Props {
+  name:
+    | 'search'
+    | 'menu'
+    | 'close'
+    | 'copy'
+    | 'check'
+    | 'mail'
+    | 'download'
+    | 'return-top'
+    | 'arrow-right'
+    | 'arrow-left'
+    | 'arrow-up-right'
+    | 'chevron-left'
+    | 'chevron-right'
+    | 'width-standard'
+    | 'width-wide'
+    | 'reading'
+    | 'fleuron';
+  size?: 16 | 20 | 24;
+  class?: string;
+}
+const { name, size = 20, class: className, ...rest } = Astro.props;
+const sources = import.meta.glob<string>('../../assets/icons/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
+const source = sources[`../../assets/icons/${name}.svg`];
+if (!source) throw new Error(`Unknown publication icon: ${name}`);
+const body = source.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+---
+<svg
+  {...rest}
+  xmlns="http://www.w3.org/2000/svg"
+  class:list={['icon', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 20 20"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+  data-icon={name}
+><Fragment set:html={body} /></svg>

@@ -1,8 +1,9 @@
 ---
-import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 import HeaderSearch from '~/components/search/HeaderSearch.astro';
 import SearchForm from '~/components/search/SearchForm.astro';
 import SearchIcon from '~/components/search/SearchIcon.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 
 const navItems = [
   { href: '/', label: 'Latest' },
@@ -13,7 +14,8 @@ const navItems = [
 ];
 const currentPath = Astro.url.pathname;
 const Wordmark = currentPath === '/' ? 'h1' : 'span';
-const isActive = (href: string) => href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
+const isActive = (href: string) =>
+  href === '/' ? currentPath === '/' : currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
 <header class="site-header" data-site-header>
@@ -23,12 +25,12 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
         <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="masthead-search" aria-expanded="false" data-search-open><SearchIcon /></a>
         <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><Wordmark class="site-header__wordmark">The Cochinchine Pensées</Wordmark></a>
         <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
+          <span class="menu-icons"><Icon name="menu" class="menu-icons__open" /><Icon name="close" class="menu-icons__close" /></span>
         </button>
       </div>
       <a href={SUBSTACK_SUBSCRIBE_URL} class="site-header__newsletter-banner" rel="external" data-newsletter-banner>
         <span class="site-header__newsletter-copy" lang="vi">Nhận thông tin bài viết mới</span>
-        <span class="site-header__newsletter-action">Subscribe on Substack <span aria-hidden="true">→</span></span>
+        <span class="site-header__newsletter-action">Subscribe on Substack <Icon name="arrow-up-right" size={16} /></span>
       </a>
       <HeaderSearch id="masthead-search" />
     </div>
@@ -44,7 +46,7 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
     <a href="/search" class="header-control header-control--search" aria-label="Tìm kiếm" aria-controls="reading-search" aria-expanded="false" data-search-open><SearchIcon /></a>
     <a href="/" class="site-header__wordmark-link" aria-label="The Cochinchine Pensées — home" data-masthead-logo><span class="site-header__wordmark site-header__wordmark--reading">The Cochinchine Pensées</span></a>
     <button type="button" class="header-control header-control--menu" aria-controls="site-menu" aria-expanded="false" aria-label="Open navigation" data-menu-toggle>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path class="menu-line menu-line--top" d="M2 5h20"/><path class="menu-line menu-line--middle" d="M2 12h20"/><path class="menu-line menu-line--bottom" d="M2 19h20"/></svg>
+      <span class="menu-icons"><Icon name="menu" class="menu-icons__open" /><Icon name="close" class="menu-icons__close" /></span>
     </button>
     <HeaderSearch id="reading-search" compact />
   </div>
@@ -438,20 +440,16 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
   .site-header__wordmark--reading {
     font-size: clamp(0.78rem, 3.3vw, 1rem);
   }
-  .menu-line {
-    transform-origin: center;
-    transition:
-      transform 180ms var(--ease-panel),
-      opacity 140ms var(--ease-panel);
+  .menu-icons { display: grid; width: 20px; height: 20px; }
+  .menu-icons :global(.icon) {
+    grid-area: 1 / 1;
+    transition: opacity 160ms var(--ease-panel);
   }
-  .is-menu-open .menu-line--top {
-    transform: rotate(45deg) translateY(7px);
-  }
-  .is-menu-open .menu-line--middle {
-    opacity: 0;
-  }
-  .is-menu-open .menu-line--bottom {
-    transform: rotate(-45deg) translateY(-7px);
+  .menu-icons :global(.menu-icons__close) { opacity: 0; }
+  .is-menu-open .menu-icons :global(.menu-icons__open) { opacity: 0; }
+  .is-menu-open .menu-icons :global(.menu-icons__close) { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-icons :global(.icon) { transition: none; }
   }
   .site-menu {
     position: fixed;

@@ -1,6 +1,8 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import Icon from '~/components/ui/Icon.astro';
 import EssayCard from './EssayCard.astro';
+
 interface Props {
   clusters: { series: CollectionEntry<'series'>; essays: CollectionEntry<'essays'>[] }[];
 }
@@ -12,7 +14,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
   <section class="series-carousel container" aria-labelledby="home-series-title" aria-roledescription="carousel" data-series-carousel>
     <div class="series-carousel__header">
       <h2 id="home-series-title">Series</h2>
-      <a href="/series" class="series-carousel__all">All series →</a>
+      <a href="/series" class="series-carousel__all">All series <Icon name="arrow-right" size={16} /></a>
     </div>
     <div class="series-carousel__toolbar">
       <label class="sr-only" for="series-picker">Chọn series</label>
@@ -21,8 +23,8 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
       </select>
       <div class="series-carousel__controls">
         <span class="series-carousel__position" data-series-position aria-hidden="true">1 / {clusters.length}</span>
-        <button type="button" data-series-prev aria-label="Series trước" aria-controls="series-track" disabled><span aria-hidden="true">←</span></button>
-        <button type="button" data-series-next aria-label="Series tiếp theo" aria-controls="series-track" disabled={clusters.length < 2}><span aria-hidden="true">→</span></button>
+        <button type="button" data-series-prev aria-label="Series trước" aria-controls="series-track" disabled><Icon name="arrow-left" /></button>
+        <button type="button" data-series-next aria-label="Series tiếp theo" aria-controls="series-track" disabled={clusters.length < 2}><Icon name="arrow-right" /></button>
       </div>
     </div>
     <div class="series-carousel__track" id="series-track" tabindex="0" aria-label="Các series" data-series-track>
@@ -30,7 +32,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
         <section class="series-carousel__slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${clusters.length}: ${series.data.nameVi ?? series.data.name}`} data-series-slide>
           <div class="series-carousel__intro">
             <h3><a href={`/series/${series.data.slug}`}>{series.data.nameVi ?? series.data.name}</a></h3>
-            <a class="series-carousel__browse" href={`/series/${series.data.slug}`}>Xem loạt bài →</a>
+            <a class="series-carousel__browse" href={`/series/${series.data.slug}`}>Xem loạt bài <Icon name="arrow-right" size={16} /></a>
           </div>
           <ul class="series-carousel__essays">
             {essays.slice(0, 3).map((essay) => <li><EssayCard essay={essay} imageSizes={imageSizes} /></li>)}

@@ -15,6 +15,7 @@ import EssayCard from '~/components/essay/EssayCard.astro';
 import SeriesCarousel from '~/components/essay/SeriesCarousel.astro';
 import HomeDiscovery from '~/components/home/HomeDiscovery.astro';
 import SiteIdentity from '~/components/seo/SiteIdentity.astro';
+import Icon from '~/components/ui/Icon.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
@@ -90,7 +91,7 @@ const featuredClusters = featuredSeries
   <section class="recent container">
     <div class="recent__header">
       <h3 class="recent__heading">Recent Essays</h3>
-      <a href="/essays" class="recent__more">All essays →</a>
+      <a href="/essays" class="recent__more">All essays <Icon name="arrow-right" size={16} /></a>
     </div>
 
     <ul class="recent__grid">
@@ -119,7 +120,7 @@ const featuredClusters = featuredSeries
               aria-controls="stacks-track"
               disabled
             >
-              <span aria-hidden="true">&lt;</span>
+              <Icon name="chevron-left" />
             </button>
             <button
               type="button"
@@ -128,10 +129,10 @@ const featuredClusters = featuredSeries
               aria-label="More books"
               aria-controls="stacks-track"
             >
-              <span aria-hidden="true">&gt;</span>
+              <Icon name="chevron-right" />
             </button>
           </div>
-          <a href="/books" class="stacks__more">All books →</a>
+          <a href="/books" class="stacks__more">All books <Icon name="arrow-right" size={16} /></a>
         </div>
       </div>
 
