@@ -111,3 +111,11 @@ export function responsiveImage(source: string, sizes: string, fallbackWidth = 8
     height: image.height,
   };
 }
+
+// Metadata reuses the largest generated image; no additional browser request.
+export function metadataImage(source: string) {
+  const image = images[source];
+  if (!image) throw new Error(`Missing metadata image: ${source}`);
+  const variant = image.variants.at(-1)!;
+  return { url: new URL(variant.src, 'https://cochinchinepensees.studio').href };
+}

@@ -250,3 +250,13 @@ All colors, fonts, and spacing live in `src/styles/tokens.css`. No magic numbers
 
 Essays: © their respective authors. All rights reserved.
 Code: no open-source license is currently included.
+
+## Publication metadata and reader downloads
+
+From v0.7.6, every published essay requires an editorial metadata review. Run
+`npm run seo:review` after editing or adding an article, then follow
+[the SEO publication workflow](docs/seo.md). This affects search metadata, not
+visible essay text. `npm run build` also generates image-only reader PDFs;
+[PDF maintenance and sharing notes](docs/reader-pdf.md) explain fonts, cache and
+verification. Build with Node >=22.13 (Node 24 recommended), including development
+dependencies required by the static export pipeline.

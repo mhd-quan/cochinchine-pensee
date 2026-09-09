@@ -1,4 +1,6 @@
 ---
+import { articleGraph, serializeJsonLd } from '~/lib/seo/publication.mjs';
+import { metadataImage } from '~/lib/responsiveImage';
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
 import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
@@ -10,6 +12,7 @@ import { foldSearchText } from '~/lib/searchText';
 
 interface Props {
   title: string;
+  seo: { url: string; description: string; published: string; modified?: string; authorUrl: string };
   searchAliases?: string;
   subtitle?: string;
   dek?: string;
@@ -33,6 +36,7 @@ interface Props {
 
 const {
   title,
+  seo,
   searchAliases = '',
   subtitle,
   dek,
@@ -61,11 +65,9 @@ const formattedDate = date.toLocaleDateString('en-US', {
 });
 
 const isoDate = date.toISOString();
-const summaryLead = `${title}${subtitle ? ` — ${subtitle}` : ''}`.trim().replace(/[.!?…]+$/, '');
-const description =
-  excerpt?.trim() ||
-  dek?.trim() ||
-  `${summaryLead}. ${form === 'pensee' ? 'Pensée' : 'Tiểu luận'} của ${author} trên The Cochinchine Pensées.`;
+const description = seo.description;
+const image = coverImage ? metadataImage(coverImage) : undefined;
+const graph = articleGraph({ title, author, lang, image: image?.url, seo });
 const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 ---
 
@@ -73,10 +75,19 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   title={title}
   description={description}
   lang={lang}
-  ogImage={coverImage}
+  canonicalUrl={seo.url}
+  ogImage={image?.url}
+  ogImageAlt={coverImageAlt}
   reader={true}
   ogType="article"
 >
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={serializeJsonLd(graph)} />
+    <meta property="article:published_time" content={seo.published} />
+    {seo.modified && <meta property="article:modified_time" content={seo.modified} />}
+    <meta name="author" content={author} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+  </Fragment>
   <article class="essay" data-pagefind-body data-pagefind-meta="title[data-search-title], title_alias[data-search-title-alias], description[data-search-description], aliases[data-search-aliases]" data-search-title={title} data-search-title-alias={foldSearchText(title)} data-search-description={excerpt ?? subtitle ?? ""} data-search-aliases={searchAliases}>
     <header class="essay__hero">
       <div class:list={['essay__hero-inner', { 'essay__hero-inner--text-only': !coverImage }]}>
@@ -129,7 +140,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         <slot />
       </div>
 
-      <div class="essay__sidebar">
+      <div class="essay__sidebar" data-nosnippet>
         <ViewCustomizer />
         <ReaderCompanion author={author} essays={moreByAuthor} title={title} />
       </div>

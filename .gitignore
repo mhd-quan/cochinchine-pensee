@@ -41,3 +41,6 @@ scripts/.fetch-covers-result.json
 # Responsive image outputs and immutable remote source cache
 public/images/responsive/
 .cache/image-sources/
+
+# Build-time raster reader exports (regenerated from article HTML).
+.cache/reader-pdf/
