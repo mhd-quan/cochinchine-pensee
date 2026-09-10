@@ -168,6 +168,38 @@ test('a cancelled Astro navigation and an initially hidden page still load withi
   assert.equal(hiddenWindow.frames.size, 0);
 });
 
+test('navigation during the gtag download queues every visit until analytics takes over', () => {
+  const document = new FakeDocument();
+  const window = new FakeWindow();
+  installGoogleAnalytics({ document, window, measurementId: 'G-TEST' });
+  window.runNext(window.frames);
+  window.runNext(window.frames);
+  window.runNext(window.idles);
+
+  const navigate = (path) => {
+    document.dispatchEvent(new Event('astro:before-preparation'));
+    window.location.href = `https://example.org/${path}`;
+    document.title = path;
+    document.dispatchEvent(new Event('astro:page-load'));
+  };
+  navigate('second');
+  navigate('third');
+  document.dispatchEvent(new Event('astro:page-load'));
+  const visits = calls(window).filter(([command]) => command === 'event');
+  assert.deepEqual(
+    visits.map(([, , fields]) => fields.page_location),
+    ['https://example.org/second', 'https://example.org/third'],
+  );
+  assert.deepEqual(
+    visits.map(([, , fields]) => fields.page_referrer),
+    ['https://example.org/', 'https://example.org/second'],
+  );
+  assert.equal(document.scripts.length, 1);
+  document.scripts[0].dispatchEvent(new Event('load'));
+  navigate('fourth');
+  assert.equal(calls(window).filter(([command]) => command === 'event').length, 2);
+});
+
 test('uses a timer fallback and requests gtag when a passive page becomes hidden', () => {
   const document = new FakeDocument();
   const window = new FakeWindow();

@@ -85,14 +85,17 @@ export function installGoogleAnalytics({ document, window, measurementId, idleTi
   else afterFirstPaint();
 
   document.addEventListener('astro:before-preparation', () => {
-    if (state.requested) return;
+    if (state.loaded) return;
     navigationHeld = true;
+    // A requested script cannot observe history until its download has finished.
+    // Keep queuing visits during that gap without starting a second download.
+    if (state.requested) return;
     cancelScheduledLoad();
     // A cancelled or failed transition may never emit astro:page-load.
     timerId = window.setTimeout(load, idleTimeout);
   });
   document.addEventListener('astro:page-load', () => {
-    if (!navigationHeld || state.requested) return;
+    if (!navigationHeld || state.loaded) return;
     navigationHeld = false;
 
     const nextLocation = window.location.href;

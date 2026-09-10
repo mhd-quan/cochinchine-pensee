@@ -6,6 +6,8 @@
   "description": "The Cochinchine Pensée — a Vietnamese editorial essay publication in the Claremont Review of Books tradition",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "test:browser": "node scripts/browser-smoke.mjs",
+    "verify": "npm run build && npm run check && npm run lint && npm test",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

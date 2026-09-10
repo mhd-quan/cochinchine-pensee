@@ -1,12 +1,12 @@
 # Branch consolidation — 10 September 2026
 
-The single integration target is `main`. PR #31 merges `local/v0.9.0` directly into `main` and includes releases previously accumulated on chained release branches. The PR remains unmerged for the owner to accept.
+The single integration target is `main`. PR #31 originally proposed merging `local/v0.9.0` directly into `main`, including releases previously accumulated on chained release branches. The subsequent [release review](releases/v0.9.0-review.md) uses `local/v0.9.0-review` for its replacement PR, also directly into `main`. No release PR is merged automatically.
 
-Only `main` and `local/v0.9.0` remain as working branches after cleanup. Historical tips, including divergent local and remote tips, are preserved as annotated archive tags on GitHub. These are recovery checkpoints, not published releases.
+At the original cleanup, only `main` and `local/v0.9.0` remained as working branches. The replacement review branch inherits that complete history. Historical tips, including divergent local and remote tips, are preserved as annotated archive tags on GitHub. These are recovery checkpoints, not published releases.
 
 The pre-existing uncommitted newsletter/reader work in `site/` was committed separately as `9926fe7`; it is an older implementation and is archived rather than overwriting its newer release equivalents. Generated-cache symlink entries in two old worktrees were also committed separately. Ignored dependencies, generated images, caches and local worktree directories remain on disk; they are not release source code.
 
-Old worktrees are detached at their saved commits. The main `site/` checkout is switched to `local/v0.9.0` so future work starts from the consolidated version. `main` stays at the GitHub main tip until the PR is accepted.
+Old worktrees are detached at their saved commits. The main `site/` checkout first moved to `local/v0.9.0` and subsequently to `local/v0.9.0-review`. `main` stays at the GitHub main tip until the replacement PR is accepted.
 
 ## Recovery
 
@@ -92,4 +92,3 @@ git worktree add -b local/recovered-work ../recovered-work archive/2026-09-10/<c
 ## Future workflow
 
 Create feature/release branches from current `main`, target `main` in every PR, and delete the feature branch after merge. Use release tags for version history rather than keeping a branch for every version. Cloudflare Workers Builds should select `main` as its production branch; this Git cleanup does not alter Cloudflare account settings.
-

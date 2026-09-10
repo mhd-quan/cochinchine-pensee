@@ -6,7 +6,7 @@ Built with **Astro 7** + Cloudflare Workers (Static Assets) + MDX + Tailwind-fre
 ## Quick start
 
 ```bash
-npm install
+npm ci
 npm run dev          # http://localhost:4321
 npm run build        # static output to ./dist
 npm run preview      # preview built site
@@ -14,7 +14,19 @@ npm run check        # astro check (type-check)
 npm test             # image delivery, reader lifecycle, SEO and search (run build first)
 npm run lint         # biome check .
 npm run format       # biome format --write .
+npm run verify       # fresh build, Astro check, lint, then all tests
 ```
+
+After switching release branches, run `npm ci` and `npm run verify`: ignored
+`node_modules`, `.astro` and `dist` can still belong to the previous checkout.
+Do not treat tests against an old `dist` directory as release validation.
+
+For browser regression checks, start `npm run preview`, then run
+`npm run test:browser` with Playwright available (or set `PERF_PLAYWRIGHT_MODULE`
+to its module path). `CHROME_PATH` can select an installed Chromium executable;
+the default is Google Chrome on macOS. The checks use a local preview only and
+block third-party traffic. They cover mobile/desktop controls, Astro back
+navigation, and discovery failure/retry/date rollover.
 
 ## Architecture
 
@@ -139,6 +151,7 @@ for shorter pieces whose thesis is deliberately less formal.
 Cloudflare Workers Builds should use:
 
 - **Build command:** `npm run build`
+- **Production branch:** `main` (select in Cloudflare Workers Builds settings)
 - **Deploy command:** `npx wrangler deploy`
 - **Output directory:** `dist`
 
