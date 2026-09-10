@@ -23,12 +23,13 @@ export async function GET(context: APIContext) {
       authors: [{ name: 'M. Q. Doan' }],
       items: sorted.map((essay) => ({
         id: `${siteUrl}essays/${essay.id}/`,
-        url: `${siteUrl}essays/${essay.id}/`,
+        url: new URL(`/essays/${essay.id}`, siteUrl).href,
         title: essay.data.title,
         content_text: essay.data.excerpt ?? essay.data.subtitle ?? essay.data.dek ?? '',
         date_published: essay.data.date.toISOString(),
         authors: [{ name: essay.data.author }],
-        tags: essay.data.tags,
+        language: essay.data.lang,
+        tags: essay.data.topics,
       })),
     }),
     {

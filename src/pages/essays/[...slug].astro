@@ -5,8 +5,11 @@
  */
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
+import ArticleImage from '~/components/essay/ArticleImage.astro';
 import EssayLayout from '~/layouts/EssayLayout.astro';
 import { getCoverTreatment } from '~/lib/coverTreatment';
+import { vietnameseSearchAliases } from '~/lib/searchText';
+import { essaySeo } from '~/lib/seo/publication.mjs';
 
 export const getStaticPaths = (async () => {
   const essays = await getCollection('essays', ({ data }) => !data.draft);
@@ -20,6 +23,16 @@ export const getStaticPaths = (async () => {
       params: { slug: essay.id },
       props: {
         essay,
+        moreByAuthor: sorted
+          .filter(
+            (candidate) => candidate.id !== essay.id && candidate.data.author === essay.data.author,
+          )
+          .slice(0, 3)
+          .map((candidate) => ({
+            url: `/essays/${candidate.id}`,
+            title: candidate.data.title,
+            date: candidate.data.date,
+          })),
         prevEssay: prevEssay
           ? { url: `/essays/${prevEssay.id}`, title: prevEssay.data.title }
           : null,
@@ -31,17 +44,21 @@ export const getStaticPaths = (async () => {
   });
 }) satisfies GetStaticPaths;
 
-const { essay, prevEssay, nextEssay } = Astro.props;
+const { essay, prevEssay, nextEssay, moreByAuthor } = Astro.props;
 const { Content } = await render(essay);
 ---
 
 <EssayLayout
   title={essay.data.title}
+  seo={essaySeo(essay.id, essay.data)}
+  searchAliases={vietnameseSearchAliases(`${essay.data.title} ${essay.data.author} ${essay.body ?? ""}`)}
   subtitle={essay.data.subtitle}
   dek={essay.data.dek}
   date={essay.data.date}
   author={essay.data.author}
-  tags={essay.data.tags}
+  lang={essay.data.lang}
+  form={essay.data.form}
+  topics={essay.data.topics}
   series={essay.data.series}
   dropcap={essay.data.dropcap}
   excerpt={essay.data.excerpt}
@@ -52,6 +69,7 @@ const { Content } = await render(essay);
   coverTreatment={getCoverTreatment(essay.id)}
   prevEssay={prevEssay}
   nextEssay={nextEssay}
+  moreByAuthor={moreByAuthor}
 >
-  <Content />
+  <Content components={{ img: ArticleImage }} />
 </EssayLayout>

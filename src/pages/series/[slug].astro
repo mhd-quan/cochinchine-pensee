@@ -17,10 +17,7 @@ export const getStaticPaths = (async () => {
   const allSeries = await getCollection('series');
   // Announced-but-unpublished essays are pulled in deliberately: their slot
   // is shown, their prose is not.
-  const allEssays = await getCollection(
-    'essays',
-    ({ data }) => !data.draft || data.comingSoon,
-  );
+  const allEssays = await getCollection('essays', ({ data }) => !data.draft || data.comingSoon);
   const essaysById = new Map(allEssays.map((e) => [e.id, e]));
 
   return allSeries.map((entry) => {

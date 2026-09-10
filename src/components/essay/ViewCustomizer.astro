@@ -1,4 +1,5 @@
 ---
+import Icon from '~/components/ui/Icon.astro';
 /**
  * Persistent reading preferences.
  * Desktop: a compact sticky rail beside the essay.
@@ -6,13 +7,13 @@
  * card-based in the manner of a native reader's display settings.
  *
  * Preferences: typeface · type size · text width · theme.
- * Typefaces are the publication's own registers — Source Serif (house),
- * EB Garamond (the display face, offered for body), and New York via
- * ui-serif for readers on Apple devices (Georgia elsewhere).
+ * Typefaces: EB Garamond, New York via ui-serif (Georgia elsewhere), and
+ * Bricolage Grotesque. The sans preview stays on the system face until chosen,
+ * so opening the reader does not download Bricolage prematurely.
  */
 ---
 
-<aside class="reader-tools" aria-label="Reading preferences">
+<aside data-pagefind-ignore class="reader-tools" aria-label="Reading preferences">
   <button
     type="button"
     class="reader-tools__mobile-trigger"
@@ -20,7 +21,7 @@
     aria-expanded="false"
     data-reader-open
   >
-    <span aria-hidden="true">Aa</span>
+    <Icon name="reading" size={24} />
     <span class="sr-only">Open reading preferences</span>
   </button>
 
@@ -43,20 +44,13 @@
         aria-label="Close reading preferences"
         data-reader-dismiss
       >
-        <span class="reader-tools__close-icon" aria-hidden="true">
-          <span></span>
-          <span></span>
-        </span>
+        <Icon name="close" />
       </button>
     </div>
 
     <fieldset class="reader-tools__group">
       <legend>Typeface</legend>
       <div class="reader-tools__options reader-tools__options--font">
-        <button type="button" data-pref="font" data-value="serif" aria-label="Source Serif typeface">
-          <span class="reader-tools__font-sample reader-tools__font-sample--serif" aria-hidden="true">Aa</span>
-          <span class="reader-tools__option-name reader-tools__option-name--serif">Source Serif</span>
-        </button>
         <button type="button" data-pref="font" data-value="garamond" aria-label="Garamond typeface">
           <span class="reader-tools__font-sample reader-tools__font-sample--garamond" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--garamond">Garamond</span>
@@ -64,6 +58,10 @@
         <button type="button" data-pref="font" data-value="newyork" aria-label="New York typeface">
           <span class="reader-tools__font-sample reader-tools__font-sample--newyork" aria-hidden="true">Aa</span>
           <span class="reader-tools__option-name reader-tools__option-name--newyork">New York</span>
+        </button>
+        <button type="button" data-pref="font" data-value="sans" aria-label="Bricolage Grotesque sans serif typeface">
+          <span class="reader-tools__font-sample reader-tools__font-sample--sans" aria-hidden="true">Aa</span>
+          <span class="reader-tools__option-name reader-tools__option-name--sans">San Serif</span>
         </button>
       </div>
     </fieldset>
@@ -83,15 +81,15 @@
       </div>
     </fieldset>
 
-    <fieldset class="reader-tools__group">
+    <fieldset class="reader-tools__group reader-tools__group--measure">
       <legend>Text width</legend>
       <div class="reader-tools__options reader-tools__options--measure">
         <button type="button" data-pref="measure" data-value="standard" aria-label="Standard text width">
-          <span class="reader-tools__measure-glyph reader-tools__measure-glyph--standard" aria-hidden="true"></span>
+          <Icon name="width-standard" />
           <span class="reader-tools__option-name">Standard</span>
         </button>
         <button type="button" data-pref="measure" data-value="wide" aria-label="Wide text width">
-          <span class="reader-tools__measure-glyph reader-tools__measure-glyph--wide" aria-hidden="true"></span>
+          <Icon name="width-wide" />
           <span class="reader-tools__option-name">Wide</span>
         </button>
       </div>
@@ -108,6 +106,10 @@
           <span class="reader-tools__swatch reader-tools__swatch--sepia" aria-hidden="true">A</span>
           <span class="reader-tools__option-name">Sepia</span>
         </button>
+        <button type="button" data-pref="theme" data-value="sage" aria-label="Sage theme">
+          <span class="reader-tools__swatch reader-tools__swatch--sage" aria-hidden="true">A</span>
+          <span class="reader-tools__option-name">Sage</span>
+        </button>
         <button type="button" data-pref="theme" data-value="night" aria-label="Night theme">
           <span class="reader-tools__swatch reader-tools__swatch--night" aria-hidden="true">A</span>
           <span class="reader-tools__option-name">Night</span>
@@ -121,8 +123,8 @@
   type ReaderPrefs = {
     fontSize: 'md' | 'lg' | 'xl';
     measure: 'standard' | 'wide';
-    theme: 'paper' | 'sepia' | 'night';
-    font: 'serif' | 'garamond' | 'newyork';
+    theme: 'paper' | 'sepia' | 'sage' | 'night';
+    font: 'garamond' | 'newyork' | 'sans';
   };
 
   type PrefName = keyof ReaderPrefs;
@@ -132,14 +134,14 @@
     fontSize: 'md',
     measure: 'standard',
     theme: 'paper',
-    font: 'serif',
+    font: 'garamond',
   };
 
   const VALID_VALUES: { [Key in PrefName]: readonly ReaderPrefs[Key][] } = {
     fontSize: ['md', 'lg', 'xl'],
     measure: ['standard', 'wide'],
-    theme: ['paper', 'sepia', 'night'],
-    font: ['serif', 'garamond', 'newyork'],
+    theme: ['paper', 'sepia', 'sage', 'night'],
+    font: ['garamond', 'newyork', 'sans'],
   };
   let activePreferenceAnimation: Animation | null = null;
   let preferenceCommitTimer: number | undefined;
@@ -168,15 +170,18 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return { ...DEFAULTS };
 
-      const stored = JSON.parse(raw) as Partial<Record<PrefName, unknown>>;
+      const stored = JSON.parse(raw) as Partial<Record<PrefName, unknown>> & { font?: unknown };
       const prefs = { ...DEFAULTS };
+      const migratedFont = stored.font === 'serif' ? 'garamond' : stored.font;
 
       for (const pref of Object.keys(DEFAULTS) as PrefName[]) {
-        const value = stored[pref];
+        const value = pref === 'font' ? migratedFont : stored[pref];
         if (typeof value === 'string' && isValidValue(pref, value)) {
           setPreference(prefs, pref, value);
         }
       }
+
+      if (migratedFont !== stored.font) savePrefs(prefs);
 
       return prefs;
     } catch {
@@ -194,15 +199,17 @@
 
   function applyPrefs(prefs: ReaderPrefs): void {
     const root = document.documentElement;
+    if (root.dataset.reader !== 'true') return;
     root.dataset.fontSize = prefs.fontSize;
     root.dataset.measure = prefs.measure;
     root.dataset.theme = prefs.theme;
     root.dataset.font = prefs.font;
-    const themeColor = prefs.theme === 'night'
-      ? '#1B1816'
-      : prefs.theme === 'sepia'
-        ? '#F5EFE0'
-        : '#FAFAF7';
+    const themeColor = {
+      paper: '#EEEEEB',
+      sepia: '#ECE6D8',
+      sage: '#E4EBE1',
+      night: '#1D1A18',
+    }[prefs.theme];
     document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
       ?.setAttribute('content', themeColor);
 
@@ -408,6 +415,9 @@
 
   initializeReaderTools();
   document.addEventListener('astro:page-load', initializeReaderTools);
+  window.addEventListener('pageshow', () => {
+    applyPrefs(loadPrefs());
+  });
 </script>
 
 <style>
@@ -532,11 +542,6 @@
     color: var(--ink-primary);
   }
 
-  .reader-tools__font-sample--serif,
-  .reader-tools__option-name--serif {
-    font-family: var(--font-serif);
-  }
-
   .reader-tools__font-sample--garamond,
   .reader-tools__option-name--garamond {
     font-family: 'EB Garamond', Garamond, Georgia, serif;
@@ -547,12 +552,22 @@
     font-family: ui-serif, 'New York', 'Iowan Old Style', Georgia, serif;
   }
 
-  .reader-tools__option-name--serif,
   .reader-tools__option-name--garamond,
-  .reader-tools__option-name--newyork {
+  .reader-tools__option-name--newyork,
+  .reader-tools__option-name--sans {
     text-transform: none;
     font-size: 0.8125rem;
     letter-spacing: 0.01em;
+  }
+
+  .reader-tools__font-sample--sans,
+  .reader-tools__option-name--sans {
+    font-family: var(--font-system-sans);
+  }
+
+  :global(html[data-reader='true'][data-font='sans']) .reader-tools__font-sample--sans,
+  :global(html[data-reader='true'][data-font='sans']) .reader-tools__option-name--sans {
+    font-family: var(--font-reader-sans);
   }
 
   .reader-tools__options--size button {
@@ -577,39 +592,6 @@
     font-size: 1.1875rem;
   }
 
-  /* Width glyphs — two bars of differing measure */
-  .reader-tools__measure-glyph {
-    position: relative;
-    display: inline-block;
-    flex: none;
-    height: 0.5rem;
-    width: 1.5rem;
-  }
-
-  .reader-tools__measure-glyph::before,
-  .reader-tools__measure-glyph::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    height: 1.5px;
-    background: currentColor;
-  }
-
-  .reader-tools__measure-glyph::before {
-    top: 0;
-    width: 100%;
-  }
-
-  .reader-tools__measure-glyph--standard::after {
-    bottom: 0;
-    width: 62%;
-  }
-
-  .reader-tools__measure-glyph--wide::after {
-    bottom: 0;
-    width: 100%;
-  }
-
   /* Theme swatches — a letter set on the theme's own paper */
   .reader-tools__swatch {
     display: grid;
@@ -625,17 +607,22 @@
   }
 
   .reader-tools__swatch--paper {
-    background: #FAFAF7;
+    background: #EEEEEB;
     color: #0F0F0F;
   }
 
   .reader-tools__swatch--sepia {
-    background: #F5EFE0;
+    background: #ECE6D8;
     color: #4A3F2A;
   }
 
+  .reader-tools__swatch--sage {
+    background: #E4EBE1;
+    color: #0F0F0F;
+  }
+
   .reader-tools__swatch--night {
-    background: #1B1816;
+    background: #1D1A18;
     color: #EDE6D6;
   }
 
@@ -704,9 +691,8 @@
     }
 
     /* Bottom sheet — grabber, generous targets, one smooth slide.
-     * Plain paper: no grain image of its own, and z above the page's
-     * body::after grain overlay (--z-toast) so the overlay cannot paint
-     * on top of the sheet. No spring — accelerate, then settle. */
+     * It shares the page's single opaque surface and stays above the rest of
+     * the reading chrome. No spring — accelerate, then settle. */
     .reader-tools__panel {
       position: fixed;
       inset: auto 0 0;
@@ -786,40 +772,6 @@
       transform: scale(0.96);
     }
 
-    .reader-tools__close-icon {
-      position: relative;
-      display: block;
-      width: 1.25rem;
-      height: 1.25rem;
-    }
-
-    .reader-tools__close-icon span {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 1.5px;
-      background: currentColor;
-      transform-origin: center;
-      transition: transform var(--t-icon);
-    }
-
-    .reader-tools__close-icon span:first-child {
-      transform: translateY(-0.25rem) scaleX(0.78);
-    }
-
-    .reader-tools__close-icon span:last-child {
-      transform: translateY(0.25rem) scaleX(0.78);
-    }
-
-    .reader-tools.is-open .reader-tools__close-icon span:first-child {
-      transform: rotate(45deg);
-    }
-
-    .reader-tools.is-open .reader-tools__close-icon span:last-child {
-      transform: rotate(-45deg);
-    }
-
     /* Card grids sized for thumbs */
     .reader-tools__group + .reader-tools__group {
       margin-top: var(--sp-5);
@@ -830,8 +782,12 @@
       gap: var(--sp-2);
     }
 
-    .reader-tools__options--font,
     .reader-tools__options--theme {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .reader-tools__options--font,
+    .reader-tools__options--size {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
@@ -862,9 +818,9 @@
       font-size: 1.5rem;
     }
 
-    .reader-tools__option-name--serif,
     .reader-tools__option-name--garamond,
-    .reader-tools__option-name--newyork {
+    .reader-tools__option-name--newyork,
+    .reader-tools__option-name--sans {
       font-size: 0.875rem;
     }
 
@@ -875,10 +831,15 @@
     }
   }
 
+  @media (max-width: 767px) {
+    .reader-tools__group--measure {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .reader-tools__panel,
     .reader-tools__scrim,
-    .reader-tools__close-icon span,
     .reader-tools__options button {
       transition-duration: 0.01ms;
     }

@@ -1,30 +1,21 @@
 /* ============================================================================
- * globals.css — Imports order matters. Tokens first, then reset, then prose.
+ * globals.css — Tokens, reset and shared typography. Prose loads with essays.
  * This file is imported once in BaseLayout.astro.
  * ========================================================================= */
 
 @import './tokens.css';
 @import './reset.css';
-@import './prose.css';
 
 /* ──────────────────────────────────────────────────────────────────
  * Fonts — self-hosted via @fontsource
- * Importing only what's used (weights + styles) to keep bundle small.
+ * Build-time subsets retain the publication's characters and OpenType features.
  * ────────────────────────────────────────────────────────────────── */
-@import '@fontsource/source-serif-4/400.css';
-@import '@fontsource/source-serif-4/400-italic.css';
-@import '@fontsource/source-serif-4/600.css';
-@import '@fontsource/source-serif-4/700.css';
+@import '../../.astro/fonts.css';
 
-@import '@fontsource/eb-garamond/400.css';
-@import '@fontsource/eb-garamond/400-italic.css';
-@import '@fontsource/eb-garamond/600.css';
-@import '@fontsource/eb-garamond/700.css';
-
-@import '@fontsource/be-vietnam-pro/400.css';
-@import '@fontsource/be-vietnam-pro/500.css';
-@import '@fontsource/be-vietnam-pro/600.css';
-@import '@fontsource/be-vietnam-pro/700.css';
+/* Format selection must not introduce a new layout box around existing art. */
+picture {
+  display: contents;
+}
 
 /* ──────────────────────────────────────────────────────────────────
  * Base typography
@@ -32,12 +23,17 @@
 html {
   font-family: var(--font-serif);
   color: var(--ink-primary);
-  background: var(--bg-page);
+  min-height: 100%;
+  /* WebKit may source inset and browser-chrome pixels from either the root
+   * canvas or body depending on scroll state. Both therefore use the same
+   * opaque token, with no composited texture to create a second colour. */
+  background-color: var(--bg-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
   font-synthesis: none;
   scrollbar-gutter: stable;
+  transition: background-color var(--t-base);
 }
 
 body {
@@ -52,34 +48,10 @@ body {
 }
 
 /* ──────────────────────────────────────────────────────────────────
- * Paper grain — one fixed, tiled noise layer over every surface.
- * Multiply keeps it reading as fibre in the paper rather than dirt
- * on the glass; night flips it to a faint screen-blended tooth.
+ * No global surface pseudo-elements: Safari cannot reproduce a composited
+ * texture in its browser chrome. Root, body and chrome instead share one
+ * opaque colour token so every viewport state resolves to the same pixels.
  * ────────────────────────────────────────────────────────────────── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-toast);
-  background-image: var(--texture-grain);
-  background-repeat: repeat;
-  opacity: var(--texture-opacity);
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-html[data-theme='night'] body::after {
-  mix-blend-mode: screen;
-  filter: invert(1);
-  opacity: 0.08;
-}
-
-@media print {
-  body::after {
-    display: none;
-  }
-}
-
 .image-filter-defs {
   position: absolute;
   overflow: hidden;
@@ -91,19 +63,26 @@ html {
   --reader-font-scale: 1;
 }
 
-html[data-measure='wide'] {
+html[data-reader='true'][data-measure='wide'] {
   --reader-measure: var(--measure-long);
 }
 
-html[data-theme='sepia'] {
-  --bg-page: #F5EFE0;
+html[data-reader='true'][data-theme='sepia'] {
+  --bg-page: #ECE6D8;
   --bg-page-deep: #EBE3D0;
   --bg-tinted: #E9DFCA;
   --rule-hair: #D8CFBE;
 }
 
-html[data-theme='night'] {
-  --bg-page: #1B1816;
+html[data-reader='true'][data-theme='sage'] {
+  --bg-page: #E4EBE1;
+  --bg-page-deep: #DAE3D6;
+  --bg-tinted: #D3DECF;
+  --rule-hair: #C6D1C1;
+}
+
+html[data-reader='true'][data-theme='night'] {
+  --bg-page: #1D1A18;
   --bg-page-deep: #14110F;
   --bg-tinted: #27211D;
   --ink-primary: #EDE6D6;
@@ -120,25 +99,38 @@ html[data-theme='night'] {
 }
 
 /* Reading type size — resolved through vars so size and typeface compose */
-html[data-font-size='lg'] {
+html[data-reader='true'][data-font-size='lg'] {
   --reader-font-size: 1.1875rem;
 }
 
-html[data-font-size='xl'] {
+html[data-reader='true'][data-font-size='xl'] {
   --reader-font-size: 1.3125rem;
 }
 
 /* Reading typeface — applies to essay prose only; chrome keeps its registers */
-html[data-font='garamond'] {
+html[data-reader='true'][data-font='garamond'] {
   --reader-font-scale: 1.09; /* EB Garamond runs small on the body; compensate */
 }
 
-html[data-font='garamond'] .prose {
+html[data-reader='true'][data-font='garamond'] .prose {
   font-family: 'EB Garamond', 'Cormorant Garamond', Garamond, Georgia, serif;
 }
 
-html[data-font='newyork'] .prose {
+html[data-reader='true'][data-font='newyork'] .prose {
   font-family: ui-serif, 'New York', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+}
+
+html[data-reader='true'][data-font='sans'] .prose {
+  font-family: var(--font-reader-sans);
+  /* Bricolage ships real 400/600 upright faces but no italic. Permit only
+   * style synthesis here so emphasis stays visible without faking weights. */
+  font-synthesis: style;
+}
+
+/* Astro keeps the root element across navigations: browse pages must switch
+ * straight to Paper instead of animating through the previous reader color. */
+html:not([data-reader='true']) {
+  transition: none;
 }
 
 html.has-reader-panel-open {
@@ -178,8 +170,8 @@ html.has-reader-panel-open {
   margin-block: var(--sp-6);
 }
 
-/* Caps-and-small-caps headlines, built from spans because the display face
- * ships no `smcp` feature. See src/lib/titleCaps.ts. */
+/* Legacy caps-and-small-caps utility for EB Garamond surfaces. Article titles
+ * use the native Playfair Display SC face and do not need scaled spans. */
 .title-caps__small {
   font-size: 0.78em;
   letter-spacing: 0.01em;
@@ -225,5 +217,45 @@ html.has-reader-panel-open {
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none !important;
+  }
+}
+
+/* Keep the masthead and its attached navigation aligned while the menu is open. */
+html.has-site-menu { overflow: hidden; }
+.skip-link:focus-visible { position: fixed; z-index: var(--z-toast); top: var(--sp-3); left: var(--sp-3); width: auto; height: auto; padding: var(--sp-3) var(--sp-4); clip: auto; overflow: visible; white-space: normal; background: var(--bg-page); color: var(--ink-primary); }
+
+/* One optical box for publication icons, independent of the reader's typeface. */
+.icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.2em;
+  overflow: visible;
+}
+
+/* Shared label rule: masthead, side menu and footer use the same motion. */
+.nav-label { position: relative; display: inline-block; }
+.nav-label::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 calc(-1 * var(--nav-rule-offset));
+  height: var(--nav-rule-width);
+  background: var(--nav-underline-color, var(--accent-crimson));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-nav);
+}
+.is-active > .nav-label::after,
+a:hover > .nav-label::after,
+a:focus-visible > .nav-label::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .nav-label::after { transition: none; }
+}
+
+/* Keep offscreen editorial sections in the document without laying out every
+ * card before the hero paints. Auto remembers measured sizes on return scroll. */
+@media screen {
+  body[data-home] :is(.discovery, .stacks, .series-carousel, .site-footer) {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 900px;
   }
 }

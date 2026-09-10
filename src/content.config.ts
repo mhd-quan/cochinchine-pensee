@@ -4,8 +4,9 @@ import { glob } from 'astro/loaders';
 /**
  * Essay schema — enforced for every MDX file in src/content/essays/.
  *
- * All essays are bodies of long-form Vietnamese prose. The schema keeps
- * frontmatter honest: required title, optional subtitle, date, dek, tags.
+ * The collection holds long-form essays and shorter pensées. The schema
+ * keeps frontmatter honest: required title, optional subtitle, date, form,
+ * dek, and topics.
  *
  * Snake-case aliases accepted from imported Substack frontmatter:
  *   cover_image → coverImage
@@ -16,6 +17,8 @@ import { glob } from 'astro/loaders';
  *   - newsletterEnabled: defaults to false; flip when activating Buttondown.
  */
 
+const essayTopic = z.enum(['Chính trị', 'Kinh tế', 'Căn tính', 'Xã hội', 'Tư tưởng', 'Hiện đại']);
+
 const essays = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/essays' }),
   schema: z
@@ -25,9 +28,10 @@ const essays = defineCollection({
       dek: z.string().optional(),
       date: z.coerce.date(),
       series: z.string().optional(),
-      tags: z.array(z.string()).default([]),
+      form: z.enum(['essay', 'pensee']).default('essay'),
+      topics: z.array(essayTopic).min(1).max(2),
       author: z.string().default('M. Q. Doan'),
-      lang: z.enum(['vi']).default('vi'),
+      lang: z.enum(['vi', 'en']).default('vi'),
       draft: z.boolean().default(false),
       // Announced but not yet published. Always paired with draft: true —
       // draft hides the text, comingSoon shows the slot in its series.

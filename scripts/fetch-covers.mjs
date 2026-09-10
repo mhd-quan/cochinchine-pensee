@@ -238,7 +238,9 @@ async function run(logger) {
     if (!r || r.ok) continue;
     logger?.warn?.(`tcp-fetch-covers: ${slug} failed — ${JSON.stringify(r.attempts ?? [])}`);
   }
-  logger?.info?.(`tcp-fetch-covers: ${okCount} covers ready (see scripts/.fetch-covers-result.json)`);
+  logger?.info?.(
+    `tcp-fetch-covers: ${okCount} covers ready (see scripts/.fetch-covers-result.json)`,
+  );
 }
 
 export default function fetchCovers() {

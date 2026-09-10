@@ -5,7 +5,7 @@
  * All component CSS uses var(--token). No magic numbers anywhere else.
  *
  * Refined 2026-08-06 (v0.4) — "Cochinchine" palette board:
- *   - Paper register (light): warm off-whites carrying a faint rag-paper grain
+ *   - Paper register (light): one continuous warm off-white canvas
  *   - Ink-well register (dark): two dark tones — lacquer cabinet + deep oxblood —
  *     used to punch contrast between sections (footer, feature bands)
  *   - Two-register typography: serif (Old Republic) + sans glyph (contemporary)
@@ -15,8 +15,8 @@
   /* ──────────────────────────────────────────────────────────────────
    * Surfaces — paper register
    * ────────────────────────────────────────────────────────────────── */
-  --bg-page:           #FAFAF7;   /* off-white subtle warm — gentler than pure white, less warm than ivory */
-  --bg-page-deep:      #F2F0EA;   /* one step warmer for cards, newsletter, callouts */
+  --bg-page:           #EEEEEB;   /* single opaque paper canvas across page and Safari chrome */
+  --bg-page-deep:      #E7E5DF;   /* one step deeper for cards, newsletter, callouts */
   --bg-tinted:         #F4EFE6;   /* CRB-style promo/overlay tint */
   --bg-rule-soft:      #F5F5F4;   /* image placeholders */
 
@@ -37,7 +37,7 @@
    * ────────────────────────────────────────────────────────────────── */
   --ink-primary:       #0F0F0F;   /* near-black for body and headings */
   --ink-secondary:     #4A4A4A;   /* metadata, byline, dek */
-  --ink-muted:         #8A8A8A;   /* kicker, dateline, small caps */
+  --ink-muted:         #6B6B6B;   /* kicker, dateline, small caps */
   --ink-faint:         #B5B5B5;   /* disabled UI states */
   --ink-inverse:       #FAFAF7;
 
@@ -57,12 +57,6 @@
   --selection-bg:      rgb(139 26 26 / 15%);  /* soft oxblood wash — text colour stays */
 
   /* ──────────────────────────────────────────────────────────────────
-   * Paper grain — tiny tiled SVG noise, laid over every surface
-   * ────────────────────────────────────────────────────────────────── */
-  --texture-grain:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0.2 0.2 0 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
-  --texture-opacity:   0.16;      /* ~1.5% effective darkening — fibre, not static */
-
-  /* ──────────────────────────────────────────────────────────────────
    * Rules and dividers
    * ────────────────────────────────────────────────────────────────── */
   --rule-hair:         #E5E5E5;   /* hairline between cards */
@@ -77,7 +71,10 @@
    * ────────────────────────────────────────────────────────────────── */
   --font-serif:        "Source Serif 4", "PT Serif", Charter, "EB Garamond", Georgia, "Times New Roman", Times, serif;
   --font-display:      "EB Garamond", "Cormorant Garamond", Garamond, "Playfair Display", Georgia, serif;
+  --font-essay-title:  "Playfair Display SC", "EB Garamond", "Cormorant Garamond", Garamond, Georgia, serif;
+  --font-reader-sans:  "Bricolage Grotesque", "Be Vietnam Pro", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-sans:         "Be Vietnam Pro", "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-system-sans:  system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-glyph:        "Be Vietnam Pro", "Inter", system-ui, sans-serif;
   --font-mono:         "JetBrains Mono", ui-monospace, Menlo, monospace;
 
@@ -91,6 +88,10 @@
   --fs-h4:             1.125rem;       /* 18px sub-section / pull-quote attribution */
   --fs-body:           1.0625rem;      /* 17px prose */
   --fs-body-larger:    1.1875rem;      /* 19px Substack-style long read */
+  --fs-nav:           0.75rem;
+  --nav-rule-width:   2px;
+  --nav-rule-offset:  0.45em;
+  --t-nav:           140ms cubic-bezier(0.2, 0, 0, 1);
   --fs-meta:           0.8125rem;      /* 13px byline/dates */
   --fs-kicker:         0.75rem;        /* 12px small-caps eyebrow */
   --fs-caption:        0.75rem;
@@ -165,7 +166,7 @@
   --ease-in-soft:      cubic-bezier(0.45, 0, 0.7, 0.4);  /* exits */
   /* Panels: leaves rest at zero velocity, accelerates, then settles.
    * Both control points stay inside [0,1] on y, so it never overshoots. */
-  --ease-panel:        cubic-bezier(0.45, 0, 0.2, 1);    /* sliding panels */
+  --ease-panel:        cubic-bezier(0.2, 0, 0, 1);       /* interruptible sliding panels */
   --spring-gentle:     linear(0, 0.0517 5%, 0.1667 10%, 0.3037 15%, 0.4394 20%, 0.5617 25%, 0.6657 30%, 0.7506 35%, 0.8177 40%, 0.8694 45%, 0.9082 50%, 0.9369 55%, 0.9575 60%, 0.9722 65%, 0.9823 70%, 0.9892 75%, 0.9938 80%, 0.9967 85%, 0.9986 90%, 0.9996 95%, 1);
   --spring-snappy:     linear(0, 0.0653 6.25%, 0.2096 12.5%, 0.3781 18.75%, 0.5394 25%, 0.6779 31.25%, 0.7882 37.5%, 0.8707 43.75%, 0.929 50%, 0.9679 56.25%, 0.9919 62.5%, 1.0054 68.75%, 1.0118 75%, 1.0138 81.25%, 1.0132 87.5%, 1.0113 93.75%, 1);
 
@@ -176,8 +177,8 @@
   --t-exit:            200ms var(--ease-in-soft);
   --t-spring:          520ms var(--spring-gentle);
   --t-spring-snap:     400ms var(--spring-snappy);
-  --t-panel:           420ms var(--ease-panel);
-  --t-panel-exit:      300ms var(--ease-panel);
+  --t-panel:           360ms var(--ease-panel);
+  --t-panel-exit:      240ms var(--ease-panel);
   --t-icon:            260ms var(--ease-panel);
 
   /* ──────────────────────────────────────────────────────────────────

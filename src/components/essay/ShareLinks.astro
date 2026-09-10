@@ -1,137 +1,153 @@
 ---
-/**
- * ShareLinks — placeholder component at launch.
- *
- * Deferred feature: when ready, swap implementation with X/Twitter,
- * Facebook, LinkedIn, copy-link, email-permalink. The slot stays reserved
- * so the layout never needs to change — just this component's body.
- *
- * Glyphs (✦, ◆, etc.) stay in round sans per design decisions.
- */
+import Icon from '~/components/ui/Icon.astro';
+import { canonicalUrl } from '~/lib/seo/publication.mjs';
+import { shareTargets } from '~/lib/share.mjs';
+
 interface Props {
   title: string;
   excerpt?: string;
 }
-
 const { title } = Astro.props;
+const canonical = canonicalUrl(Astro.url.pathname);
+const targets = shareTargets(title, canonical);
+const slug = new URL(canonical).pathname.split('/').at(-1);
 ---
 
-<div class="share-links" aria-label="Share">
-  <span class="share-links__label">Share</span>
-  <ul class="share-links__list">
+<div class="reader-actions" aria-label="Chia sẻ bài viết" data-nosnippet data-pagefind-ignore>
+  <span class="reader-actions__label" lang="en">Share</span>
+  <ul class="reader-actions__list" role="list">
     <li>
-      <a
-        href="#"
-        class="share-links__btn"
-        aria-label="Share on X"
-        data-share="twitter"
-      >
-        <span class="share-links__glyph" aria-hidden="true">X</span>
+      <button type="button" data-reader-share={targets.facebook} disabled class="reader-actions__btn" aria-label="Chia sẻ trên Facebook" title="Chia sẻ trên Facebook">
+        <!-- Official Secondary Logo: vector from the editor-supplied Facebook asset pack. -->
+        <svg class="reader-actions__facebook" width="20" height="20" viewBox="100 100 500 500" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M600 350c0-138.07-111.93-250-250-250S100 211.93 100 350c0 117.246 80.715 215.621 189.605 242.637V426.395h-51.55V350h51.55v-32.918c0-85.094 38.508-124.531 122.047-124.531 15.84 0 43.168 3.101 54.348 6.21v69.255c-5.898-.621-16.148-.934-28.883-.934-40.992 0-56.832 15.527-56.832 55.898V350h81.66l-14.027 76.395h-67.633v171.773C504.075 583.218 600 477.816 600 350" />
+        </svg>
+      </button>
+    </li>
+    <li>
+      <button type="button" data-reader-share={targets.x} disabled class="reader-actions__btn" aria-label="Chia sẻ trên X" title="Chia sẻ trên X">
+        <!-- Unmodified path from the official X logo pack. -->
+        <svg class="reader-actions__x" width="16" height="17" viewBox="0 0 1200 1227" aria-hidden="true" focusable="false">
+          <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
+        </svg>
+      </button>
+    </li>
+    <li>
+      <button type="button" class="reader-actions__btn" aria-label="Chép đường dẫn" title="Chép đường dẫn" data-copy-url={canonical} disabled>
+        <Icon name="copy" class="reader-actions__copy" />
+        <Icon name="check" class="reader-actions__check" />
+      </button>
+    </li>
+    <li>
+      <a href={targets.email} class="reader-actions__btn" aria-label="Gởi bài qua email" title="Gởi bài qua email" data-astro-prefetch="false">
+        <Icon name="mail" />
       </a>
     </li>
     <li>
-      <a
-        href="#"
-        class="share-links__btn"
-        aria-label="Share on Facebook"
-        data-share="facebook"
-      >
-        <span class="share-links__glyph" aria-hidden="true">f</span>
-      </a>
-    </li>
-    <li>
-      <a
-        href="#"
-        class="share-links__btn"
-        aria-label="Copy link"
-        data-share="copy"
-      >
-        <span class="share-links__glyph" aria-hidden="true">⎘</span>
-      </a>
-    </li>
-    <li>
-      <a
-        href={`mailto:?subject=${encodeURIComponent(title)}`}
-        class="share-links__btn"
-        aria-label="Share via email"
-      >
-        <span class="share-links__glyph" aria-hidden="true">✉</span>
+      <a href={`/downloads/essays/${slug}.pdf`} download={`${slug}.pdf`} class="reader-actions__btn" aria-label="Tải bản PDF để đọc hoặc in" title="Tải bản PDF để đọc hoặc in" rel="nofollow" data-astro-prefetch="false">
+        <Icon name="download" />
       </a>
     </li>
   </ul>
+  <noscript>
+    <p><a href={targets.facebook} target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">Facebook</a> · <a href={targets.x} target="_blank" rel="noopener noreferrer" data-astro-prefetch="false">X</a></p>
+  </noscript>
+  <span class="reader-actions__status sr-only" role="status" aria-live="polite"></span>
+  <input class="reader-actions__fallback" aria-label="Đường dẫn bài viết để chép" type="url" value={canonical} readonly hidden />
 </div>
 
 <script>
-  // Wire up copy-link and share-button handlers.
-  // Currently inert (preview state). When ready to deploy, replace
-  // href="#" with live share URLs.
-  document.querySelectorAll<HTMLAnchorElement>('[data-share]').forEach((link) => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      const action = link.dataset.share;
-      if (action === 'copy') {
-        navigator.clipboard?.writeText(window.location.href)
-          .then(() => {
-            const glyph = link.querySelector('.share-links__glyph');
-            const original = glyph?.textContent;
-            if (glyph) glyph.textContent = '✓';
-            setTimeout(() => {
-              if (glyph && original) glyph.textContent = original;
-            }, 1500);
-          })
-          .catch(() => {});
-      }
+  function initializeShareLinks() {
+    document.querySelectorAll<HTMLButtonElement>('[data-reader-share]').forEach((button) => {
+      if (button.dataset.initialized) return;
+      button.dataset.initialized = 'true';
+      button.disabled = false;
+      button.addEventListener('click', () => {
+        window.open(button.dataset.readerShare!, '_blank', 'noopener,noreferrer');
+      });
     });
-  });
+    document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach((button) => {
+      if (button.dataset.initialized) return;
+      button.dataset.initialized = 'true';
+      button.disabled = false;
+      let timer: ReturnType<typeof setTimeout>;
+      button.addEventListener('click', async () => {
+        const root = button.closest('.reader-actions');
+        const status = root?.querySelector<HTMLElement>('[role="status"]');
+        const fallback = root?.querySelector<HTMLInputElement>('input');
+        try {
+          if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+          await navigator.clipboard.writeText(button.dataset.copyUrl!);
+          if (!button.isConnected) return;
+          if (fallback) fallback.hidden = true;
+          button.classList.add('is-copied');
+          button.setAttribute('aria-label', 'Đã chép đường dẫn');
+          if (status) { status.classList.add('sr-only'); status.textContent = 'Đã chép đường dẫn bài viết.'; }
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            button.classList.remove('is-copied');
+            button.setAttribute('aria-label', 'Chép đường dẫn');
+            if (status) status.textContent = '';
+          }, 2000);
+        } catch {
+          if (!button.isConnected) return;
+          if (status) { status.classList.remove('sr-only'); status.textContent = 'Xin chép đường dẫn bên dưới.'; }
+          if (fallback) { fallback.hidden = false; fallback.focus(); fallback.select(); }
+        }
+      });
+    });
+  }
+  initializeShareLinks();
+  document.addEventListener('astro:page-load', initializeShareLinks);
 </script>
 
 <style>
-  .share-links {
+  .reader-actions {
+    --share-interaction: var(--accent-crimson);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-4) 0;
     margin-block: var(--sp-5);
     border-block: 1px solid var(--rule-hair);
   }
-
-  .share-links__label {
+  .reader-actions__label {
     font-family: var(--font-sans);
     font-size: var(--fs-kicker);
-    font-weight: var(--w-bold);
-    letter-spacing: var(--tr-kicker);
-    text-transform: uppercase;
-    color: var(--ink-muted);
+    font-weight: var(--w-semibold);
+    color: var(--ink-secondary);
   }
-
-  .share-links__list {
-    display: flex;
-    gap: var(--sp-2);
-  }
-
-  .share-links__btn {
+  .reader-actions__list { display: flex; flex-wrap: wrap; gap: var(--sp-1); list-style: none; padding: 0; margin: 0; }
+  .reader-actions__btn {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1px solid var(--rule-hair);
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid transparent;
     color: var(--ink-secondary);
-    font-family: var(--font-glyph);
-    font-size: 1rem;
-    line-height: 1;
-    transition:
-      color var(--t-base),
-      border-color var(--t-base),
-      transform var(--t-fast);
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--t-fast), border-color var(--t-fast);
   }
-
-  .share-links__btn:hover {
-    color: var(--accent-crimson);
-    border-color: var(--accent-crimson);
+  .reader-actions__btn:hover { color: var(--share-interaction); border-color: var(--share-interaction); }
+  .reader-actions__btn:focus-visible { outline: 2px solid var(--share-interaction); outline-offset: var(--focus-offset); }
+  .reader-actions__btn:disabled { opacity: 0.4; cursor: default; }
+  .reader-actions__facebook, .reader-actions__x { color: #000; }
+  :global(html[data-theme='night']) .reader-actions { --share-interaction: var(--accent-on-dark); }
+  :global(html[data-theme='night']) .reader-actions__facebook,
+  :global(html[data-theme='night']) .reader-actions__x { color: #fff; }
+  .reader-actions__copy, .reader-actions__check { transition: opacity 160ms var(--ease-panel); }
+  .reader-actions__check { position: absolute; opacity: 0; }
+  .is-copied .reader-actions__copy { opacity: 0; }
+  .is-copied .reader-actions__check { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .reader-actions__copy, .reader-actions__check { transition: none; }
   }
-
-  .share-links__btn:active {
-    transform: scale(0.96);
-  }
+  .is-copied { color: var(--share-interaction); }
+  .reader-actions__fallback { width: 100%; min-width: 0; padding: var(--sp-3); font-size: 1rem; background: var(--bg-page); color: var(--ink-primary); border: 1px solid var(--rule-strong); }
+  .reader-actions__fallback[hidden] { display: none; }
+  .reader-actions__status:not(.sr-only) { width: 100%; font-family: var(--font-serif); font-size: var(--fs-meta); }
 </style>

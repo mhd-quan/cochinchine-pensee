@@ -1,0 +1,78 @@
+---
+import Icon from '~/components/ui/Icon.astro';
+---
+<button type="button" class="reader-return" aria-label="Về đầu bài viết" title="Về đầu bài viết" data-reader-return hidden>
+  <Icon name="return-top" />
+</button>
+
+<script>
+  let dispose: (() => void) | undefined;
+  function initializeReaderNavigation() {
+    dispose?.();
+    const button = document.querySelector<HTMLButtonElement>('[data-reader-return]');
+    const end = document.querySelector<HTMLElement>('[data-article-end]');
+    const title = document.querySelector<HTMLElement>('#essay-title');
+    const companion = document.querySelector<HTMLElement>('.reader-companion');
+    const prose = document.querySelector<HTMLElement>('.prose');
+    if (!button || !end || !title) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      button.hidden = !(window.scrollY > 0 && end.getBoundingClientRect().bottom <= window.innerHeight);
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const resize = new ResizeObserver(() => {
+      if (companion) companion.style.setProperty('--companion-height', `${companion.getBoundingClientRect().height}px`);
+      schedule();
+    });
+    if (prose) resize.observe(prose);
+    if (companion) resize.observe(companion);
+    const returnToTop = () => {
+      title.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    };
+    button.addEventListener('click', returnToTop);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('pageshow', schedule);
+    update();
+    dispose = () => {
+      cancelAnimationFrame(frame);
+      resize.disconnect();
+      button.removeEventListener('click', returnToTop);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('pageshow', schedule);
+    };
+  }
+  initializeReaderNavigation();
+  document.addEventListener('astro:page-load', initializeReaderNavigation);
+  document.addEventListener('astro:before-swap', () => dispose?.());
+</script>
+
+<style>
+  .reader-return {
+    position: fixed;
+    left: max(var(--gutter-mobile), env(safe-area-inset-left));
+    bottom: max(var(--gutter-mobile), env(safe-area-inset-bottom));
+    z-index: calc(var(--z-overlay) - 1);
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--rule-strong);
+    background: var(--bg-page);
+    color: var(--ink-primary);
+    cursor: pointer;
+    box-shadow: 0 0.3rem 1rem rgb(15 15 15 / 8%);
+  }
+  .reader-return[hidden] { display: none; }
+  .reader-return:hover { color: var(--accent-crimson); }
+  .reader-return:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+  :global(html[data-theme='night']) .reader-return:hover { color: var(--accent-on-dark); }
+  :global(html[data-theme='night']) .reader-return:focus-visible { outline-color: var(--accent-on-dark); }
+  @media (max-width: 1099px) {
+    .reader-return { left: auto; right: max(var(--gutter-mobile), env(safe-area-inset-right)); }
+    :global(body:has(.reader-tools.is-open)) .reader-return { visibility: hidden; }
+  }
+</style>

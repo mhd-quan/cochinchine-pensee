@@ -7,9 +7,12 @@
  */
 import '~/styles/globals.css';
 import { ClientRouter } from 'astro:transitions';
+import GoogleAnalytics from '~/components/analytics/GoogleAnalytics.astro';
+import ReaderPreferences from '~/components/essay/ReaderPreferences.astro';
 import Footer from '~/components/nav/Footer.astro';
 import Header from '~/components/nav/Header.astro';
 import MetaTags from '~/components/seo/MetaTags.astro';
+import fontPreloads from '../../.astro/font-preloads.mjs';
 
 interface Props {
   title: string;
@@ -17,7 +20,10 @@ interface Props {
   lang?: 'en' | 'vi';
   canonicalUrl?: string;
   ogImage?: string;
+  ogImageAlt?: string;
   noindex?: boolean;
+  reader?: boolean;
+  ogType?: 'website' | 'article';
 }
 
 const {
@@ -26,58 +32,73 @@ const {
   lang = 'en',
   canonicalUrl,
   ogImage,
+  ogImageAlt,
   noindex = false,
+  reader = false,
+  ogType = 'website',
 } = Astro.props;
 
 const fullTitle =
   title === 'The Cochinchine Pensées'
     ? 'The Cochinchine Pensées'
     : `${title} — The Cochinchine Pensées`;
+const pathname = Astro.url.pathname;
+const hasVietnameseHeading =
+  lang === 'vi' || Astro.url.pathname === '/' || /[ĂăĐđĨĩŨũƠơƯư\u1EA0-\u1EF9]/u.test(title);
+const hasEssayList =
+  pathname === '/' ||
+  ['/essays', '/authors', '/series', '/archives', '/pensees'].some(
+    (section) => pathname === section || pathname.startsWith(`${section}/`),
+  );
+const hasEssayTitle = reader || hasEssayList;
+const hasGenericHeading = !reader && pathname !== '/' && pathname !== '/search';
+const criticalFonts = fontPreloads.filter((font) => {
+  if (font.role === 'wordmark') return !hasEssayTitle;
+  if (font.role === 'essay-title') return hasEssayTitle;
+  return (
+    font.role === 'heading' &&
+    hasGenericHeading &&
+    (font.script === 'latin' || hasVietnameseHeading)
+  );
+});
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} data-reader={reader ? 'true' : undefined} data-theme="paper">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#FAFAF7" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#EEEEEB" />
+    <meta name="color-scheme" content={reader ? 'light dark' : 'light'} />
     <meta name="generator" content={Astro.generator} />
 
-    <script is:inline>
-      try {
-        const saved = JSON.parse(localStorage.getItem('tcp-reader-prefs') || '{}');
-        const root = document.documentElement;
-        if (['md', 'lg', 'xl'].includes(saved.fontSize)) root.dataset.fontSize = saved.fontSize;
-        if (['standard', 'wide'].includes(saved.measure)) root.dataset.measure = saved.measure;
-        if (['serif', 'garamond', 'newyork'].includes(saved.font)) root.dataset.font = saved.font;
-        if (['paper', 'sepia', 'night'].includes(saved.theme)) {
-          root.dataset.theme = saved.theme;
-          const colors = { paper: '#FAFAF7', sepia: '#F5EFE0', night: '#1B1816' };
-          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors[saved.theme]);
-        }
-      } catch {
-        // Invalid or blocked storage falls back to the paper defaults.
-      }
-    </script>
+    {criticalFonts.map((font) => (
+      <link rel="preload" href={font.href} as="font" type="font/woff2" crossorigin />
+    ))}
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <GoogleAnalytics />
+
+    <ReaderPreferences />
+
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=0.5.1" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=0.5.1" />
 
     <MetaTags
       title={fullTitle}
       description={description}
       canonicalUrl={canonicalUrl}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
+      lang={lang}
       noindex={noindex}
+      ogType={ogType}
     />
-
-    {/* DNS prefetch for any external resources we may add later */}
-    <link rel="dns-prefetch" href="//cochinchinepensees.studio" />
+    <slot name="head" />
 
     {/* View Transitions — Astro 7 native */}
     <ClientRouter />
   </head>
-  <body>
+  <body data-home={pathname === "/" ? "true" : undefined}>
     <svg class="image-filter-defs" aria-hidden="true" width="0" height="0" focusable="false">
       <defs>
         <filter
@@ -101,7 +122,7 @@ const fullTitle =
       </defs>
     </svg>
 
-    <a href="#main" class="sr-only">Skip to main content</a>
+    <a href="#main" class="sr-only skip-link">Skip to main content</a>
 
     <Header />
 

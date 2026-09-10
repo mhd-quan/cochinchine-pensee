@@ -1,0 +1,46 @@
+---
+import { SUBSTACK_PUBLICATION_URL } from '~/lib/newsletter';
+
+interface Props {
+  description: string;
+}
+
+const { description } = Astro.props;
+const url = new URL('/', Astro.site).href;
+const name = 'The Cochinchine Pensées';
+const publisher = { '@id': `${url}#publisher` };
+const website = { '@id': `${url}#website` };
+const identity = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      ...publisher,
+      name,
+      url,
+      sameAs: [SUBSTACK_PUBLICATION_URL],
+    },
+    {
+      '@type': 'WebSite',
+      ...website,
+      name,
+      alternateName: ['Cochinchine Pensées', 'Cochinchine Pensees'],
+      url,
+      description,
+      inLanguage: ['vi', 'en'],
+      publisher,
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${url}#webpage`,
+      name,
+      url,
+      description,
+      isPartOf: website,
+      about: publisher,
+    },
+  ],
+};
+---
+
+<script is:inline type="application/ld+json" set:html={JSON.stringify(identity).replace(/</g, '\\u003c')} />

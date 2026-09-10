@@ -17,7 +17,7 @@ export async function GET(context: APIContext) {
       description: essay.data.subtitle ?? essay.data.dek ?? '',
       link: `/essays/${essay.id}`,
       author: essay.data.author,
-      categories: essay.data.tags,
+      categories: essay.data.topics,
     })),
     customData: '<language>vi</language>',
     stylesheet: '/rss-styles.xsl',
