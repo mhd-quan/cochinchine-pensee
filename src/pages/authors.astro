@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleList from '~/components/directory/ArticleList.astro';
+import DirectoryLayout from '~/layouts/DirectoryLayout.astro';
+import { authorSlug } from '~/lib/authorArchive.mjs';
+
+const published = (
+  await getCollection('essays', ({ data }) => !data.draft && !data.comingSoon)
+).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const authors = [...new Set(published.map(({ data }) => data.author))]
+  .sort((a, b) => a.localeCompare(b, 'vi'))
+  .map((name) => ({
+    name,
+    slug: authorSlug(name),
+    entries: published.filter(({ data }) => data.author === name),
+  }));
+---
+
+<DirectoryLayout title="Authors" description="Các tác giả trên The Cochinchine Pensées và danh mục bài viết đã xuất bản của từng người.">
+  <nav class="directory-jump" aria-label="Authors">
+    {authors.map(({ name, slug }) => <a href={`/authors/${slug}`}>{name}</a>)}
+  </nav>
+  {authors.map(({ name, slug, entries }) => (
+    <section id={`author-${slug}`} aria-labelledby={`author-${slug}-title`}>
+      <h2 id={`author-${slug}-title`}><a href={`/authors/${slug}`}>{name}</a></h2>
+      <ArticleList entries={entries} />
+    </section>
+  ))}
+</DirectoryLayout>
+
+<style>
+  h2 a:hover {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+</style>

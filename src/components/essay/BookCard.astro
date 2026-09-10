@@ -15,6 +15,8 @@
  * the title and author rather than leaving a broken <img>.
  */
 import type { CollectionEntry } from 'astro:content';
+import Icon from '~/components/ui/Icon.astro';
+import { bookImageSizes, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
   book: CollectionEntry<'books'>;
@@ -23,20 +25,22 @@ interface Props {
 const { book } = Astro.props;
 const cover = book.data.coverImage?.trim();
 const hasCover = Boolean(cover);
+const sizes = cover ? bookImageSizes(cover) : '';
 ---
 
 <a href={`/essays/${book.data.reviewEssayId}`} class="book-card">
   <figure class="book-card__cover">
     {hasCover ? (
       <span class="book-card__jacket">
-        <img
-          src={cover}
-          alt={book.data.coverImageAlt ?? `Bìa sách ${book.data.title}`}
-          width={book.data.coverWidth}
-          height={book.data.coverHeight}
-          loading="lazy"
-          decoding="async"
-        />
+        <picture>
+          <source {...responsiveSource(cover!, sizes)} />
+          <img
+            {...responsiveImage(cover!, sizes, 400)}
+            alt={book.data.coverImageAlt ?? `Bìa sách ${book.data.title}`}
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
         <span class="book-card__spine" aria-hidden="true"></span>
       </span>
     ) : (
@@ -55,7 +59,7 @@ const hasCover = Boolean(cover);
     <h4 class="book-card__title">{book.data.title}</h4>
     <p class="book-card__author">{book.data.author}</p>
     {book.data.blurb && <p class="book-card__blurb">{book.data.blurb}</p>}
-    <span class="book-card__cta">Read review →</span>
+    <span class="book-card__cta">Read review <Icon name="arrow-right" size={16} /></span>
   </div>
 </a>
 

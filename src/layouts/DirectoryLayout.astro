@@ -1,0 +1,76 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="directory container">
+    <header class="directory__header">
+      <h1>{title}</h1>
+      <slot name="intro" />
+    </header>
+    <div class="directory__body"><slot /></div>
+  </article>
+</BaseLayout>
+
+<style>
+  .directory {
+    padding-block: var(--sp-12) var(--sp-10);
+  }
+
+  .directory__header {
+    max-width: var(--measure-prose);
+    margin: 0 auto var(--sp-10);
+    text-align: center;
+  }
+
+  .directory__header h1 {
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-h1);
+    line-height: var(--lh-headline);
+  }
+
+  .directory__header :global(p) {
+    color: var(--ink-secondary);
+    text-wrap: pretty;
+  }
+
+  .directory__body {
+    max-width: var(--content-max);
+    margin-inline: auto;
+  }
+
+  .directory__body :global(section) {
+    margin-bottom: var(--sp-10);
+    scroll-margin-top: var(--sp-16);
+  }
+
+  .directory__body :global(h2) {
+    margin-bottom: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    line-height: var(--lh-headline);
+  }
+
+  .directory__body :global(.directory-jump) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
+    margin-bottom: var(--sp-8);
+  }
+
+  .directory__body :global(.directory-jump a) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

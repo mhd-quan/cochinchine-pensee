@@ -1,0 +1,18 @@
+---
+/**
+ * Site-wide Google Analytics tag.
+ *
+ * BaseLayout includes this component once for every HTML page. Keeping it out
+ * of development avoids recording local browsing in the production property.
+ * GA4 Enhanced Measurement handles ClientRouter history changes after the tag
+ * loads. The bootstrap preserves a very early Astro navigation explicitly.
+ */
+---
+
+<script>
+  import { installGoogleAnalytics } from '~/lib/googleAnalytics.mjs';
+
+  if (import.meta.env.PROD) {
+    installGoogleAnalytics({ document, window, measurementId: 'G-WDT4QZN4C6' });
+  }
+</script>

@@ -1,0 +1,61 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import ArticleList from '~/components/directory/ArticleList.astro';
+import DirectoryLayout from '~/layouts/DirectoryLayout.astro';
+import { authorSlug } from '~/lib/authorArchive.mjs';
+
+interface AuthorArchive {
+  name: string;
+  slug: string;
+  entries: CollectionEntry<'essays'>[];
+}
+
+export const getStaticPaths = (async () => {
+  const published = (
+    await getCollection('essays', ({ data }) => !data.draft && !data.comingSoon)
+  ).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const names = [...new Set(published.map(({ data }) => data.author))].sort((a, b) =>
+    a.localeCompare(b, 'vi'),
+  );
+
+  return names.map((name) => ({
+    params: { slug: authorSlug(name) },
+    props: {
+      name,
+      slug: authorSlug(name),
+      entries: published.filter(({ data }) => data.author === name),
+    } satisfies AuthorArchive,
+  }));
+}) satisfies GetStaticPaths;
+
+const { name, slug, entries } = Astro.props as AuthorArchive;
+const essayCount = entries.length;
+const description = `${name}: ${essayCount} bài viết đã xuất bản trên The Cochinchine Pensées.`;
+---
+
+<DirectoryLayout title={name} description={description}>
+  <p slot="intro" class="author-intro">
+    {essayCount} {essayCount === 1 ? 'published essay' : 'published essays'}
+    <span aria-hidden="true"> · </span>
+    <a href="/authors">All authors</a>
+  </p>
+  <section id={`author-${slug}`} aria-labelledby={`author-${slug}-title`}>
+    <h2 id={`author-${slug}-title`} class="sr-only">Essays by {name}</h2>
+    <ArticleList entries={entries} />
+  </section>
+</DirectoryLayout>
+
+<style>
+  .author-intro {
+    font-family: var(--font-sans);
+    font-size: var(--fs-meta);
+    line-height: var(--lh-meta);
+  }
+
+  .author-intro a {
+    color: var(--accent-crimson);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

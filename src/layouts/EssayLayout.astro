@@ -1,12 +1,27 @@
 ---
+import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
+import ReaderNavigation from '~/components/essay/ReaderNavigation.astro';
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { metadataImage } from '~/lib/responsiveImage';
+import { articleGraph, serializeJsonLd } from '~/lib/seo/publication.mjs';
+import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
-import { titleCaps } from '~/lib/titleCaps';
+import { HERO_IMAGE_SIZES, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
+import { foldSearchText } from '~/lib/searchText';
 
 interface Props {
   title: string;
+  seo: {
+    url: string;
+    description: string;
+    published: string;
+    modified?: string;
+    authorUrl: string;
+  };
+  searchAliases?: string;
   subtitle?: string;
   dek?: string;
   date: Date;
@@ -24,10 +39,13 @@ interface Props {
   coverTreatment?: CoverTreatment;
   prevEssay?: { url: string; title: string } | null;
   nextEssay?: { url: string; title: string } | null;
+  moreByAuthor?: { url: string; title: string; date: Date }[];
 }
 
 const {
   title,
+  seo,
+  searchAliases = '',
   subtitle,
   dek,
   date,
@@ -45,6 +63,7 @@ const {
   coverTreatment = 'paper',
   prevEssay,
   nextEssay,
+  moreByAuthor = [],
 } = Astro.props;
 
 const formattedDate = date.toLocaleDateString('en-US', {
@@ -54,16 +73,30 @@ const formattedDate = date.toLocaleDateString('en-US', {
 });
 
 const isoDate = date.toISOString();
+const description = seo.description;
+const image = coverImage ? metadataImage(coverImage) : undefined;
+const graph = articleGraph({ title, author, lang, image: image?.url, seo });
 const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 ---
 
 <BaseLayout
   title={title}
-  description={excerpt ?? dek ?? subtitle}
+  description={description}
   lang={lang}
-  ogImage={coverImage}
+  canonicalUrl={seo.url}
+  ogImage={image?.url}
+  ogImageAlt={coverImageAlt}
+  reader={true}
+  ogType="article"
 >
-  <article class="essay">
+  <Fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={serializeJsonLd(graph)} />
+    <meta property="article:published_time" content={seo.published} />
+    {seo.modified && <meta property="article:modified_time" content={seo.modified} />}
+    <meta name="author" content={author} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+  </Fragment>
+  <article class="essay" data-pagefind-body data-pagefind-meta="title[data-search-title], title_alias[data-search-title-alias], description[data-search-description], aliases[data-search-aliases]" data-search-title={title} data-search-title-alias={foldSearchText(title)} data-search-description={excerpt ?? subtitle ?? ""} data-search-aliases={searchAliases}>
     <header class="essay__hero">
       <div class:list={['essay__hero-inner', { 'essay__hero-inner--text-only': !coverImage }]}>
         <div class="essay__header-copy">
@@ -73,25 +106,19 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
             </p>
           )}
 
-          <h1 class="essay__title">
-            {titleCaps(title).map((segment) => (
-              segment.small
-                ? <span class="title-caps__small">{segment.text}</span>
-                : <span>{segment.text}</span>
-            ))}
-          </h1>
+          <h1 id="essay-title" tabindex="-1" class="essay__title" data-pagefind-weight="10">{title}</h1>
 
           {subtitle && <p class="essay__subtitle">{subtitle}</p>}
           {dek && <p class="essay__dek">{dek}</p>}
 
           <div class="essay__byline">
-            <span class="essay__byline-by">by</span>
+            <span class="essay__byline-by" data-pagefind-ignore>by</span>
             <span class="essay__byline-author">{author}</span>
-            <span class="essay__byline-sep" aria-hidden="true">·</span>
-            <time datetime={isoDate}>{formattedDate}</time>
+            <span data-pagefind-ignore class="essay__byline-sep" aria-hidden="true">·</span>
+            <time data-pagefind-ignore datetime={isoDate}>{formattedDate}</time>
           </div>
 
-          <div class="essay__topics" aria-label={`${topicLead} ${topics.join(', ')}`}>
+          <div data-pagefind-ignore class="essay__topics" aria-label={`${topicLead} ${topics.join(', ')}`}>
             <span class="essay__topics-label">{topicLead}</span>
             <ul class="essay__topics-list" aria-label="Chủ đề">
               {topics.map((topic) => <li class="essay__topic">{topic}</li>)}
@@ -101,27 +128,37 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 
         {coverImage && (
           <figure class="essay__cover" data-cover-treatment={coverTreatment}>
-            <img
-              src={coverImage}
-              alt={coverImageAlt}
-              loading="eager"
-              decoding="async"
-              fetchpriority="high"
-            />
+            <picture>
+              <source {...responsiveSource(coverImage, HERO_IMAGE_SIZES)} />
+              <img
+                {...responsiveImage(coverImage, HERO_IMAGE_SIZES)}
+                alt={coverImageAlt}
+                loading="eager"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </picture>
           </figure>
         )}
       </div>
     </header>
 
     <div class="essay__reading-shell">
-      <div class:list={['prose', { 'has-dropcap': dropcap }]}>
-        <slot />
+      <div class="essay__reading-column">
+        <div class:list={['prose', { 'has-dropcap': dropcap }]}>
+          <slot />
+        </div>
+        <div class="essay__end-mark" data-article-end aria-hidden="true"><Icon name="fleuron" size={16} /></div>
+        <ShareLinks title={title} excerpt={excerpt} />
       </div>
 
-      <ViewCustomizer />
+      <div class="essay__sidebar" data-nosnippet>
+        <ViewCustomizer />
+        <ReaderCompanion author={author} essays={moreByAuthor} title={title} />
+      </div>
     </div>
 
-    <footer class="essay__footer">
+    <footer class="essay__footer" data-pagefind-ignore>
       {publicationHistory && (
         <details class="essay__history">
           <summary>Publication history</summary>
@@ -134,19 +171,17 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         </details>
       )}
 
-      <ShareLinks title={title} excerpt={excerpt} />
-
       {(prevEssay || nextEssay) && (
         <nav class="essay__prev-next" aria-label="Article navigation">
           {prevEssay ? (
             <a href={prevEssay.url} class="essay__prev-next-link essay__prev-next-link--prev">
-              <span class="essay__prev-next-direction">← Previous</span>
+              <span class="essay__prev-next-direction"><Icon name="arrow-left" size={16} /> Previous</span>
               <span class="essay__prev-next-title">{prevEssay.title}</span>
             </a>
           ) : <span />}
           {nextEssay ? (
             <a href={nextEssay.url} class="essay__prev-next-link essay__prev-next-link--next">
-              <span class="essay__prev-next-direction">Next →</span>
+              <span class="essay__prev-next-direction">Next <Icon name="arrow-right" size={16} /></span>
               <span class="essay__prev-next-title">{nextEssay.title}</span>
             </a>
           ) : <span />}
@@ -154,9 +189,11 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
       )}
     </footer>
   </article>
+  <ReaderNavigation />
 </BaseLayout>
 
 <style>
+  .essay__end-mark { display: flex; justify-content: center; margin-block: var(--sp-6); color: var(--ink-muted); }
   .essay {
     padding-bottom: var(--sp-12);
   }
@@ -200,7 +237,8 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 
   .essay__title {
     margin-bottom: var(--sp-4);
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-bold);
     font-size: var(--fs-h1);
     line-height: var(--lh-headline);
     letter-spacing: 0.015em;
@@ -377,7 +415,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   }
 
   .essay__prev-next-link {
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
     color: var(--ink-primary);
     transition: color var(--t-base);
   }
@@ -408,26 +446,38 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   .essay__prev-next-title {
     display: block;
     font-size: var(--fs-h4);
-    font-weight: var(--w-semibold);
+    font-weight: var(--w-bold);
     line-height: var(--lh-headline);
   }
 
   @media (min-width: 1100px) {
     .essay__reading-shell {
       display: grid;
-      grid-template-columns: 10rem minmax(0, var(--reader-measure)) 10rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, var(--reader-measure)) 14rem;
       align-items: start;
-      gap: var(--sp-8);
+      gap: var(--sp-6);
       width: min(100%, calc(var(--measure-long) + 30rem));
       padding-inline: var(--gutter-tablet);
     }
 
-    .essay__reading-shell :global(.prose) {
+    .essay__reading-column {
       grid-column: 2;
+      min-width: 0;
     }
 
-    .essay__reading-shell :global(.reader-tools) {
+    .essay__sidebar {
       grid-column: 3;
+      min-width: 0;
+      align-self: stretch;
+    }
+
+    .essay__sidebar :global(.reader-tools) {
+      position: static;
+    }
+
+    .essay__sidebar :global(.reader-companion) {
+      position: sticky;
+      top: min(calc(4.25rem + var(--sp-5)), calc(100dvh - var(--companion-height, 0px) - var(--sp-6)));
     }
 
     .essay__footer {
@@ -444,6 +494,12 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 
     .essay__cover {
       aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .essay__reading-shell {
+      width: 100%;
     }
   }
 

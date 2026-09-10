@@ -11,7 +11,7 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import { getCoverTreatment } from '~/lib/coverTreatment';
-import { titleCaps } from '~/lib/titleCaps';
+import { containedImageSizes, responsiveImage, responsiveSource } from '~/lib/responsiveImage';
 
 interface Props {
   essay: CollectionEntry<'essays'>;
@@ -20,6 +20,9 @@ interface Props {
 const { essay } = Astro.props;
 const href = `/essays/${essay.id}`;
 const hasCover = Boolean(essay.data.coverImage);
+const sizes = hasCover
+  ? containedImageSizes(essay.data.coverImage!, '(min-width: 768px) 168px, calc(100vw - 2.5rem)')
+  : '';
 const coverTreatment = getCoverTreatment(essay.id);
 
 const day = essay.data.date.toLocaleDateString('en-US', {
@@ -39,13 +42,7 @@ const year = String(essay.data.date.getFullYear());
 
   <div class="essay-row__body">
     <h3 class="essay-row__title">
-      <a href={href}>
-        {titleCaps(essay.data.title).map((segment) => (
-          segment.small
-            ? <span class="title-caps__small">{segment.text}</span>
-            : <span>{segment.text}</span>
-        ))}
-      </a>
+      <a href={href}>{essay.data.title}</a>
     </h3>
     {essay.data.subtitle && (
       <p class="essay-row__subtitle">{essay.data.subtitle}</p>
@@ -55,12 +52,15 @@ const year = String(essay.data.date.getFullYear());
   {hasCover && (
     <a href={href} class="essay-row__cover-link" aria-hidden="true" tabindex="-1">
       <figure class="essay-row__cover" data-cover-treatment={coverTreatment}>
-        <img
-          src={essay.data.coverImage}
-          alt={essay.data.coverImageAlt ?? ''}
-          loading="lazy"
-          decoding="async"
-        />
+        <picture>
+          <source {...responsiveSource(essay.data.coverImage!, sizes)} />
+          <img
+            {...responsiveImage(essay.data.coverImage!, sizes, 400)}
+            alt={essay.data.coverImageAlt ?? ''}
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
       </figure>
     </a>
   )}
@@ -105,10 +105,10 @@ const year = String(essay.data.date.getFullYear());
     color: var(--ink-faint);
   }
 
-  /* Caps and small caps, as on the EssayCard — the words' own capitals
-   * stand full-height, the rest render as smaller capitals. */
+  /* Playfair Display SC supplies the small-cap forms natively. */
   .essay-row__title {
-    font-family: var(--font-display);
+    font-family: var(--font-essay-title);
+    font-weight: var(--w-bold);
     font-size: var(--fs-h3);
     line-height: var(--lh-headline);
     letter-spacing: 0.02em;

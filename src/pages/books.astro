@@ -21,17 +21,13 @@ const books = allBooks
 
 <BaseLayout
   title="Books"
-  description="Book reviews and intellectual literature referenced in The Cochinchine Pensées."
+  description="Điểm sách trên The Cochinchine Pensées: những tác phẩm về văn chương, triết học, chính trị và xã hội, cùng các bài tiểu luận đọc và bàn về chúng."
 >
   <section class="books">
     <div class="container">
       <header class="books__header">
         <p class="books__eyebrow">The Stacks</p>
         <h1 class="books__title">Books Reviewed</h1>
-        <p class="books__subtitle">
-          The works these essays read. Each one links to the essay that
-          reviewed it.
-        </p>
       </header>
 
       <ul class="books__grid">
@@ -52,7 +48,7 @@ const books = allBooks
 
   .books__header {
     text-align: center;
-    margin-bottom: var(--sp-10);
+    margin-bottom: var(--sp-8);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
@@ -69,20 +65,12 @@ const books = allBooks
 
   .books__title {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    font-size: var(--fs-h1);
     line-height: 1.1;
     color: var(--ink-primary);
     margin-bottom: var(--sp-3);
   }
 
-  .books__subtitle {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: var(--fs-body-larger);
-    color: var(--ink-secondary);
-    max-width: 36rem;
-    margin-inline: auto;
-  }
 
   .books__grid {
     display: grid;

@@ -1,0 +1,12 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleList from '~/components/directory/ArticleList.astro';
+import DirectoryLayout from '~/layouts/DirectoryLayout.astro';
+
+const pensees = (await getCollection('essays', ({ data }) => !data.draft && data.form === 'pensee'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<DirectoryLayout title="Pensées" description="Những pensées trên The Cochinchine Pensées: ghi chép, suy tưởng và các bài viết mang hình thức tự do.">
+  <ArticleList entries={pensees} />
+</DirectoryLayout>

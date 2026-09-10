@@ -18,6 +18,7 @@ import EssayCard from '~/components/essay/EssayCard.astro';
 import Pagination from '~/components/nav/Pagination.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { PER_PAGE } from '~/lib/pagination';
+import { ARCHIVE_IMAGE_SIZES } from '~/lib/responsiveImage';
 
 const allEssays = await getCollection('essays', ({ data }) => !data.draft);
 const sortedEssays = allEssays.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -28,16 +29,13 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
 
 <BaseLayout
   title="Essays"
-  description="All essays published in The Cochinchine Pensées."
+  description="Kho tiểu luận tiếng Việt của The Cochinchine Pensées về chính trị, văn hóa, xã hội và tư tưởng. Tìm bài viết theo thời gian, từ mới nhất đến cũ hơn."
 >
   <section class="archive">
     <div class="container">
       <header class="archive__header">
         <p class="archive__eyebrow">Archive</p>
         <h1 class="archive__title">All Essays</h1>
-        <p class="archive__subtitle">
-          {sortedEssays.length} essays, sorted from most recent.
-        </p>
       </header>
 
       <ul class="archive__list archive__list--rows" data-archive-rows>
@@ -51,7 +49,7 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
       <ul class="archive__list archive__list--grid" data-archive-grid>
         {essays.map((essay) => (
           <li>
-            <EssayCard essay={essay} />
+            <EssayCard essay={essay} imageSizes={ARCHIVE_IMAGE_SIZES} />
           </li>
         ))}
       </ul>
@@ -73,7 +71,7 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
 
   .archive__header {
     text-align: center;
-    margin-bottom: var(--sp-12);
+    margin-bottom: var(--sp-8);
     padding-bottom: var(--sp-8);
     border-bottom: 1px solid var(--rule-hair);
   }
@@ -90,19 +88,12 @@ const lastPage = Math.max(1, Math.ceil(sortedEssays.length / PER_PAGE));
 
   .archive__title {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+    font-size: var(--fs-h1);
     line-height: 1.1;
     color: var(--ink-primary);
     margin-bottom: var(--sp-3);
   }
 
-  .archive__subtitle {
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--ink-secondary);
-    font-size: var(--fs-body);
-    margin-bottom: var(--sp-5);
-  }
 
   /* Mobile: row list. Desktop: hidden via media query below. */
   .archive__list--grid {

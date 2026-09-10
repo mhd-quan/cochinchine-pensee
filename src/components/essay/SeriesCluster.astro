@@ -11,6 +11,8 @@
  */
 import type { CollectionEntry } from 'astro:content';
 import EssayCard from '~/components/essay/EssayCard.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { SERIES_IMAGE_SIZES } from '~/lib/responsiveImage';
 
 interface Props {
   series: CollectionEntry<'series'>;
@@ -26,14 +28,14 @@ const trio = essays.slice(0, 3);
     <p class="series-cluster__eyebrow">Series</p>
     <h3 class="series-cluster__name">{series.data.nameVi ?? series.data.name}</h3>
     <a href={`/series/${series.data.slug}`} class="series-cluster__more">
-      Browse all essays →
+      Browse all essays <Icon name="arrow-right" size={16} />
     </a>
   </header>
 
   <ul class="series-cluster__trio">
     {trio.map((essay) => (
       <li>
-        <EssayCard essay={essay} />
+        <EssayCard essay={essay} imageSizes={SERIES_IMAGE_SIZES} />
       </li>
     ))}
   </ul>
