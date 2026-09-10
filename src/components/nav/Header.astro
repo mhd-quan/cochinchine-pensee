@@ -6,6 +6,7 @@
  * right-edge menu button. Mobile: compact wordmark, no navigation strip,
  * and a top-right menu button. Both buttons open the same accessible drawer.
  */
+import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 
 const navItems = [
   { href: '/', label: 'Latest' },
@@ -48,6 +49,18 @@ function isActive(itemHref: string): boolean {
         </span>
       </button>
     </div>
+
+    <a
+      href={SUBSTACK_SUBSCRIBE_URL}
+      class="site-header__newsletter-banner"
+      rel="external"
+      aria-label="Subscribe to The Cochinchine Pensées newsletter on Substack"
+    >
+      <span class="site-header__newsletter-copy">Weekly essays, delivered by email.</span>
+      <span class="site-header__newsletter-action">
+        Subscribe on Substack <span aria-hidden="true">→</span>
+      </span>
+    </a>
 
     <div class="site-header__nav-tier">
       <div class="site-header__nav-inner">
@@ -515,6 +528,61 @@ function isActive(itemHref: string): boolean {
     padding-top: calc(var(--sp-3) + env(safe-area-inset-top, 0px));
     border-bottom: 1px solid var(--rule-hair);
     text-align: center;
+  }
+
+  .site-header__newsletter-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-height: 2.75rem;
+    padding: var(--sp-2) var(--gutter-mobile);
+    background-color: var(--bg-oxblood-well);
+    color: var(--ink-on-dark);
+    text-align: center;
+    user-select: none;
+    transition:
+      background-color var(--t-fast),
+      color var(--t-fast);
+  }
+
+  .site-header__newsletter-banner:hover {
+    background-color: var(--accent-crimson);
+    color: var(--ink-inverse);
+  }
+
+  .site-header__newsletter-banner:focus-visible {
+    outline: 2px solid var(--ink-on-dark);
+    outline-offset: -3px;
+  }
+
+  .site-header__newsletter-copy {
+    display: none;
+    font-family: var(--font-serif);
+    font-size: var(--fs-meta);
+    font-style: italic;
+    line-height: var(--lh-meta);
+  }
+
+  .site-header__newsletter-action {
+    font-family: var(--font-sans);
+    font-size: var(--fs-kicker);
+    font-weight: var(--w-semibold);
+    line-height: 1.3;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 32rem) {
+    .site-header__newsletter-copy {
+      display: inline;
+    }
+
+    .site-header__newsletter-action {
+      padding-inline-start: var(--sp-3);
+      border-inline-start: 1px solid var(--rule-on-dark);
+    }
   }
 
   .site-header__wordmark-link {
@@ -990,6 +1058,10 @@ function isActive(itemHref: string): boolean {
     .site-header__wordmark {
       font-size: clamp(1.5rem, 1.15rem + 1vw, 2rem);
       letter-spacing: 0.06em;
+    }
+
+    .site-header__newsletter-banner {
+      padding-inline: var(--gutter-tablet);
     }
 
     .site-header__reading-bar {
