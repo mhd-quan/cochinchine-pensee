@@ -1,4 +1,5 @@
 ---
+import Icon from '~/components/ui/Icon.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 ---
@@ -19,7 +20,7 @@ import { SUBSTACK_SUBSCRIBE_URL } from '~/lib/newsletter';
 
       <p class="subscribe__action">
         <a href={SUBSTACK_SUBSCRIBE_URL} class="subscribe__link subscribe__cta" rel="external">
-          Subscribe on Substack →
+          Subscribe on Substack <Icon name="arrow-up-right" size={16} />
         </a>
       </p>
 

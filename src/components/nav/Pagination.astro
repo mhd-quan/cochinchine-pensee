@@ -1,8 +1,10 @@
 ---
+import Icon from '~/components/ui/Icon.astro';
+
 /**
  * Pagination — Prev / Next for the essay archive.
  *
- * Arrow glyphs are literal angle brackets, per house preference.
+ * Chevron silhouettes retain the archive’s angle-bracket navigation.
  * A disabled edge renders as a span, not a dead link.
  */
 interface Props {
@@ -18,12 +20,12 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
 <nav class="pagination" aria-label="Essay pages">
   {prevUrl ? (
     <a href={prevUrl} class="pagination__link" rel="prev">
-      <span class="pagination__glyph" aria-hidden="true">&lt;</span>
+      <Icon name="chevron-left" size={16} />
       <span>Prev Page</span>
     </a>
   ) : (
     <span class="pagination__link is-disabled" aria-disabled="true">
-      <span class="pagination__glyph" aria-hidden="true">&lt;</span>
+      <Icon name="chevron-left" size={16} />
       <span>Prev Page</span>
     </span>
   )}
@@ -37,12 +39,12 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
   {nextUrl ? (
     <a href={nextUrl} class="pagination__link" rel="next">
       <span>Next Page</span>
-      <span class="pagination__glyph" aria-hidden="true">&gt;</span>
+      <Icon name="chevron-right" size={16} />
     </a>
   ) : (
     <span class="pagination__link is-disabled" aria-disabled="true">
       <span>Next Page</span>
-      <span class="pagination__glyph" aria-hidden="true">&gt;</span>
+      <Icon name="chevron-right" size={16} />
     </span>
   )}
 </nav>
@@ -60,7 +62,7 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
 
   .pagination__link {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: var(--sp-3);
     min-height: 2.75rem;
     padding-block: var(--sp-2);
@@ -83,13 +85,6 @@ const { prevUrl, nextUrl, currentPage, lastPage } = Astro.props;
     color: var(--ink-muted);
     opacity: 0.35;
     cursor: default;
-  }
-
-  .pagination__glyph {
-    font-family: var(--font-sans);
-    font-size: 1em;
-    line-height: 1;
-    letter-spacing: 0;
   }
 
   .pagination__count {

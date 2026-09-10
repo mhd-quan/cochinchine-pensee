@@ -1,10 +1,11 @@
 ---
-import { articleGraph, serializeJsonLd } from '~/lib/seo/publication.mjs';
-import { metadataImage } from '~/lib/responsiveImage';
+import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
 import ReaderNavigation from '~/components/essay/ReaderNavigation.astro';
 import ShareLinks from '~/components/essay/ShareLinks.astro';
 import ViewCustomizer from '~/components/essay/ViewCustomizer.astro';
-import ReaderCompanion from '~/components/essay/ReaderCompanion.astro';
+import Icon from '~/components/ui/Icon.astro';
+import { metadataImage } from '~/lib/responsiveImage';
+import { articleGraph, serializeJsonLd } from '~/lib/seo/publication.mjs';
 import '~/styles/prose.css';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import type { CoverTreatment } from '~/lib/coverTreatment';
@@ -13,7 +14,13 @@ import { foldSearchText } from '~/lib/searchText';
 
 interface Props {
   title: string;
-  seo: { url: string; description: string; published: string; modified?: string; authorUrl: string };
+  seo: {
+    url: string;
+    description: string;
+    published: string;
+    modified?: string;
+    authorUrl: string;
+  };
   searchAliases?: string;
   subtitle?: string;
   dek?: string;
@@ -141,7 +148,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         <div class:list={['prose', { 'has-dropcap': dropcap }]}>
           <slot />
         </div>
-        <div data-article-end aria-hidden="true"></div>
+        <div class="essay__end-mark" data-article-end aria-hidden="true"><Icon name="fleuron" size={16} /></div>
         <ShareLinks title={title} excerpt={excerpt} />
       </div>
 
@@ -168,13 +175,13 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
         <nav class="essay__prev-next" aria-label="Article navigation">
           {prevEssay ? (
             <a href={prevEssay.url} class="essay__prev-next-link essay__prev-next-link--prev">
-              <span class="essay__prev-next-direction">← Previous</span>
+              <span class="essay__prev-next-direction"><Icon name="arrow-left" size={16} /> Previous</span>
               <span class="essay__prev-next-title">{prevEssay.title}</span>
             </a>
           ) : <span />}
           {nextEssay ? (
             <a href={nextEssay.url} class="essay__prev-next-link essay__prev-next-link--next">
-              <span class="essay__prev-next-direction">Next →</span>
+              <span class="essay__prev-next-direction">Next <Icon name="arrow-right" size={16} /></span>
               <span class="essay__prev-next-title">{nextEssay.title}</span>
             </a>
           ) : <span />}
@@ -186,6 +193,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
 </BaseLayout>
 
 <style>
+  .essay__end-mark { display: flex; justify-content: center; margin-block: var(--sp-6); color: var(--ink-muted); }
   .essay {
     padding-bottom: var(--sp-12);
   }

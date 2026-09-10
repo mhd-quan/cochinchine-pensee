@@ -1,4 +1,5 @@
 ---
+import Icon from '~/components/ui/Icon.astro';
 /**
  * Persistent reading preferences.
  * Desktop: a compact sticky rail beside the essay.
@@ -20,7 +21,7 @@
     aria-expanded="false"
     data-reader-open
   >
-    <span aria-hidden="true">Aa</span>
+    <Icon name="reading" size={24} />
     <span class="sr-only">Open reading preferences</span>
   </button>
 
@@ -43,10 +44,7 @@
         aria-label="Close reading preferences"
         data-reader-dismiss
       >
-        <span class="reader-tools__close-icon" aria-hidden="true">
-          <span></span>
-          <span></span>
-        </span>
+        <Icon name="close" />
       </button>
     </div>
 
@@ -87,11 +85,11 @@
       <legend>Text width</legend>
       <div class="reader-tools__options reader-tools__options--measure">
         <button type="button" data-pref="measure" data-value="standard" aria-label="Standard text width">
-          <span class="reader-tools__measure-glyph reader-tools__measure-glyph--standard" aria-hidden="true"></span>
+          <Icon name="width-standard" />
           <span class="reader-tools__option-name">Standard</span>
         </button>
         <button type="button" data-pref="measure" data-value="wide" aria-label="Wide text width">
-          <span class="reader-tools__measure-glyph reader-tools__measure-glyph--wide" aria-hidden="true"></span>
+          <Icon name="width-wide" />
           <span class="reader-tools__option-name">Wide</span>
         </button>
       </div>
@@ -594,39 +592,6 @@
     font-size: 1.1875rem;
   }
 
-  /* Width glyphs — two bars of differing measure */
-  .reader-tools__measure-glyph {
-    position: relative;
-    display: inline-block;
-    flex: none;
-    height: 0.5rem;
-    width: 1.5rem;
-  }
-
-  .reader-tools__measure-glyph::before,
-  .reader-tools__measure-glyph::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    height: 1.5px;
-    background: currentColor;
-  }
-
-  .reader-tools__measure-glyph::before {
-    top: 0;
-    width: 100%;
-  }
-
-  .reader-tools__measure-glyph--standard::after {
-    bottom: 0;
-    width: 62%;
-  }
-
-  .reader-tools__measure-glyph--wide::after {
-    bottom: 0;
-    width: 100%;
-  }
-
   /* Theme swatches — a letter set on the theme's own paper */
   .reader-tools__swatch {
     display: grid;
@@ -807,40 +772,6 @@
       transform: scale(0.96);
     }
 
-    .reader-tools__close-icon {
-      position: relative;
-      display: block;
-      width: 1.25rem;
-      height: 1.25rem;
-    }
-
-    .reader-tools__close-icon span {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      width: 100%;
-      height: 1.5px;
-      background: currentColor;
-      transform-origin: center;
-      transition: transform var(--t-icon);
-    }
-
-    .reader-tools__close-icon span:first-child {
-      transform: translateY(-0.25rem) scaleX(0.78);
-    }
-
-    .reader-tools__close-icon span:last-child {
-      transform: translateY(0.25rem) scaleX(0.78);
-    }
-
-    .reader-tools.is-open .reader-tools__close-icon span:first-child {
-      transform: rotate(45deg);
-    }
-
-    .reader-tools.is-open .reader-tools__close-icon span:last-child {
-      transform: rotate(-45deg);
-    }
-
     /* Card grids sized for thumbs */
     .reader-tools__group + .reader-tools__group {
       margin-top: var(--sp-5);
@@ -909,7 +840,6 @@
   @media (prefers-reduced-motion: reduce) {
     .reader-tools__panel,
     .reader-tools__scrim,
-    .reader-tools__close-icon span,
     .reader-tools__options button {
       transition-duration: 0.01ms;
     }

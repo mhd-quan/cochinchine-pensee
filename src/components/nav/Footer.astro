@@ -20,7 +20,7 @@ const footerLinks = [
       <nav class="site-footer__nav" aria-label="Footer">
         <ul class="site-footer__links">
           {footerLinks.map(({ href, label }) => (
-            <li><a href={href} class="site-footer__link">{label}</a></li>
+            <li><a href={href} class="site-footer__link"><span class="nav-label">{label}</span></a></li>
           ))}
         </ul>
       </nav>
@@ -58,6 +58,7 @@ const footerLinks = [
 
 <style>
   .site-footer {
+    --nav-underline-color: var(--accent-on-dark);
     --footer-link-size: var(--fs-nav);
     --footer-divider-space: clamp(2rem, 5vw, 5rem);
     margin-top: var(--sp-10);
@@ -105,13 +106,8 @@ const footerLinks = [
 
   .site-footer__link {
     padding-block: var(--sp-2);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.35em;
   }
 
-  .site-footer__link:hover {
-    text-decoration-line: underline;
-  }
 
   .site-footer a:focus-visible {
     outline: 2px solid var(--ink-on-dark);
