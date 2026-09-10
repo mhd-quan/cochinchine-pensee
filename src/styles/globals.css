@@ -231,3 +231,22 @@ html.has-site-menu { overflow: hidden; }
   vertical-align: -0.2em;
   overflow: visible;
 }
+
+/* Shared label rule: masthead, side menu and footer use the same motion. */
+.nav-label { position: relative; display: inline-block; }
+.nav-label::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 calc(-1 * var(--nav-rule-offset));
+  height: var(--nav-rule-width);
+  background: var(--nav-underline-color, var(--accent-crimson));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-nav);
+}
+.is-active > .nav-label::after,
+a:hover > .nav-label::after,
+a:focus-visible > .nav-label::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .nav-label::after { transition: none; }
+}

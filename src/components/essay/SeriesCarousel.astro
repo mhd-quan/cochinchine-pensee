@@ -23,8 +23,8 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
       </select>
       <div class="series-carousel__controls">
         <span class="series-carousel__position" data-series-position aria-hidden="true">1 / {clusters.length}</span>
-        <button type="button" data-series-prev aria-label="Series trước" aria-controls="series-track" disabled><Icon name="arrow-left" /></button>
-        <button type="button" data-series-next aria-label="Series tiếp theo" aria-controls="series-track" disabled={clusters.length < 2}><Icon name="arrow-right" /></button>
+        <button type="button" data-series-prev aria-label="Series trước" aria-controls="series-track" disabled><Icon name="chevron-left" /></button>
+        <button type="button" data-series-next aria-label="Series tiếp theo" aria-controls="series-track" disabled={clusters.length < 2}><Icon name="chevron-right" /></button>
       </div>
     </div>
     <div class="series-carousel__track" id="series-track" tabindex="0" aria-label="Các series" data-series-track>
@@ -32,7 +32,6 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
         <section class="series-carousel__slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${clusters.length}: ${series.data.nameVi ?? series.data.name}`} data-series-slide>
           <div class="series-carousel__intro">
             <h3><a href={`/series/${series.data.slug}`}>{series.data.nameVi ?? series.data.name}</a></h3>
-            <a class="series-carousel__browse" href={`/series/${series.data.slug}`}>Xem loạt bài <Icon name="arrow-right" size={16} /></a>
           </div>
           <ul class="series-carousel__essays">
             {essays.slice(0, 3).map((essay) => <li><EssayCard essay={essay} imageSizes={imageSizes} /></li>)}
@@ -162,8 +161,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
     letter-spacing: var(--tr-kicker);
     text-transform: uppercase;
   }
-  .series-carousel__all,
-  .series-carousel__browse {
+  .series-carousel__all {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -177,8 +175,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
     text-transform: uppercase;
     white-space: nowrap;
   }
-  .series-carousel__all:hover,
-  .series-carousel__browse:hover {
+  .series-carousel__all:hover {
     text-decoration: underline;
     text-underline-offset: 0.3em;
   }
@@ -266,9 +263,6 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
   }
   .series-carousel__intro h3 a {
     color: var(--ink-primary);
-  }
-  .series-carousel__browse {
-    flex-shrink: 0;
   }
   .series-carousel__essays {
     display: grid;

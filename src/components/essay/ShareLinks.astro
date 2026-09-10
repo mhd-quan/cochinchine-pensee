@@ -14,7 +14,7 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
 ---
 
 <div class="reader-actions" aria-label="Chia sẻ bài viết" data-nosnippet data-pagefind-ignore>
-  <span class="reader-actions__label">Chia sẻ</span>
+  <span class="reader-actions__label" lang="en">Share</span>
   <ul class="reader-actions__list" role="list">
     <li>
       <button type="button" data-reader-share={targets.facebook} disabled class="reader-actions__btn" aria-label="Chia sẻ trên Facebook" title="Chia sẻ trên Facebook">
@@ -27,7 +27,7 @@ const slug = new URL(canonical).pathname.split('/').at(-1);
     <li>
       <button type="button" data-reader-share={targets.x} disabled class="reader-actions__btn" aria-label="Chia sẻ trên X" title="Chia sẻ trên X">
         <!-- Unmodified path from the official X logo pack. -->
-        <svg class="reader-actions__x" width="18" height="19" viewBox="0 0 1200 1227" aria-hidden="true" focusable="false">
+        <svg class="reader-actions__x" width="16" height="17" viewBox="0 0 1200 1227" aria-hidden="true" focusable="false">
           <path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" fill="currentColor" />
         </svg>
       </button>
