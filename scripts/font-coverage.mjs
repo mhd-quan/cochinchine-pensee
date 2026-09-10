@@ -1,12 +1,9 @@
-import fontverter from 'fontverter';
-import opentype from '@shuding/opentype.js';
+import { create } from 'fontkit';
 
+/** Read cmap coverage without dropping variable-font axes or requiring axis names. */
 export async function fontCodePoints(buffer) {
-  const ttf = await fontverter.convert(buffer, 'truetype');
-  const font = opentype.parse(ttf.buffer.slice(ttf.byteOffset, ttf.byteOffset + ttf.byteLength));
-  return new Set(Object.entries(font.tables.cmap.glyphIndexMap)
-    .filter(([, glyph]) => glyph !== 0)
-    .map(([point]) => Number(point)));
+  const font = create(buffer);
+  return new Set(font.characterSet.filter((point) => font.glyphForCodePoint(point).id !== 0));
 }
 
 export function unicodeRange(points) {

@@ -157,7 +157,7 @@ class FakeDocument extends EventTarget {
 
 function fakeContainer(payload) {
   const elements = new Map([
-    ['[data-home-discovery-payload]', new FakeElement('script')],
+    ['[data-home-discovery-catalog]', new FakeElement('script')],
     ['[data-home-discovery-active]', new FakeElement()],
     ['[data-home-discovery-link]', new FakeElement('a')],
     ['[data-home-discovery-blockquote]', new FakeElement('blockquote')],
@@ -166,7 +166,7 @@ function fakeContainer(payload) {
     ['[data-home-discovery-author]', new FakeElement('span')],
     ['[data-home-discovery-image]', new FakeElement('figure')],
   ]);
-  elements.get('[data-home-discovery-payload]').textContent = JSON.stringify(payload);
+  elements.get('[data-home-discovery-catalog]').textContent = JSON.stringify(Object.keys(payload.articles).map((essayId) => ({ essayId, count: 2, url: `/discovery/${essayId}.json` })));
   return {
     dataset: {},
     elements,
@@ -242,92 +242,116 @@ function assertSelection(container, expected, quoteKey) {
   assert.equal(picture.children[3].src, `${expected}.webp`);
 }
 
-test('direct, reload, Astro Back and BFCache keep the shared quote until Vietnam midnight', () => {
+const flush = () => new Promise((resolve) => setImmediate(resolve));
+function fakeWindow() {
+  const window = new EventTarget();
+  window.requests = [];
+  window.fetch = async (url) => {
+    window.requests.push(url);
+    const essayId = url.match(/([^/]+)\.json$/)[1];
+    return { ok: true, json: async () => ({
+      ...lifecyclePayload.articles[essayId], essayId,
+      quotes: lifecyclePayload.choices.filter((choice) => choice.essayId === essayId).map(({ quote }) => quote),
+    }) };
+  };
+  return window;
+}
+
+test('lazy discovery fetches only the selected article, reuses it, and rotates at Vietnam midnight', async () => {
   let instant = new Date('2026-01-01T12:00:00Z');
-  const now = () => instant;
   const first = fakeContainer(lifecyclePayload);
   const document = new FakeDocument(first);
-  const window = new EventTarget();
-  createHomeDiscoveryLifecycle({ document, window, now });
+  const window = fakeWindow();
+  const lifecycle = createHomeDiscoveryLifecycle({ document, window, now: () => instant });
+  await flush();
   assertSelection(first, 'a', 'a:0');
-
+  assert.deepEqual(window.requests, ['/discovery/a.json']);
   document.dispatchEvent(new Event('astro:page-load'));
-  assertSelection(first, 'a', 'a:0');
-
+  await flush();
+  assert.equal(window.requests.length, 1);
   document.container = undefined;
   document.dispatchEvent(new Event('astro:page-load'));
-
   const back = fakeContainer(lifecyclePayload);
   document.container = back;
-  document.dispatchEvent(new Event('astro:page-load'));
+  window.dispatchEvent(new Event('pageshow'));
+  await flush();
   assertSelection(back, 'a', 'a:0');
-
-  const restored = new Event('pageshow');
-  Object.defineProperty(restored, 'persisted', { value: true });
-  window.dispatchEvent(restored);
-  assertSelection(back, 'a', 'a:0');
-
+  assert.equal(window.requests.length, 1);
   instant = new Date('2026-01-01T17:00:00Z');
   window.dispatchEvent(new Event('focus'));
+  await flush();
   assertSelection(back, 'b', 'b:0');
-
-  window.dispatchEvent(restored);
-  assertSelection(back, 'b', 'b:0');
-
   instant = new Date('2026-01-02T17:00:00Z');
-  document.dispatchEvent(new Event('visibilitychange'));
+  await lifecycle.show();
   assertSelection(back, 'a', 'a:1');
+  assert.deepEqual(window.requests, ['/discovery/a.json', '/discovery/b.json']);
 });
 
-test('separate visitors and reloads use the same quote without randomness or storage', () => {
-  const instant = new Date('2026-01-04T04:00:00Z');
+test('current server fallback needs no request and offscreen discovery waits for intersection', async () => {
+  const container = fakeContainer(lifecyclePayload);
+  const document = new FakeDocument(container);
+  const window = fakeWindow();
+  let intersect;
+  window.IntersectionObserver = class {
+    constructor(callback) { intersect = callback; }
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+  createHomeDiscoveryLifecycle({ document, window, now: () => new Date('2026-01-01T12:00:00Z') });
+  await flush();
+  assert.equal(window.requests.length, 0);
+  container.dataset.discoveryDay = '2026-01-01';
+  intersect([{ isIntersecting: true }]);
+  await flush();
+  assert.equal(window.requests.length, 0);
+  container.dataset.discoveryDay = '2025-12-31';
+  intersect([{ isIntersecting: true }]);
+  await flush();
+  assertSelection(container, 'a', 'a:0');
+});
+
+test('failed requests preserve fallback and retry; late responses cannot mutate a swapped page', async () => {
   const first = fakeContainer(lifecyclePayload);
-  createHomeDiscoveryLifecycle({
-    document: new FakeDocument(first),
-    window: new EventTarget(),
-    now: () => instant,
-  });
-  assertSelection(first, 'b', 'b:1');
-
-  const secondVisitor = fakeContainer(lifecyclePayload);
-  createHomeDiscoveryLifecycle({
-    document: new FakeDocument(secondVisitor),
-    window: new EventTarget(),
-    now: () => new Date('2026-01-04T22:00:00+07:00'),
-  });
-  assertSelection(secondVisitor, 'b', 'b:1');
-
-  const source = readFileSync(new URL('src/lib/homeQuoteSelection.mjs', root), 'utf8');
-  assert.doesNotMatch(source, /Math\.random|sessionStorage|localStorage/);
-  const reload = fakeContainer(lifecyclePayload);
-  createHomeDiscoveryLifecycle({
-    document: new FakeDocument(reload),
-    window: new EventTarget(),
-    now: () => instant,
-  });
-  assertSelection(reload, 'b', 'b:1');
+  first.dataset.essayId = 'fallback';
+  const document = new FakeDocument(first);
+  const window = fakeWindow();
+  const fetch = window.fetch;
+  window.fetch = async () => ({ ok: false });
+  const lifecycle = createHomeDiscoveryLifecycle({ document, window, now: () => new Date('2026-01-01T12:00:00Z') });
+  await flush();
+  assert.equal(first.dataset.essayId, 'fallback');
+  let resolve;
+  window.fetch = () => new Promise((done) => { resolve = done; });
+  const pending = lifecycle.show();
+  document.container = fakeContainer(lifecyclePayload);
+  resolve(await fetch('/discovery/a.json'));
+  await pending;
+  assert.equal(first.dataset.essayId, 'fallback');
+  await lifecycle.show();
+  assertSelection(document.container, 'a', 'a:0');
 });
 
-test('built homepage keeps the payload out of the rendered quote DOM and offers a no-script picture', () => {
+test('built homepage has a usable SSR picture and a small index of immutable article resources', () => {
   const home = readFileSync(new URL('dist/index.html', root), 'utf8');
   const module = home.match(/<section\b[^>]*data-home-discovery[\s\S]*?<\/section>/)?.[0];
   assert.ok(module);
-  const active = module.match(/data-home-discovery-active[^>]*>([\s\S]*?)<noscript>/)?.[1];
-  assert.ok(active);
-  assert.doesNotMatch(active, /<img\b/);
-  assert.match(module, /<noscript>[\s\S]*?<picture\b[\s\S]*?<img\b/);
-  assert.equal([...module.matchAll(/data-home-discovery-payload/g)].length, 1);
-  assert.doesNotMatch(
-    module.match(/data-home-discovery-payload[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '',
-    /[<&]/,
-  );
-
-  const payloadText =
-    module.match(/data-home-discovery-payload[^>]*>([\s\S]*?)<\/script>/)?.[1] ?? '';
-  const payload = JSON.parse(payloadText);
-  const article = Object.values(payload.articles)[0];
-  const widths = (srcset) => [...srcset.matchAll(/\s(\d+)w(?:,|$)/g)].map((match) => +match[1]);
-  assert.ok(Math.max(...widths(article.image.mobileAvif.srcset)) <= 672);
-  assert.ok(Math.max(...widths(article.image.mobileWebp.srcset)) <= 672);
-  assert.ok(Math.max(...widths(article.image.avif.srcset)) > 672);
+  assert.match(module, /<picture\b[\s\S]*?<img\b/);
+  assert.doesNotMatch(module, /<noscript>|data-home-discovery-payload/);
+  const text = module.match(/data-home-discovery-catalog[^>]*>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(Buffer.byteLength(text) < 10_000);
+  assert.doesNotMatch(text, /[<&]/);
+  const catalog = JSON.parse(text);
+  assert.equal(catalog.length, 57);
+  assert.equal(catalog.reduce((sum, entry) => sum + entry.count, 0), 114);
+  for (const entry of catalog) {
+    assert.match(entry.url, /^\/discovery\/[a-f0-9]{20}\.json$/);
+    const article = JSON.parse(readFileSync(new URL(`dist${entry.url}`, root), 'utf8'));
+    assert.equal(article.essayId, entry.essayId);
+    assert.equal(article.quotes.length, entry.count);
+    const widths = (srcset) => [...srcset.matchAll(/\s(\d+)w(?:,|$)/g)].map((match) => +match[1]);
+    assert.ok(Math.max(...widths(article.image.mobileAvif.srcset)) <= 672);
+    assert.ok(Math.max(...widths(article.image.mobileWebp.srcset)) <= 672);
+    assert.ok(Math.max(...widths(article.image.avif.srcset)) > 672);
+  }
 });

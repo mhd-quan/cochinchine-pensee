@@ -10,7 +10,7 @@ const output = path.join(root, '.astro/fonts');
 const families = ['source-serif-4', 'eb-garamond', 'be-vietnam-pro'];
 const styles = {
   'source-serif-4': ['400', '400-italic', '600', '700'],
-  'eb-garamond': ['400', '400-italic', '600', '700'],
+  'eb-garamond': ['wght', '400-italic'],
   'be-vietnam-pro': ['400', '500', '600', '700'],
 };
 const localFaces = [
@@ -176,8 +176,9 @@ export async function generateFonts(logger = console) {
   const inventory = [];
   const preloads = [];
   for (const family of families) {
-    const directory = path.join(root, 'node_modules/@fontsource', family);
     for (const style of styles[family]) {
+      const variable = style === 'wght';
+      const directory = path.join(root, variable ? 'node_modules/@fontsource-variable' : 'node_modules/@fontsource', family);
       const original = await fs.readFile(path.join(directory, `${style}.css`), 'utf8');
       // Fontsource's Latin-ext ranges overlap Vietnamese (Đ, ư, ỵ, …).
       // Give complete Vietnamese coverage to its small subset first, so an
@@ -196,7 +197,7 @@ export async function generateFonts(logger = console) {
           const source = face.match(/url\(([^)]+\.woff2)\)/)[1];
           const script = source
             .replace(`./files/${family}-`, '')
-            .replace(/-\d+-(normal|italic)\.woff2$/, '');
+            .replace(/-(?:\d+|wght)-(normal|italic)\.woff2$/, '');
           return { face, source, script };
         })
         .sort((a, b) => priority.indexOf(a.script) - priority.indexOf(b.script));
@@ -238,19 +239,19 @@ export async function generateFonts(logger = console) {
         const coverage = unicodeRange(selected);
         css.push(
           face
+            .replace('EB Garamond Variable', 'EB Garamond')
             .replace(/src:[^;]+;/, `src: url('./fonts/${filename}') format('woff2');`)
             .replace(/unicode-range:[^;]+;/, `unicode-range: ${coverage};`),
         );
         if (
           family === 'eb-garamond' &&
-          ((style === '600' && script === 'latin') ||
-            (style === '700' && ['latin', 'vietnamese'].includes(script)))
+          style === 'wght' && ['latin', 'vietnamese'].includes(script)
         ) {
-          preloads.push({ filename, script, role: style === '600' ? 'wordmark' : 'heading' });
+          preloads.push({ filename, script, role: script === 'latin' ? 'wordmark' : 'heading' });
         }
         inventory.push({
           source: `${family}/${source}`,
-          sourceType: 'fontsource',
+          sourceType: variable ? 'fontsource-variable' : 'fontsource',
           output: filename,
           family,
           style,

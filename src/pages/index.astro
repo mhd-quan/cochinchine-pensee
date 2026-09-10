@@ -150,6 +150,7 @@ const featuredClusters = featuredSeries
 </BaseLayout>
 
 <script>
+  import { whenVisible } from "~/lib/whenVisible";
   function initStacks() {
     for (const section of document.querySelectorAll<HTMLElement>('[data-stacks]')) {
       if (section.dataset.initialized === 'true') continue;
@@ -221,8 +222,7 @@ const featuredClusters = featuredSeries
     }
   }
 
-  document.addEventListener('astro:page-load', initStacks);
-  initStacks();
+  whenVisible('[data-stacks]', initStacks);
 </script>
 
 <style>

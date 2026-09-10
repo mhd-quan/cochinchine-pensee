@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import quoteRecords from '~/data/home-quotes.json';
+import { homeDiscoveryEntries } from '~/lib/homeDiscoveryData';
 import { authorSlug } from '~/lib/authorArchive.mjs';
 import { getCoverTreatment } from '~/lib/coverTreatment';
 import { getVietnamDateKey, selectDailyHomeQuote } from '~/lib/homeQuoteSelection.mjs';
@@ -19,56 +19,13 @@ interface Props {
 const { essays } = Astro.props;
 const published = essays.filter(({ data }) => !data.draft && !data.comingSoon);
 const essaysById = new Map(published.map((essay) => [essay.id, essay]));
-const eligibleRecords = quoteRecords.filter(({ essayId }) => essaysById.has(essayId));
-if (eligibleRecords.length === 0)
-  throw new Error('Home discovery needs at least one published quote');
-
-const articlePayload = Object.fromEntries(
-  eligibleRecords.map(({ essayId }) => {
-    const essay = essaysById.get(essayId);
-    if (!essay?.data.coverImage) throw new Error(`Home discovery essay has no cover: ${essayId}`);
-    const sizes = HOME_DISCOVERY_IMAGE_SIZES;
-    return [
-      essayId,
-      {
-        essayId,
-        href: `/essays/${essayId}`,
-        title: essay.data.title,
-        author: essay.data.author,
-        lang: essay.data.lang,
-        coverTreatment: getCoverTreatment(essay.id),
-        image: {
-          alt: essay.data.coverImageAlt ?? `Minh hoạ cho ${essay.data.title}`,
-          mobileAvif: responsiveSource(
-            essay.data.coverImage,
-            sizes,
-            HOME_DISCOVERY_MOBILE_MAX_WIDTH,
-          ),
-          avif: responsiveSource(essay.data.coverImage, sizes),
-          mobileWebp: responsiveWebpSource(
-            essay.data.coverImage,
-            sizes,
-            HOME_DISCOVERY_MOBILE_MAX_WIDTH,
-          ),
-          fallback: responsiveImage(essay.data.coverImage, sizes, 480),
-        },
-      },
-    ];
-  }),
+const entries = homeDiscoveryEntries(published);
+const choices = entries.flatMap(({ essayId, payload }) =>
+  payload.quotes.map((quote, index) => ({ essayId, quote, quoteKey: `${essayId}:${index}` })),
 );
-const choices = eligibleRecords.flatMap(({ essayId, quotes }) =>
-  quotes.map((quote, index) => ({
-    quoteKey: `${essayId}:${index}`,
-    essayId,
-    quote,
-  })),
-);
-const payload = JSON.stringify({ articles: articlePayload, choices })
-  .replaceAll('&', '\\u0026')
+const catalog = JSON.stringify(entries.map(({ essayId, count, url }) => ({ essayId, count, url })))
   .replaceAll('<', '\\u003c')
-  .replaceAll('>', '\\u003e')
-  .replaceAll('\u2028', '\\u2028')
-  .replaceAll('\u2029', '\\u2029');
+  .replaceAll('&', '\\u0026');
 
 const buildInstant = new Date();
 const buildDateKey = getVietnamDateKey(buildInstant);
@@ -110,7 +67,6 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
             data-home-discovery-image
             data-cover-treatment={getCoverTreatment(fallbackEssay.id)}
           >
-            <noscript>
               <picture>
                 <source
                   media="(max-width: 55.999rem)"
@@ -136,7 +92,6 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
                   decoding="async"
                 />
               </picture>
-            </noscript>
           </figure>
           <blockquote
             class="quote-feature__quote"
@@ -155,8 +110,8 @@ const authors = [...new Set(published.map(({ data }) => data.author))]
       <script
         is:inline
         type="application/json"
-        data-home-discovery-payload
-        set:html={payload}
+        data-home-discovery-catalog
+        set:html={catalog}
       ></script>
     </article>
 

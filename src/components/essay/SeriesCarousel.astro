@@ -44,6 +44,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
 )}
 
 <script>
+  import { whenVisible } from "~/lib/whenVisible";
   function initSeries() {
     const root = document.querySelector<HTMLElement>('[data-series-carousel]');
     if (!root || root.dataset.ready) return;
@@ -138,8 +139,7 @@ const imageSizes = '(min-width: 1280px) 384px, (min-width: 768px) calc((100vw - 
       { once: true, signal },
     );
   }
-  document.addEventListener('astro:page-load', initSeries);
-  initSeries();
+  whenVisible('[data-series-carousel]', initSeries);
 </script>
 
 <style>

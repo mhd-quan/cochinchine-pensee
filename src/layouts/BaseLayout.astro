@@ -53,7 +53,7 @@ const hasEssayList =
 const hasEssayTitle = reader || hasEssayList;
 const hasGenericHeading = !reader && pathname !== '/' && pathname !== '/search';
 const criticalFonts = fontPreloads.filter((font) => {
-  if (font.role === 'wordmark') return true;
+  if (font.role === 'wordmark') return !hasEssayTitle;
   if (font.role === 'essay-title') return hasEssayTitle;
   return (
     font.role === 'heading' &&
@@ -98,7 +98,7 @@ const criticalFonts = fontPreloads.filter((font) => {
     {/* View Transitions — Astro 7 native */}
     <ClientRouter />
   </head>
-  <body>
+  <body data-home={pathname === "/" ? "true" : undefined}>
     <svg class="image-filter-defs" aria-hidden="true" width="0" height="0" focusable="false">
       <defs>
         <filter

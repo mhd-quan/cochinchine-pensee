@@ -99,73 +99,93 @@ function makePicture(document, image) {
  * history, focus or visibility events that can reveal a date change.
  */
 export function createHomeDiscoveryLifecycle({ document, window, now = () => new Date() }) {
-  const show = () => {
-    const container = document.querySelector('[data-home-discovery]');
-    if (!container) return undefined;
+  const resources = new Map();
+  let observer;
+  let observed;
 
+  const update = async (container) => {
     const dayKey = getVietnamDateKey(now());
-    if (container.dataset.discoveryReady === 'true' && container.dataset.discoveryDay === dayKey) {
-      return undefined;
-    }
-
-    const payloadNode = container.querySelector('[data-home-discovery-payload]');
-    const active = container.querySelector('[data-home-discovery-active]');
-    const link = container.querySelector('[data-home-discovery-link]');
-    const quote = container.querySelector('[data-home-discovery-quote]');
-    const blockquote = container.querySelector('[data-home-discovery-blockquote]');
-    const title = container.querySelector('[data-home-discovery-title]');
-    const author = container.querySelector('[data-home-discovery-author]');
-    const image = container.querySelector('[data-home-discovery-image]');
-    if (!payloadNode || !active || !link || !blockquote || !quote || !title || !author || !image) {
-      return undefined;
-    }
-
-    let payload;
+    // The server picture and quotation are already correct on the build day.
+    if (container.dataset.discoveryDay === dayKey) return;
+    const catalogNode = container.querySelector('[data-home-discovery-catalog]');
+    if (!catalogNode) return;
     try {
-      payload = JSON.parse(payloadNode.textContent ?? '{}');
+      const catalog = JSON.parse(catalogNode.textContent ?? '[]');
+      const choices = catalog.flatMap(({ essayId, count }) =>
+        Array.from({ length: count }, (_, index) => ({ essayId, index, quoteKey: `${essayId}:${index}` })),
+      );
+      const selection = selectDailyHomeQuote(choices, dayKey);
+      const entry = catalog.find(({ essayId }) => essayId === selection?.essayId);
+      if (!entry) return;
+      let pending = resources.get(entry.url);
+      if (!pending) {
+        pending = window.fetch(entry.url).then((response) => {
+          if (!response.ok) throw new Error('Discovery resource unavailable');
+          return response.json();
+        }).catch((error) => { resources.delete(entry.url); throw error; });
+        resources.set(entry.url, pending);
+      }
+      const article = await pending;
+      // A fetch can finish after an Astro swap, a second update, or midnight.
+      if (document.querySelector('[data-home-discovery]') !== container ||
+          getVietnamDateKey(now()) !== dayKey || container.dataset.discoveryDay === dayKey) return;
+      if (article.essayId !== selection.essayId || typeof article.quotes?.[selection.index] !== 'string') return;
+      const selected = { ...article, ...selection, quote: article.quotes[selection.index] };
+      const link = container.querySelector('[data-home-discovery-link]');
+      const quote = container.querySelector('[data-home-discovery-quote]');
+      const blockquote = container.querySelector('[data-home-discovery-blockquote]');
+      const title = container.querySelector('[data-home-discovery-title]');
+      const author = container.querySelector('[data-home-discovery-author]');
+      const image = container.querySelector('[data-home-discovery-image]');
+      if (!link || !quote || !blockquote || !title || !author || !image) return;
+      link.href = selected.href;
+      link.setAttribute('aria-label', `Read ${selected.title}`);
+      blockquote.cite = selected.href;
+      quote.textContent = selected.quote;
+      quote.lang = selected.lang;
+      title.textContent = selected.title;
+      title.lang = selected.lang;
+      author.textContent = selected.author;
+      image.dataset.coverTreatment = selected.coverTreatment;
+      image.replaceChildren(makePicture(document, selected.image));
+      container.dataset.discoveryDay = dayKey;
+      container.dataset.essayId = selected.essayId;
+      container.dataset.quoteKey = selected.quoteKey;
+      return selected;
     } catch {
+      // Offline, blocked requests, or an older cached page keep their full SSR fallback.
+      // A subsequent focus/pageshow event can retry a failed request.
       return undefined;
     }
-    if (
-      !payload ||
-      typeof payload !== 'object' ||
-      !Array.isArray(payload.choices) ||
-      payload.choices.length === 0 ||
-      !payload.articles ||
-      typeof payload.articles !== 'object'
-    )
-      return undefined;
-
-    const selection = selectDailyHomeQuote(payload.choices, dayKey);
-    const article = selection ? payload.articles[selection.essayId] : undefined;
-    if (!selection || !article) return undefined;
-    const selected = { ...selection, ...article };
-
-    link.href = selected.href;
-    link.setAttribute('aria-label', `Read ${selected.title}`);
-    blockquote.cite = selected.href;
-    quote.textContent = selected.quote;
-    quote.lang = selected.lang;
-    title.textContent = selected.title;
-    title.lang = selected.lang;
-    author.textContent = selected.author;
-    image.dataset.coverTreatment = selected.coverTreatment;
-    image.replaceChildren(makePicture(document, selected.image));
-    active.hidden = false;
-    container.dataset.discoveryReady = 'true';
-    container.dataset.discoveryDay = dayKey;
-    container.dataset.essayId = selected.essayId;
-    container.dataset.quoteKey = selected.quoteKey;
-    return selected;
   };
 
+  const show = () => {
+    const container = document.querySelector('[data-home-discovery]');
+    if (container !== observed) {
+      observer?.disconnect();
+      observer = undefined;
+      observed = container;
+    }
+    if (!container || document.visibilityState === 'hidden') return;
+    if (!window.IntersectionObserver) return update(container);
+    if (!observer) {
+      observer = new window.IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) void update(container);
+      }, { rootMargin: '400px' });
+    }
+    // Re-observing also handles a date change while the section is in view.
+    observer.unobserve(container);
+    observer.observe(container);
+  };
   document.addEventListener('astro:page-load', show);
+  document.addEventListener('astro:before-swap', () => {
+    observer?.disconnect();
+    observer = undefined;
+    observed = undefined;
+  });
   window.addEventListener('pageshow', show);
   window.addEventListener('focus', show);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'hidden') show();
-  });
+  document.addEventListener('visibilitychange', show);
   show();
-
   return { show };
 }

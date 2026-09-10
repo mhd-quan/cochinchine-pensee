@@ -250,3 +250,12 @@ a:focus-visible > .nav-label::after { transform: scaleX(1); }
 @media (prefers-reduced-motion: reduce) {
   .nav-label::after { transition: none; }
 }
+
+/* Keep offscreen editorial sections in the document without laying out every
+ * card before the hero paints. Auto remembers measured sizes on return scroll. */
+@media screen {
+  body[data-home] :is(.discovery, .stacks, .series-carousel, .site-footer) {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 900px;
+  }
+}

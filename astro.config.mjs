@@ -34,7 +34,7 @@ export default defineConfig({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '');
         return (
-          !path.startsWith('/draft/') && !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
+          !path.startsWith('/discovery/') && !path.startsWith('/draft/') && !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
         );
       },
     }),

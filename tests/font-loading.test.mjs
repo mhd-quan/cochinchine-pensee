@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import fontverter from 'fontverter';
+import { create } from 'fontkit';
 import { fontCodePoints } from '../scripts/font-coverage.mjs';
 import { publicationCharacters, publicationTitleCharacters } from '../scripts/subset-fonts.mjs';
 
@@ -37,18 +38,18 @@ test('font repartition preserves the original publication character coverage', a
   const requested = new Set(
     [...(await publicationCharacters())].map((char) => char.codePointAt(0)),
   );
-  const fontsourceInventory = inventory.filter((font) => font.sourceType === 'fontsource');
+  const fontsourceInventory = inventory.filter((font) => font.sourceType.startsWith('fontsource'));
   for (const key of new Set(fontsourceInventory.map((font) => `${font.family}/${font.style}`))) {
     const [family, style] = key.split('/');
     const originalCSS = await readFile(
-      new URL(`node_modules/@fontsource/${family}/${style}.css`, root),
+      new URL(`node_modules/${style === 'wght' ? '@fontsource-variable' : '@fontsource'}/${family}/${style}.css`, root),
       'utf8',
     );
     const expected = new Set();
     for (const [face] of originalCSS.matchAll(/@font-face\s*\{[^}]+\}/g)) {
       const source = face.match(/url\(([^)]+\.woff2)\)/)[1];
       const supported = await fontCodePoints(
-        await readFile(new URL(`node_modules/@fontsource/${family}/${source}`, root)),
+        await readFile(new URL(`node_modules/${style === 'wght' ? '@fontsource-variable' : '@fontsource'}/${family}/${source}`, root)),
       );
       for (const point of pointsIn(face.match(/unicode-range:\s*([^;]+);/)[1])) {
         if (supported.has(point) && requested.has(point)) expected.add(point);
@@ -146,15 +147,15 @@ test('critical font preloads are page-specific and never fetch Bricolage eagerly
   const pages = [
     {
       page: 'index.html',
-      count: 2,
+      count: 1,
       include: ['playfair-display-sc-700'],
     },
-    { page: 'books/index.html', count: 2, include: [] },
+    { page: 'books/index.html', count: 1, include: [] },
     { page: 'search/index.html', count: 1, include: [] },
-    { page: 'essays/index.html', count: 3, include: ['playfair-display-sc-700'] },
+    { page: 'essays/index.html', count: 1, include: ['playfair-display-sc-700'] },
     {
       page: 'essays/2026-09-02-hongkong-va-hoang-chi-phong/index.html',
-      count: 2,
+      count: 1,
       include: ['playfair-display-sc-700'],
     },
   ];
@@ -174,5 +175,13 @@ test('critical font preloads are page-specific and never fetch Bricolage eagerly
       assert.ok(html.includes(`url(${href})`) || html.includes(`url("${href}")`), href);
       assert.ok((await readFile(new URL(`dist${href}`, root))).length > 0, href);
     }
+  }
+});
+
+ test('Garamond normal subsets keep a real variable weight axis', async () => {
+  for (const font of inventory.filter((font) => font.family === 'eb-garamond' && font.style === 'wght')) {
+    const parsed = create(await readFile(new URL(`.astro/fonts/${font.output}`, root)));
+    assert.equal(parsed.variationAxes.wght.min, 400);
+    assert.equal(parsed.variationAxes.wght.max, 800);
   }
 });
