@@ -1,5 +1,5 @@
-import profiles from '../../../editorial/essay-seo.json' with { type: 'json' };
 import { createHash } from 'node:crypto';
+import profiles from '../../../editorial/essay-seo.json' with { type: 'json' };
 import { authorSlug } from '../authorArchive.mjs';
 
 export const SITE = 'https://cochinchinepensees.studio';
@@ -25,7 +25,10 @@ export function essaySeo(id, data) {
   const url = canonicalUrl(`/essays/${id}`);
   const published = new Date(data.date).toISOString();
   const modified = profile.contentModifiedAt;
-  if (modified && (!Number.isFinite(Date.parse(modified)) || Date.parse(modified) < Date.parse(published))) {
+  if (
+    modified &&
+    (!Number.isFinite(Date.parse(modified)) || Date.parse(modified) < Date.parse(published))
+  ) {
     throw new Error(`Invalid contentModifiedAt: ${id}`);
   }
   return {
@@ -43,8 +46,11 @@ export function sitemapEntry(item) {
   const profile = id && profiles[id];
   // Metadata changes count as significant page updates, not rewrites of the essay.
   // These stored editorial dates never advance merely because a build runs.
-  const lastmod = profile && [profile.metadataUpdatedAt, profile.contentModifiedAt]
-    .filter(Boolean).sort((a, b) => Date.parse(b) - Date.parse(a))[0];
+  const lastmod =
+    profile &&
+    [profile.metadataUpdatedAt, profile.contentModifiedAt]
+      .filter(Boolean)
+      .sort((a, b) => Date.parse(b) - Date.parse(a))[0];
   return { ...item, url, ...(lastmod ? { lastmod } : {}) };
 }
 
@@ -55,21 +61,42 @@ export function articleGraph({ title, author, lang, image, seo }) {
     '@context': 'https://schema.org',
     '@graph': [
       { '@type': 'Organization', '@id': publisherId, name: PUBLICATION, url: `${SITE}/` },
-      { '@type': 'WebSite', '@id': websiteId, name: PUBLICATION, url: `${SITE}/`, publisher: { '@id': publisherId } },
+      {
+        '@type': 'WebSite',
+        '@id': websiteId,
+        name: PUBLICATION,
+        url: `${SITE}/`,
+        publisher: { '@id': publisherId },
+      },
       { '@type': 'Person', '@id': `${seo.authorUrl}#person`, name: author, url: seo.authorUrl },
       {
-        '@type': 'WebPage', '@id': `${seo.url}#webpage`, url: seo.url,
-        name: title, description: seo.description, inLanguage: lang,
-        isPartOf: { '@id': websiteId }, mainEntity: { '@id': `${seo.url}#article` },
+        '@type': 'WebPage',
+        '@id': `${seo.url}#webpage`,
+        url: seo.url,
+        name: title,
+        description: seo.description,
+        inLanguage: lang,
+        isPartOf: { '@id': websiteId },
+        mainEntity: { '@id': `${seo.url}#article` },
       },
       {
-        '@type': 'Article', '@id': `${seo.url}#article`, url: seo.url,
-        headline: title, description: seo.description, inLanguage: lang,
+        '@type': 'Article',
+        '@id': `${seo.url}#article`,
+        url: seo.url,
+        headline: title,
+        description: seo.description,
+        inLanguage: lang,
         datePublished: seo.published,
         ...(seo.modified ? { dateModified: seo.modified } : {}),
         ...(image ? { image: [image] } : {}),
-        author: { '@id': `${seo.authorUrl}#person`, '@type': 'Person', name: author, url: seo.authorUrl },
-        publisher: { '@id': publisherId }, mainEntityOfPage: { '@id': `${seo.url}#webpage` },
+        author: {
+          '@id': `${seo.authorUrl}#person`,
+          '@type': 'Person',
+          name: author,
+          url: seo.authorUrl,
+        },
+        publisher: { '@id': publisherId },
+        mainEntityOfPage: { '@id': `${seo.url}#webpage` },
         isAccessibleForFree: true,
       },
     ],

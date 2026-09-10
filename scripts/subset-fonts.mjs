@@ -178,7 +178,11 @@ export async function generateFonts(logger = console) {
   for (const family of families) {
     for (const style of styles[family]) {
       const variable = style === 'wght';
-      const directory = path.join(root, variable ? 'node_modules/@fontsource-variable' : 'node_modules/@fontsource', family);
+      const directory = path.join(
+        root,
+        variable ? 'node_modules/@fontsource-variable' : 'node_modules/@fontsource',
+        family,
+      );
       const original = await fs.readFile(path.join(directory, `${style}.css`), 'utf8');
       // Fontsource's Latin-ext ranges overlap Vietnamese (Đ, ư, ỵ, …).
       // Give complete Vietnamese coverage to its small subset first, so an
@@ -245,7 +249,8 @@ export async function generateFonts(logger = console) {
         );
         if (
           family === 'eb-garamond' &&
-          style === 'wght' && ['latin', 'vietnamese'].includes(script)
+          style === 'wght' &&
+          ['latin', 'vietnamese'].includes(script)
         ) {
           preloads.push({ filename, script, role: script === 'latin' ? 'wordmark' : 'heading' });
         }

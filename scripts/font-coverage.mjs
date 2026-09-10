@@ -15,7 +15,10 @@ export function unicodeRange(points) {
   const emit = () => spans.push(start === end ? `U+${hex(start)}` : `U+${hex(start)}-${hex(end)}`);
   for (const point of sorted.slice(1)) {
     if (point === end + 1) end = point;
-    else { emit(); start = end = point; }
+    else {
+      emit();
+      start = end = point;
+    }
   }
   if (start !== undefined) emit();
   return spans.join(',');

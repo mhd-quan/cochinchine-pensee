@@ -9,5 +9,7 @@ export async function getStaticPaths() {
 }
 
 export function GET({ props }: { props: { body: string } }) {
-  return new Response(props.body, { headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+  return new Response(props.body, {
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+  });
 }

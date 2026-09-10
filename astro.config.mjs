@@ -4,10 +4,10 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import fetchCovers from './scripts/fetch-covers.mjs';
-import responsiveImages from './scripts/responsive-images.mjs';
-import publicationFonts from './scripts/subset-fonts.mjs';
-import searchIndex from './scripts/search-index.mjs';
 import publicationIntegrity from './scripts/publication-integrity.mjs';
+import responsiveImages from './scripts/responsive-images.mjs';
+import searchIndex from './scripts/search-index.mjs';
+import publicationFonts from './scripts/subset-fonts.mjs';
 import { sitemapEntry } from './src/lib/seo/publication.mjs';
 
 // The Cochinchine Pensées — Astro 7 config
@@ -34,7 +34,9 @@ export default defineConfig({
       filter: (page) => {
         const path = new URL(page).pathname.replace(/\/$/, '');
         return (
-          !path.startsWith('/discovery/') && !path.startsWith('/draft/') && !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
+          !path.startsWith('/discovery/') &&
+          !path.startsWith('/draft/') &&
+          !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
         );
       },
     }),

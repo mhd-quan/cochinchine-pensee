@@ -166,7 +166,13 @@ function fakeContainer(payload) {
     ['[data-home-discovery-author]', new FakeElement('span')],
     ['[data-home-discovery-image]', new FakeElement('figure')],
   ]);
-  elements.get('[data-home-discovery-catalog]').textContent = JSON.stringify(Object.keys(payload.articles).map((essayId) => ({ essayId, count: 2, url: `/discovery/${essayId}.json` })));
+  elements.get('[data-home-discovery-catalog]').textContent = JSON.stringify(
+    Object.keys(payload.articles).map((essayId) => ({
+      essayId,
+      count: 2,
+      url: `/discovery/${essayId}.json`,
+    })),
+  );
   return {
     dataset: {},
     elements,
@@ -249,10 +255,16 @@ function fakeWindow() {
   window.fetch = async (url) => {
     window.requests.push(url);
     const essayId = url.match(/([^/]+)\.json$/)[1];
-    return { ok: true, json: async () => ({
-      ...lifecyclePayload.articles[essayId], essayId,
-      quotes: lifecyclePayload.choices.filter((choice) => choice.essayId === essayId).map(({ quote }) => quote),
-    }) };
+    return {
+      ok: true,
+      json: async () => ({
+        ...lifecyclePayload.articles[essayId],
+        essayId,
+        quotes: lifecyclePayload.choices
+          .filter((choice) => choice.essayId === essayId)
+          .map(({ quote }) => quote),
+      }),
+    };
   };
   return window;
 }
@@ -293,7 +305,9 @@ test('current server fallback needs no request and offscreen discovery waits for
   const window = fakeWindow();
   let intersect;
   window.IntersectionObserver = class {
-    constructor(callback) { intersect = callback; }
+    constructor(callback) {
+      intersect = callback;
+    }
     observe() {}
     unobserve() {}
     disconnect() {}
@@ -318,11 +332,18 @@ test('failed requests preserve fallback and retry; late responses cannot mutate 
   const window = fakeWindow();
   const fetch = window.fetch;
   window.fetch = async () => ({ ok: false });
-  const lifecycle = createHomeDiscoveryLifecycle({ document, window, now: () => new Date('2026-01-01T12:00:00Z') });
+  const lifecycle = createHomeDiscoveryLifecycle({
+    document,
+    window,
+    now: () => new Date('2026-01-01T12:00:00Z'),
+  });
   await flush();
   assert.equal(first.dataset.essayId, 'fallback');
   let resolve;
-  window.fetch = () => new Promise((done) => { resolve = done; });
+  window.fetch = () =>
+    new Promise((done) => {
+      resolve = done;
+    });
   const pending = lifecycle.show();
   document.container = fakeContainer(lifecyclePayload);
   resolve(await fetch('/discovery/a.json'));
@@ -343,7 +364,10 @@ test('built homepage has a usable SSR picture and a small index of immutable art
   assert.doesNotMatch(text, /[<&]/);
   const catalog = JSON.parse(text);
   assert.equal(catalog.length, 57);
-  assert.equal(catalog.reduce((sum, entry) => sum + entry.count, 0), 114);
+  assert.equal(
+    catalog.reduce((sum, entry) => sum + entry.count, 0),
+    114,
+  );
   for (const entry of catalog) {
     assert.match(entry.url, /^\/discovery\/[a-f0-9]{20}\.json$/);
     const article = JSON.parse(readFileSync(new URL(`dist${entry.url}`, root), 'utf8'));

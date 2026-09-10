@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
-import { foldSearchText, vietnameseSearchAliases } from '../src/lib/searchText.ts';
 import { searchPublication } from '../src/lib/searchQuery.ts';
+import { foldSearchText, vietnameseSearchAliases } from '../src/lib/searchText.ts';
 
 const dist = new URL('../dist/', import.meta.url);
 const html = (path) => readFileSync(new URL(path, dist), 'utf8');

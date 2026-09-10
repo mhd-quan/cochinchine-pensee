@@ -112,24 +112,42 @@ export function createHomeDiscoveryLifecycle({ document, window, now = () => new
     try {
       const catalog = JSON.parse(catalogNode.textContent ?? '[]');
       const choices = catalog.flatMap(({ essayId, count }) =>
-        Array.from({ length: count }, (_, index) => ({ essayId, index, quoteKey: `${essayId}:${index}` })),
+        Array.from({ length: count }, (_, index) => ({
+          essayId,
+          index,
+          quoteKey: `${essayId}:${index}`,
+        })),
       );
       const selection = selectDailyHomeQuote(choices, dayKey);
       const entry = catalog.find(({ essayId }) => essayId === selection?.essayId);
       if (!entry) return;
       let pending = resources.get(entry.url);
       if (!pending) {
-        pending = window.fetch(entry.url).then((response) => {
-          if (!response.ok) throw new Error('Discovery resource unavailable');
-          return response.json();
-        }).catch((error) => { resources.delete(entry.url); throw error; });
+        pending = window
+          .fetch(entry.url)
+          .then((response) => {
+            if (!response.ok) throw new Error('Discovery resource unavailable');
+            return response.json();
+          })
+          .catch((error) => {
+            resources.delete(entry.url);
+            throw error;
+          });
         resources.set(entry.url, pending);
       }
       const article = await pending;
       // A fetch can finish after an Astro swap, a second update, or midnight.
-      if (document.querySelector('[data-home-discovery]') !== container ||
-          getVietnamDateKey(now()) !== dayKey || container.dataset.discoveryDay === dayKey) return;
-      if (article.essayId !== selection.essayId || typeof article.quotes?.[selection.index] !== 'string') return;
+      if (
+        document.querySelector('[data-home-discovery]') !== container ||
+        getVietnamDateKey(now()) !== dayKey ||
+        container.dataset.discoveryDay === dayKey
+      )
+        return;
+      if (
+        article.essayId !== selection.essayId ||
+        typeof article.quotes?.[selection.index] !== 'string'
+      )
+        return;
       const selected = { ...article, ...selection, quote: article.quotes[selection.index] };
       const link = container.querySelector('[data-home-discovery-link]');
       const quote = container.querySelector('[data-home-discovery-quote]');
@@ -169,9 +187,12 @@ export function createHomeDiscoveryLifecycle({ document, window, now = () => new
     if (!container || document.visibilityState === 'hidden') return;
     if (!window.IntersectionObserver) return update(container);
     if (!observer) {
-      observer = new window.IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) void update(container);
-      }, { rootMargin: '400px' });
+      observer = new window.IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) void update(container);
+        },
+        { rootMargin: '400px' },
+      );
     }
     // Re-observing also handles a date change while the section is in view.
     observer.unobserve(container);

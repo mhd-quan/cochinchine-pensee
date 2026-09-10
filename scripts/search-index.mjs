@@ -1,6 +1,6 @@
-import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
-import { createIndex, close } from 'pagefind';
+import { fileURLToPath } from 'node:url';
+import { close, createIndex } from 'pagefind';
 
 export default function searchIndex() {
   return {

@@ -1,5 +1,6 @@
-import { foldSearchText } from '~/lib/searchText';
 import { searchPublication } from '~/lib/searchQuery';
+import { foldSearchText } from '~/lib/searchText';
+
 type SearchData = { url: string; meta: { title?: string; description?: string }; excerpt: string };
 type SearchHit = { id: string; data: () => Promise<SearchData> };
 type SearchEngine = {

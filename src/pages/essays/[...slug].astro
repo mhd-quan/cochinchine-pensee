@@ -5,10 +5,10 @@
  */
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
-import EssayLayout from '~/layouts/EssayLayout.astro';
-import { vietnameseSearchAliases } from '~/lib/searchText';
-import { getCoverTreatment } from '~/lib/coverTreatment';
 import ArticleImage from '~/components/essay/ArticleImage.astro';
+import EssayLayout from '~/layouts/EssayLayout.astro';
+import { getCoverTreatment } from '~/lib/coverTreatment';
+import { vietnameseSearchAliases } from '~/lib/searchText';
 import { essaySeo } from '~/lib/seo/publication.mjs';
 
 export const getStaticPaths = (async () => {
@@ -24,7 +24,9 @@ export const getStaticPaths = (async () => {
       props: {
         essay,
         moreByAuthor: sorted
-          .filter((candidate) => candidate.id !== essay.id && candidate.data.author === essay.data.author)
+          .filter(
+            (candidate) => candidate.id !== essay.id && candidate.data.author === essay.data.author,
+          )
           .slice(0, 3)
           .map((candidate) => ({
             url: `/essays/${candidate.id}`,

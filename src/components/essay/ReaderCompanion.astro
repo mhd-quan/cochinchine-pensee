@@ -8,7 +8,10 @@ interface Props {
 const { author, title, essays } = Astro.props;
 const letterHref = `mailto:letters@cochinchinepensees.studio?subject=${encodeURIComponent(`Thư bạn đọc: ${title}`)}`;
 const dateFormat = new Intl.DateTimeFormat('vi-VN', {
-  day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
 });
 ---
 

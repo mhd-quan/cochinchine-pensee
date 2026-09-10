@@ -1,6 +1,10 @@
 ---
 import SearchIcon from './SearchIcon.astro';
-interface Props { id: string; variant?: 'page' | 'header' | 'compact' | 'menu' }
+
+interface Props {
+  id: string;
+  variant?: 'page' | 'header' | 'compact' | 'menu';
+}
 const { id, variant = 'page' } = Astro.props;
 ---
 
