@@ -13,6 +13,8 @@ const root = path.resolve(directory);
 const output = process.env.PERF_OUTPUT || '/tmp';
 const traceEnabled = process.env.PERF_TRACE === '1';
 const desktop = process.env.PERF_DESKTOP === '1';
+const routePath = process.env.PERF_PATH || '/';
+const allowExternal = process.env.PERF_EXTERNAL === '1';
 await fs.mkdir(output, { recursive: true });
 await fs.access(path.join(root, 'index.html'));
 const cache = new Map();
@@ -55,7 +57,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const url = `http://127.0.0.1:${server.address().port}/`;
+const url = new URL(routePath, `http://127.0.0.1:${server.address().port}/`).href;
 let browser;
 try {
   browser = await chromium.launch({
@@ -79,7 +81,9 @@ try {
       }
     });
     await page.route('**/*', (route) =>
-      new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort(),
+      allowExternal || new URL(route.request().url()).hostname === '127.0.0.1'
+        ? route.continue()
+        : route.abort(),
     );
     await page.addInitScript(() => {
       window.__perf = { lcp: 0, layoutShifts: [], longTasks: [] };
@@ -185,7 +189,8 @@ try {
           cpuRate: 4,
           latencyMs: 170,
           downloadBytesPerSecond: 1125000,
-          externalRequests: 'blocked',
+          path: routePath,
+          externalRequests: allowExternal ? 'allowed' : 'blocked',
           cache: 'fresh context, disabled',
           observation: 'load + 2000 ms; long tasks are not a WebPageTest TBT equivalent',
           cls: 'largest session window: gap < 1 second, duration < 5 seconds',

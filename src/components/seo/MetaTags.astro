@@ -21,7 +21,9 @@ const {
   description,
   canonicalUrl,
   ogImage = '/og-default.png',
-  ogImageAlt,
+  ogImageAlt = ogImage === '/og-default.png'
+    ? 'The Cochinchine Pensées — Tiểu luận, pensées và điểm sách'
+    : undefined,
   lang = 'vi',
   noindex = false,
   ogType = 'website',
@@ -42,6 +44,13 @@ const ogImageUrl = new URL(ogImage, siteUrl).toString();
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
 <meta property="og:image" content={ogImageUrl} />
+{ogImage === '/og-default.png' && (
+  <Fragment>
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+  </Fragment>
+)}
 {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
 {ogImageAlt && <meta name="twitter:image:alt" content={ogImageAlt} />}
 <meta property="og:site_name" content="The Cochinchine Pensées" />

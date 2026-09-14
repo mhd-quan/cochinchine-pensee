@@ -85,7 +85,7 @@ const topicLead = form === 'pensee' ? 'Pensée về' : 'Luận về';
   lang={lang}
   canonicalUrl={seo.url}
   ogImage={image?.url}
-  ogImageAlt={coverImageAlt}
+  ogImageAlt={image ? coverImageAlt : undefined}
   reader={true}
   ogType="article"
 >

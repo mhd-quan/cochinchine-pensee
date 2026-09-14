@@ -36,7 +36,7 @@ export default defineConfig({
         return (
           !path.startsWith('/discovery/') &&
           !path.startsWith('/draft/') &&
-          !['/draft', '/about', '/search', '/404', '/404.html'].includes(path)
+          !['/draft', '/search', '/404', '/404.html'].includes(path)
         );
       },
     }),

@@ -16,7 +16,7 @@ import fontPreloads from '../../.astro/font-preloads.mjs';
 
 interface Props {
   title: string;
-  description?: string;
+  description: string;
   lang?: 'en' | 'vi';
   canonicalUrl?: string;
   ogImage?: string;
@@ -28,7 +28,7 @@ interface Props {
 
 const {
   title,
-  description = 'A Vietnamese editorial publication in the Claremont Review of Books tradition.',
+  description,
   lang = 'en',
   canonicalUrl,
   ogImage,

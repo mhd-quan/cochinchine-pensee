@@ -39,6 +39,9 @@ const footerLinks = [
   <div class="site-footer__bottom">
     <div class="container site-footer__closing" data-nosnippet>
       <div class="site-footer__legal">
+        <p class="site-footer__contact">
+          <a href="/privacy">Privacy</a> · <a href="mailto:letters@cochinchinepensees.studio">Contact</a>
+        </p>
         <p class="site-footer__copyright">© {year} The Cochinchine Pensées</p>
         <p class="site-footer__disclaimer" lang="vi">
           Quan điểm trong mỗi bài viết thuộc về tác giả, không nhất thiết đại diện
@@ -147,6 +150,14 @@ const footerLinks = [
   .site-footer__closing {
     gap: var(--sp-8);
     padding-block: var(--sp-8);
+  }
+
+  .site-footer__contact a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 
   .site-footer__copyright,

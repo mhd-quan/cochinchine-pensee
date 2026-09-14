@@ -9,5 +9,5 @@ directory = "./dist"
 not_found_handling = "404-page"
 html_handling = "drop-trailing-slash"
 
-# Analytics (free, no cookie banner)
+# Cloudflare Web Analytics is configured separately from the site’s GA4 tag.
 # Enable in Cloudflare dashboard: Workers & Pages → cochinchine-pensee → Analytics

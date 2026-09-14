@@ -1,5 +1,8 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import descriptions from '../editorial/image-descriptions.json';
+
+const imageDescriptions: Record<string, string> = descriptions;
 
 /**
  * Essay schema — enforced for every MDX file in src/content/essays/.
@@ -53,6 +56,8 @@ const essays = defineCollection({
     .transform((data) => ({
       ...data,
       coverImage: data.coverImage ?? data.cover_image,
+      coverImageAlt:
+        data.coverImageAlt ?? imageDescriptions[data.coverImage ?? data.cover_image ?? ''],
       originalUrl: data.originalUrl ?? data.url,
     })),
 });

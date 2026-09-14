@@ -8,10 +8,12 @@ type SearchEngine = {
   search: (query: string) => Promise<{ results: SearchHit[] }>;
 };
 let engine: Promise<SearchEngine> | undefined;
+let engineAttempt = 0;
 
 function loadEngine() {
   // The index and WASM stay off the critical path, including on the search page.
-  const url = '/pagefind/pagefind.js';
+  // Browsers cache rejected module imports. A user retry needs a fresh URL.
+  const url = `/pagefind/pagefind.js${engineAttempt ? `?retry=${engineAttempt}` : ''}`;
   engine ??= import(/* @vite-ignore */ url)
     .then(async (pagefind: SearchEngine) => {
       await pagefind.options({
@@ -21,6 +23,7 @@ function loadEngine() {
     })
     .catch((error) => {
       engine = undefined;
+      engineAttempt++;
       throw error;
     });
   return engine;

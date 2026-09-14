@@ -26,7 +26,9 @@ For browser regression checks, start `npm run preview`, then run
 to its module path). `CHROME_PATH` can select an installed Chromium executable;
 the default is Google Chrome on macOS. The checks use a local preview only and
 block third-party traffic. They cover mobile/desktop controls, Astro back
-navigation, and discovery failure/retry/date rollover.
+navigation, discovery failure/retry/date rollover, 320–1440px page layouts,
+search loading/error/retry, keyboard navigation and reading without JavaScript.
+Set `PERF_BASE_URL` if preview uses a port other than 4321.
 
 ## Architecture
 

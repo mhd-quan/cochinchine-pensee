@@ -62,12 +62,15 @@ test('every page has a single self-canonical and pagination remains crawlable', 
   }
 });
 
-test('unfinished About is noindex but discoverable, and excluded from the sitemap', () => {
-  assert.match(html('about/index.html'), /name="robots" content="noindex, follow"/);
+test('About and Privacy are indexable, while error and search pages stay out of the sitemap', () => {
+  assert.doesNotMatch(html('about/index.html'), /name="robots" content="noindex/);
+  assert.doesNotMatch(html('privacy/index.html'), /name="robots" content="noindex/);
   const sitemap = html('sitemap-0.xml');
-  assert.doesNotMatch(sitemap, /<loc>[^<]*\/(?:about\/?|404(?:\.html)?)<\/loc>/);
+  assert.doesNotMatch(sitemap, /<loc>[^<]*\/(?:search\/?|404(?:\.html)?)<\/loc>/);
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => new URL(match[1]).href);
   assert.ok(urls.includes('https://cochinchinepensees.studio/'));
+  assert.ok(urls.includes('https://cochinchinepensees.studio/about'));
+  assert.ok(urls.includes('https://cochinchinepensees.studio/privacy'));
   assert.match(sitemap, /<loc>https:\/\/cochinchinepensees.studio\/essays\/2<\/loc>/);
   assert.doesNotMatch(html('robots.txt'), /Disallow: \/about/);
 });

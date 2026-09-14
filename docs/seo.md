@@ -42,3 +42,26 @@ Các bài từng đăng trên Substack cần được theo dõi riêng: self-can
 - [Google: Canonical](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)
 
 Kiểm tra HTTP trước phát hành ngày 09-09-2026: HTTP chuyển 301 sang HTTPS; URL bài có dấu `/` cuối chuyển 307 về đường dẫn chuẩn; URL không tồn tại trả 404. Host `www` chưa phân giải DNS ở môi trường kiểm tra. Bản này giữ canonical không dấu `/` và không đổi DNS của chủ sở hữu; nếu mở host `www` sau này, cấu hình redirect vĩnh viễn về host chính tại Cloudflare.
+
+
+## v0.9.1 — Page metadata and accessibility
+
+Every `BaseLayout` caller must supply a description. `npm test` checks the built
+HTML for unique titles/descriptions, local share images and favicon assets,
+explicit image alternatives, dimensions and responsive image candidates.
+About and Privacy are indexable and included in the sitemap; search and 404 remain
+excluded. Keep using `/sitemap-index.xml` as the submission URL.
+
+`public/og-default.png` is the 1200 × 630 publication card for pages without an
+article cover. Regenerate it with `node scripts/social-image.mjs` after an approved
+artwork change. It uses the existing licensed fonts and is never fetched as a
+visible page image. Article metadata continues to reuse its responsive cover.
+
+`editorial/image-descriptions.json` contains visually reviewed alternatives for
+imported image URLs, shared between inline illustrations and cover fallbacks.
+New inline images need meaningful Markdown alt text or a reviewed entry here;
+a missing description fails the build. An intentionally decorative imported
+image can have an explicitly reviewed empty string in this file. Keep any
+existing meaningful Markdown/frontmatter description. The catalogue is used at
+build time, not imported by browser scripts. Essay source text and editorial SEO
+review hashes are unchanged by this accessibility-only catalogue.
