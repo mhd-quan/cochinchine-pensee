@@ -14,6 +14,16 @@ try {
     new URL(route.request().url()).origin === base.origin ? route.continue() : route.abort(),
   );
   const page = await context.newPage();
+  // Observe browser deprecations before navigation, including bundled dependencies.
+  // This local preview excludes Cloudflare's production-only injected scripts.
+  const audits = await context.newCDPSession(page);
+  const deprecations = [];
+  audits.on('Audits.issueAdded', ({ issue }) => {
+    if (issue.code === 'DeprecationIssue') {
+      deprecations.push(issue.details.deprecationIssueDetails);
+    }
+  });
+  await audits.send('Audits.enable');
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const routes = [
@@ -36,6 +46,7 @@ try {
       const response = await page.goto(new URL(route, base).href);
       assert.equal(response.status(), route === '/missing-v091' ? 404 : 200, route);
       await page.evaluate(() => document.fonts.ready);
+      assert.deepEqual(deprecations, [], `Deprecated browser API: ${route} at ${width}px`);
       assert.ok(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         `${width}px: ${route}`,
@@ -101,6 +112,8 @@ try {
   assert.equal(await search.locator('li').count(), 0);
   console.log('PASS search: loading, failed index, retry, results, empty result, cleared query');
   assert.deepEqual(errors, []);
+  assert.deepEqual(deprecations, [], 'Deprecated browser API during interactive checks');
+  console.log('PASS no browser API deprecations in local pages and search interactions');
   await context.close();
 
   const noScript = await browser.newContext({
